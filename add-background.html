@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Background to PDF – Quick Do PDF</title>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <link rel="stylesheet" href="tools.css">
+    <style>
+        /* Indigio/Purple theme overrides for Add Background */
+        body.theme-bg {
+            --a1: #818cf8;
+            --a2: #6366f1;
+        }
+
+        .theme-bg .orb1 {
+            background: rgba(129, 140, 248, 0.12);
+        }
+
+        .theme-bg .orb2 {
+            background: rgba(99, 102, 241, 0.12);
+        }
+
+        .color-picker-wrap {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            padding: 0;
+            background: none;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 2px solid var(--border);
+            border-radius: 50%;
+        }
+
+        .preset-colors {
+            display: flex;
+            gap: 8px;
+        }
+
+        .preset-colors button {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="theme-bg">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Applying Background...</p>
+        <p class="loader-sub">Adding color layer to all pages</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">Add <span>Background</span></h1>
+        <p class="page-subtitle">Instantly apply a solid background color to every page of your PDF document.</p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">🎨</div>
+            <h3>Drop your PDF file here</h3>
+            <p>We'll modify the background instantly</p>
+            <label class="select-btn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Select PDF File
+                <input type="file" id="pdfInput" accept="application/pdf">
+            </label>
+        </div>
+
+        <div id="fileInfo"></div>
+
+        <div class="option-card hidden" id="infoCard">
+            <h4 style="margin-bottom: 8px; color: #fff;">Select Background Color</h4>
+            <p style="color: var(--muted); font-size: 13px;">Pick a color below. This will be drawn behind your PDF's
+                text and transparent images.</p>
+
+            <div class="color-picker-wrap">
+                <input type="color" id="bgColor" value="#fef3c7" onchange="updateHex()">
+                <div style="flex-grow: 1;">
+                    <div style="font-family: monospace; color: var(--muted); margin-bottom: 6px;" id="hexValue">#fef3c7
+                    </div>
+                    <div class="preset-colors">
+                        <button style="background: #fef3c7" onclick="setColor('#fef3c7')"></button>
+                        <button style="background: #e0f2fe" onclick="setColor('#e0f2fe')"></button>
+                        <button style="background: #dcfce7" onclick="setColor('#dcfce7')"></button>
+                        <button style="background: #fce7f3" onclick="setColor('#fce7f3')"></button>
+                        <button style="background: #f3f4f6" onclick="setColor('#f3f4f6')"></button>
+                        <button style="background: #1e293b" onclick="setColor('#1e293b')"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="action-btn hidden" id="actionBtn" onclick="applyBackground()">
+            <span><svg style="margin-right:8px; vertical-align:text-bottom" width="20" height="20" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg> Save New Document</span>
+        </button>
+
+        <div class="success-msg hidden" id="successMsg">
+            <div class="s-icon">✅</div>
+            <h3>Background Applied</h3>
+            <p>Your colored PDF has been downloaded successfully.</p>
+        </div>
+    </main>
+
+    <script>
+        const inp = document.getElementById('pdfInput');
+        const drop = document.getElementById('dropArea');
+        const info = document.getElementById('fileInfo');
+        const infoCard = document.getElementById('infoCard');
+        const btn = document.getElementById('actionBtn');
+        const ldr = document.getElementById('loader');
+        const sMsg = document.getElementById('successMsg');
+        const colorPicker = document.getElementById('bgColor');
+        const hexVal = document.getElementById('hexValue');
+        let origBuf = null;
+
+        inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+            if (f) loadFile(f);
+        });
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+        async function loadFile(file) {
+            sMsg.classList.add('hidden');
+            infoCard.classList.add('hidden');
+            info.innerHTML = '';
+
+            try {
+                origBuf = await file.arrayBuffer();
+                info.innerHTML = `<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fs">${fmt(file.size)}</span></div>`;
+
+                infoCard.classList.remove('hidden');
+                btn.classList.remove('hidden');
+            } catch (e) {
+                alert('Failed to read PDF: ' + e.message);
+            }
+        }
+
+        function updateHex() { hexVal.textContent = colorPicker.value; }
+        function setColor(h) { colorPicker.value = h; updateHex(); }
+
+        function hexToRgba(hex) {
+            const r = parseInt(hex.slice(1, 3), 16) / 255;
+            const g = parseInt(hex.slice(3, 5), 16) / 255;
+            const b = parseInt(hex.slice(5, 7), 16) / 255;
+            return { r, g, b };
+        }
+
+        async function applyBackground() {
+            if (!origBuf) return;
+            ldr.classList.add('active');
+
+            try {
+                const { PDFDocument, rgb } = PDFLib;
+
+                // Load source ONLY to read page sizes
+                const srcDoc = await PDFDocument.load(origBuf);
+                const newDoc = await PDFDocument.create();
+                const srcPages = srcDoc.getPages();
+                const bgCol = hexToRgba(colorPicker.value);
+
+                for (let i = 0; i < srcPages.length; i++) {
+                    const srcPage = srcPages[i];
+                    const { width, height } = srcPage.getSize();
+
+                    // Use embedPage with the actual page object (NOT embedPdf with bytes)
+                    const embeddedPage = await newDoc.embedPage(srcPage);
+
+                    const p = newDoc.addPage([width, height]);
+
+                    // 1. Draw colored rectangle FIRST (bottom layer)
+                    p.drawRectangle({
+                        x: 0,
+                        y: 0,
+                        width: width,
+                        height: height,
+                        color: rgb(bgCol.r, bgCol.g, bgCol.b)
+                    });
+
+                    // 2. Draw original page content ON TOP of the color
+                    p.drawPage(embeddedPage, {
+                        x: 0,
+                        y: 0,
+                        width: width,
+                        height: height,
+                    });
+                }
+
+                const pdfBytes = await newDoc.save();
+
+                await new Promise(r => setTimeout(r, 800)); // fake slight delay for UI feedback
+
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+                a.download = 'colored_background.pdf';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+                sMsg.classList.remove('hidden');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+
+            ldr.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

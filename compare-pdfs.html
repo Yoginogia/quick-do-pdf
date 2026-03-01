@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare PDFs – Quick Do PDF</title>
+    <!-- Load PDF.js for text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Load jsdiff for comparing strings -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/7.0.0/diff.min.js"></script>
+    <link rel="stylesheet" href="tools.css">
+    <style>
+        /* Cyan theme overrides for Compare PDFs */
+        body.theme-compare {
+            --a1: #06b6d4;
+            --a2: #0891b2;
+        }
+
+        .theme-compare .orb1 {
+            background: rgba(6, 182, 212, 0.12);
+        }
+
+        .theme-compare .orb2 {
+            background: rgba(8, 145, 178, 0.12);
+        }
+
+        .dual-upload {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .dual-upload {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .upload-zone {
+            padding: 30px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #diffResult {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            margin-top: 24px;
+        }
+
+        .diff-added {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            text-decoration: none;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .diff-removed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            text-decoration: line-through;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body class="theme-compare">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Comparing Documents...</p>
+        <p class="loader-sub">Analyzing text differences</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main style="max-width: 1000px;">
+        <h1 class="page-title">Compare <span>PDFs</span></h1>
+        <p class="page-subtitle">Upload two versions of a document to highlight what was added, removed, or changed.</p>
+
+        <div class="dual-upload">
+            <div class="upload-zone" id="dropArea1">
+                <div class="upload-icon">📄</div>
+                <h3 style="font-size:18px;">Original Doc (V1)</h3>
+                <label class="select-btn" style="margin-top:10px;">Select File
+                    <input type="file" id="pdfInput1" accept="application/pdf">
+                </label>
+                <div id="fileInfo1" style="margin-top: 15px;"></div>
+            </div>
+
+            <div class="upload-zone" id="dropArea2">
+                <div class="upload-icon">📝</div>
+                <h3 style="font-size:18px;">Modified Doc (V2)</h3>
+                <label class="select-btn" style="margin-top:10px;">Select File
+                    <input type="file" id="pdfInput2" accept="application/pdf">
+                </label>
+                <div id="fileInfo2" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px;">
+            <button class="action-btn" id="actionBtn" onclick="compareFiles()"
+                style="opacity: 0.5; pointer-events: none;">
+                <span><svg style="margin-right:8px; vertical-align:text-bottom" width="20" height="20" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg> Run Comparison</span>
+            </button>
+        </div>
+
+        <div id="diffResult" class="hidden"></div>
+
+    </main>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        let file1Buf = null;
+        let file2Buf = null;
+
+        const inp1 = document.getElementById('pdfInput1');
+        const info1 = document.getElementById('fileInfo1');
+        const inp2 = document.getElementById('pdfInput2');
+        const info2 = document.getElementById('fileInfo2');
+        const btn = document.getElementById('actionBtn');
+        const ldr = document.getElementById('loader');
+        const res = document.getElementById('diffResult');
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+        inp1.addEventListener('change', async () => {
+            if (inp1.files[0]) {
+                file1Buf = await inp1.files[0].arrayBuffer();
+                info1.innerHTML = `<span style="font-size:13px; color:var(--a1)">${inp1.files[0].name}</span>`;
+                checkReady();
+            }
+        });
+
+        inp2.addEventListener('change', async () => {
+            if (inp2.files[0]) {
+                file2Buf = await inp2.files[0].arrayBuffer();
+                info2.innerHTML = `<span style="font-size:13px; color:var(--a1)">${inp2.files[0].name}</span>`;
+                checkReady();
+            }
+        });
+
+        function checkReady() {
+            if (file1Buf && file2Buf) {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            }
+        }
+
+        async function extractText(buf) {
+            const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+            let txt = "";
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const strings = content.items.map(item => item.str);
+                txt += strings.join(" ") + "\n";
+            }
+            return txt.replace(/\s+/g, ' '); // normalize whitespace
+        }
+
+        async function compareFiles() {
+            ldr.classList.add('active');
+            res.classList.add('hidden');
+
+            try {
+                const t1 = await extractText(file1Buf);
+                const t2 = await extractText(file2Buf);
+
+                const diff = Diff.diffWords(t1, t2);
+
+                let outputHtml = "";
+                diff.forEach((part) => {
+                    const val = part.value.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    if (part.added) {
+                        outputHtml += `<span class="diff-added">${val}</span>`;
+                    } else if (part.removed) {
+                        outputHtml += `<span class="diff-removed">${val}</span>`;
+                    } else {
+                        outputHtml += `<span>${val}</span>`;
+                    }
+                });
+
+                res.innerHTML = outputHtml;
+                res.classList.remove('hidden');
+
+            } catch (e) {
+                alert("Comparison failed: " + e.message);
+            }
+
+            ldr.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

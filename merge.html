@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merge PDF – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+</head>
+<body class="theme-red">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text">Merging your PDFs...</p><p class="loader-sub">Please wait</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+</header>
+<main>
+  <h1 class="page-title">Merge <span>PDF Files</span></h1>
+  <p class="page-subtitle">Combine multiple PDFs into one document</p>
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">📂</div>
+    <h3>Drop PDF files here</h3>
+    <p>Drag & drop or click the button below</p>
+    <label class="select-btn"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Select PDF Files<input type="file" id="mergeInput" multiple accept="application/pdf"></label>
+  </div>
+  <div id="fileList"></div>
+  <button class="action-btn hidden" id="actionBtn" onclick="mergePDF()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg> Merge PDFs
+  </button>
+  <div id="successMsg" class="success-msg hidden"><div class="s-icon">✅</div><h3>Done!</h3><p>merged.pdf downloaded successfully.</p></div>
+</main>
+<script>
+const inp = document.getElementById('mergeInput');
+const drop = document.getElementById('dropArea');
+const list = document.getElementById('fileList');
+const btn  = document.getElementById('actionBtn');
+const ok   = document.getElementById('successMsg');
+const ldr  = document.getElementById('loader');
+
+inp.addEventListener('change', () => render(inp.files));
+drop.addEventListener('dragover',  e => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', e => {
+  e.preventDefault(); drop.classList.remove('over');
+  const dt = new DataTransfer();
+  [...e.dataTransfer.files].filter(f=>f.type==='application/pdf').forEach(f=>dt.items.add(f));
+  inp.files = dt.files; render(inp.files);
+});
+
+function fmt(b){ return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB'; }
+function render(files){
+  list.innerHTML=''; ok.classList.add('hidden');
+  [...files].forEach((f,i)=>{
+    const d=document.createElement('div'); d.className='file-item'; d.style.animationDelay=i*60+'ms';
+    d.innerHTML=`<span class="fi">📄</span><span class="fn">${f.name}</span><span class="fs">${fmt(f.size)}</span>`;
+    list.appendChild(d);
+  });
+  files.length>=2 ? btn.classList.remove('hidden') : btn.classList.add('hidden');
+}
+
+async function mergePDF(){
+  const files=inp.files;
+  if(!files||files.length<2){alert('Select at least 2 PDFs');return;}
+  ldr.classList.add('active'); ok.classList.add('hidden');
+  try{
+    const {PDFDocument}=PDFLib;
+    const m=await PDFDocument.create();
+    for(const f of files){
+      const pdf=await PDFDocument.load(await f.arrayBuffer());
+      (await m.copyPages(pdf,pdf.getPageIndices())).forEach(p=>m.addPage(p));
+    }
+    const bytes=await m.save();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    a.download='merged.pdf'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    ldr.classList.remove('active'); ok.classList.remove('hidden');
+  }catch(e){ldr.classList.remove('active');alert('Error: '+e.message);}
+}
+</script>
+</body>
+</html>

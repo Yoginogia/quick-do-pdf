@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rotate PDF – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .rotation-btns { display:flex; gap:12px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+    .rot-btn {
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      padding:18px 24px; border-radius:14px; border:1px solid var(--border);
+      background:var(--surface); color:var(--muted); cursor:pointer;
+      transition:all 0.2s; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; min-width:90px;
+    }
+    .rot-btn .ri { font-size:28px; transition:transform 0.4s; }
+    .rot-btn:hover, .rot-btn.active { border-color:var(--a1); background:color-mix(in srgb,var(--a1) 10%,transparent); color:var(--a1); }
+    .rot-btn.active .ri { transform:rotate(var(--deg)); }
+    .page-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; margin-top:20px; width:100%; max-width:580px; }
+    .page-thumb {
+      border-radius:10px; border:2px solid var(--border); background:var(--surface);
+      padding:10px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative;
+    }
+    .page-thumb.selected { border-color:var(--a1); background:color-mix(in srgb,var(--a1) 8%,transparent); }
+    .page-thumb canvas { width:100%; border-radius:6px; display:block; }
+    .page-thumb .p-label { font-size:11px; color:var(--muted); margin-top:6px; }
+    .page-thumb .p-angle { font-size:11px; color:var(--a1); font-weight:700; }
+    .select-all-row { display:flex; gap:10px; width:100%; max-width:580px; margin-top:16px; }
+    .mini-btn { padding:8px 16px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:13px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
+    .mini-btn:hover { border-color:var(--a1); color:var(--a1); }
+  </style>
+</head>
+<body class="theme-blue">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text">Rotating pages...</p><p class="loader-sub">Saving your PDF</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+</header>
+<main>
+  <h1 class="page-title">Rotate <span>PDF Pages</span></h1>
+  <p class="page-subtitle">Select pages and choose rotation direction</p>
+
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">🔄</div>
+    <h3>Drop your PDF file here</h3>
+    <p>All pages will be shown for selection</p>
+    <label class="select-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Select PDF File
+      <input type="file" id="pdfInput" accept="application/pdf">
+    </label>
+  </div>
+
+  <div class="select-all-row" id="selRow" style="display:none">
+    <button class="mini-btn" onclick="selectAll()">Select All</button>
+    <button class="mini-btn" onclick="deselectAll()">Deselect All</button>
+  </div>
+
+  <div class="page-grid" id="pageGrid"></div>
+
+  <div class="option-card hidden" id="rotCard">
+    <h4>Rotation Direction</h4>
+    <div class="rotation-btns">
+      <button class="rot-btn" style="--deg:-90deg" data-angle="270" onclick="pickRot(this)">
+        <span class="ri">↺</span> 90° Left
+      </button>
+      <button class="rot-btn active" style="--deg:180deg" data-angle="180" onclick="pickRot(this)">
+        <span class="ri">🔃</span> 180°
+      </button>
+      <button class="rot-btn" style="--deg:90deg" data-angle="90" onclick="pickRot(this)">
+        <span class="ri">↻</span> 90° Right
+      </button>
+    </div>
+  </div>
+
+  <button class="action-btn hidden" id="actionBtn" onclick="rotatePDF()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    Rotate & Save PDF
+  </button>
+
+  <div id="successMsg" class="success-msg hidden">
+    <div class="s-icon">✅</div><h3>Done!</h3><p>Rotated PDF downloaded.</p>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const inp=document.getElementById('pdfInput');
+const drop=document.getElementById('dropArea');
+const grid=document.getElementById('pageGrid');
+const btn=document.getElementById('actionBtn');
+const ok=document.getElementById('successMsg');
+const ldr=document.getElementById('loader');
+const rotCard=document.getElementById('rotCard');
+const selRow=document.getElementById('selRow');
+let pdfBuf=null, angle=180, pageAngles=[];
+
+inp.addEventListener('change',()=>{ if(inp.files[0]) loadPDF(inp.files[0]); });
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.classList.remove('over');
+  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf');
+  if(f){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;loadPDF(f);}
+});
+
+function pickRot(el){
+  document.querySelectorAll('.rot-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active'); angle=parseInt(el.dataset.angle);
+}
+
+function selectAll(){ document.querySelectorAll('.page-thumb').forEach(t=>t.classList.add('selected')); updateBtn(); }
+function deselectAll(){ document.querySelectorAll('.page-thumb').forEach(t=>t.classList.remove('selected')); updateBtn(); }
+
+function updateBtn(){
+  const sel=document.querySelectorAll('.page-thumb.selected').length;
+  sel>0?btn.classList.remove('hidden'):btn.classList.add('hidden');
+}
+
+async function loadPDF(file){
+  grid.innerHTML=''; ok.classList.add('hidden'); pageAngles=[];
+  pdfBuf=await file.arrayBuffer();
+  // ✅ FIX: slice() creates a fresh copy so pdfBuf stays intact for later use
+  const pdf=await pdfjsLib.getDocument({data: pdfBuf.slice(0)}).promise;
+  const total=pdf.numPages;
+  selRow.style.display='flex';
+  rotCard.classList.remove('hidden');
+
+  for(let i=1;i<=total;i++){
+    pageAngles.push(0);
+    const page=await pdf.getPage(i);
+    const vp=page.getViewport({scale:0.6});
+    const canvas=document.createElement('canvas');
+    const ctx=canvas.getContext('2d');
+    canvas.width=vp.width; canvas.height=vp.height;
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+
+    const card=document.createElement('div'); card.className='page-thumb selected'; card.dataset.page=i;
+    card.innerHTML=`<div class="p-angle" id="angle-${i}">0°</div><div class="p-label">Page ${i}</div>`;
+    card.insertBefore(canvas,card.firstChild);
+    card.addEventListener('click',()=>{card.classList.toggle('selected');updateBtn();});
+    grid.appendChild(card);
+  }
+  updateBtn();
+}
+
+async function rotatePDF(){
+  if(!pdfBuf){alert('Select a PDF');return;}
+  const selected=[...document.querySelectorAll('.page-thumb.selected')].map(t=>parseInt(t.dataset.page));
+  if(!selected.length){alert('Select at least one page');return;}
+  ldr.classList.add('active'); ok.classList.add('hidden');
+  try{
+    const {PDFDocument,degrees}=PDFLib;
+    const pdf=await PDFDocument.load(pdfBuf.slice(0));
+    selected.forEach(idx=>{
+      const page=pdf.getPage(idx-1);
+      page.setRotation(degrees((page.getRotation().angle+angle)%360));
+    });
+    const bytes=await pdf.save();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    a.download='rotated.pdf'; document.body.appendChild(a);a.click();document.body.removeChild(a);
+    ldr.classList.remove('active'); ok.classList.remove('hidden');
+  }catch(e){ldr.classList.remove('active');alert('Error: '+e.message);}
+}
+</script>
+</body>
+</html>

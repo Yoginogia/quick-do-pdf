@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Word – Quick Do PDF</title>
+    <!-- Load PDF.js for text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- docx.js will be dynamically loaded as an ES module via esm.sh -->
+    <link rel="stylesheet" href="tools.css">
+    <style>
+        /* Sky Blue theme overrides for PDF to Word */
+        body.theme-word {
+            --a1: #0ea5e9;
+            --a2: #2563eb;
+        }
+
+        .theme-word .orb1 {
+            background: rgba(14, 165, 233, 0.12);
+        }
+
+        .theme-word .orb2 {
+            background: rgba(37, 99, 235, 0.12);
+        }
+    </style>
+</head>
+
+<body class="theme-word">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Converting to Word...</p>
+        <p class="loader-sub">Extracting text and formatting</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">PDF to <span>Word</span></h1>
+        <p class="page-subtitle">Extract text from your PDF and instantly convert it into an editable Microsoft Word
+            (.docx) document.</p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">📝</div>
+            <h3>Drop your PDF file here</h3>
+            <p>We'll extract the text directly in your browser</p>
+            <label class="select-btn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Select PDF File
+                <input type="file" id="pdfInput" accept="application/pdf">
+            </label>
+        </div>
+
+        <div id="fileInfo"></div>
+
+        <div class="option-card hidden" id="infoCard">
+            <div
+                style="display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-size: 32px;">📑</div>
+                <div>
+                    <h4 style="margin-bottom: 4px;">Ready to Convert</h4>
+                    <p style="color: var(--muted); font-size: 14px;">The document will be processed locally and saved as
+                        a .docx file.</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="action-btn hidden" id="actionBtn" onclick="convertToWord()">
+            <span><svg style="margin-right:8px; vertical-align:text-bottom" width="20" height="20" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg> Download Word File</span>
+        </button>
+
+        <div class="success-msg hidden" id="successMsg">
+            <div class="s-icon">✅</div>
+            <h3>Conversion Successful</h3>
+            <p>Your editable Word document (.docx) is ready.</p>
+        </div>
+    </main>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const inp = document.getElementById('pdfInput');
+        const drop = document.getElementById('dropArea');
+        const info = document.getElementById('fileInfo');
+        const infoCard = document.getElementById('infoCard');
+        const btn = document.getElementById('actionBtn');
+        const ldr = document.getElementById('loader');
+        const sMsg = document.getElementById('successMsg');
+        let origBuf = null;
+        let fileName = "document";
+
+        inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+            if (f) loadFile(f);
+        });
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+        async function loadFile(file) {
+            sMsg.classList.add('hidden');
+            infoCard.classList.add('hidden');
+            info.innerHTML = '';
+
+            try {
+                origBuf = await file.arrayBuffer();
+                fileName = file.name.replace(/\.pdf$/i, '');
+                info.innerHTML = `<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fs">${fmt(file.size)}</span></div>`;
+
+                infoCard.classList.remove('hidden');
+                btn.classList.remove('hidden');
+            } catch (e) {
+                alert('Failed to read PDF: ' + e.message);
+            }
+        }
+
+        async function convertToWord() {
+            if (!origBuf) return;
+            ldr.classList.add('active');
+
+            try {
+                // 1. Extract Text using pdf.js
+                const pdf = await pdfjsLib.getDocument({ data: origBuf }).promise;
+                const maxPages = pdf.numPages;
+                let paragraphsData = [];
+
+                for (let i = 1; i <= maxPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+
+                    let lastY = -1;
+                    let currentLineData = [];
+
+                    // Group text items roughly by their Y position (lines)
+                    for (const item of textContent.items) {
+                        const y = item.transform[5];
+                        if (lastY === -1 || Math.abs(y - lastY) > 5) {
+                            if (currentLineData.length > 0) {
+                                paragraphsData.push(currentLineData.join(" "));
+                                currentLineData = [];
+                            }
+                        }
+                        currentLineData.push(item.str);
+                        lastY = y;
+                    }
+                    if (currentLineData.length > 0) {
+                        paragraphsData.push(currentLineData.join(" "));
+                    }
+                    paragraphsData.push(""); // Page break spacer basically
+                }
+
+                // 2. Build the word document using docx.js via dynamic ES module import
+                const docxModule = await import('https://esm.sh/docx@7.8.2');
+                const { Document, Packer, Paragraph, TextRun } = docxModule;
+
+                // Convert arrays of strings into docx Paragraphs
+                const docParagraphs = paragraphsData.map(textLine => {
+                    return new Paragraph({
+                        children: [
+                            new TextRun({
+                                text: textLine,
+                                size: 24, // 12pt font
+                                font: "Calibri",
+                            })
+                        ],
+                        spacing: { after: 120 }
+                    });
+                });
+
+                const doc = new Document({
+                    sections: [{
+                        properties: {},
+                        children: docParagraphs.length > 0 ? docParagraphs : [new Paragraph("No text could be extracted from this PDF.")]
+                    }]
+                });
+
+                // 3. Export as .docx
+                const blob = await Packer.toBlob(doc);
+
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `${fileName}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                sMsg.classList.remove('hidden');
+            } catch (e) {
+                alert('Conversion Error: ' + e.message);
+            }
+
+            ldr.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

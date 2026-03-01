@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JPG to PDF – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+</head>
+<body class="theme-gold">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text">Creating PDF...</p><p class="loader-sub">Converting your images</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+</header>
+<main>
+  <h1 class="page-title">JPG <span>to PDF</span></h1>
+  <p class="page-subtitle">Convert images into a single PDF document</p>
+
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">🖼️</div>
+    <h3>Drop your images here</h3>
+    <p>Select one or multiple JPG/PNG images</p>
+    <label class="select-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Select Images
+      <input type="file" id="jpgInput" multiple accept="image/jpeg,image/jpg,image/png">
+    </label>
+  </div>
+
+  <div class="img-grid" id="previewGrid"></div>
+
+  <button class="action-btn hidden" id="actionBtn" onclick="jpgToPDF()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+    Convert to PDF
+  </button>
+
+  <div id="successMsg" class="success-msg hidden">
+    <div class="s-icon">✅</div><h3>PDF Created!</h3>
+    <p id="successDetail">Images converted to PDF.</p>
+  </div>
+</main>
+<script>
+const inp  = document.getElementById('jpgInput');
+const drop = document.getElementById('dropArea');
+const grid = document.getElementById('previewGrid');
+const btn  = document.getElementById('actionBtn');
+const ok   = document.getElementById('successMsg');
+const ldr  = document.getElementById('loader');
+
+inp.addEventListener('change', () => showPreviews(inp.files));
+drop.addEventListener('dragover',  e => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', e => {
+  e.preventDefault(); drop.classList.remove('over');
+  const dt = new DataTransfer();
+  [...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')).forEach(f=>dt.items.add(f));
+  if(dt.files.length){ inp.files=dt.files; showPreviews(dt.files); }
+});
+
+function showPreviews(files){
+  grid.innerHTML=''; ok.classList.add('hidden');
+  if(!files.length){ btn.classList.add('hidden'); return; }
+  [...files].forEach((f,i)=>{
+    const card = document.createElement('div'); card.className='img-card'; card.style.animationDelay=i*60+'ms';
+    const img  = document.createElement('img'); img.src = URL.createObjectURL(f);
+    const num  = document.createElement('div'); num.className='ic-num'; num.textContent=i+1;
+    const lbl  = document.createElement('div'); lbl.className='ic-label'; lbl.textContent=f.name;
+    card.appendChild(img); card.appendChild(num); card.appendChild(lbl);
+    grid.appendChild(card);
+  });
+  btn.classList.remove('hidden');
+}
+
+async function jpgToPDF(){
+  const files = inp.files;
+  if(!files||!files.length){ alert('Select images'); return; }
+  ldr.classList.add('active'); ok.classList.add('hidden');
+  try{
+    const {PDFDocument} = PDFLib;
+    const pdf = await PDFDocument.create();
+    for(const f of files){
+      const bytes = await f.arrayBuffer();
+      let img;
+      try { img = await pdf.embedJpg(bytes); } catch { img = await pdf.embedPng(bytes); }
+      const page = pdf.addPage([img.width, img.height]);
+      page.drawImage(img, {x:0, y:0, width:img.width, height:img.height});
+    }
+    const pdfBytes = await pdf.save();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([pdfBytes],{type:'application/pdf'}));
+    a.download = 'converted.pdf';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    ldr.classList.remove('active');
+    document.getElementById('successDetail').textContent = `${files.length} image(s) converted to PDF.`;
+    ok.classList.remove('hidden');
+  }catch(e){ ldr.classList.remove('active'); alert('Error: '+e.message); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Page Numbers – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .preview-box {
+      width:100%; max-width:580px; background:var(--surface); border:1px solid var(--border);
+      border-radius:16px; padding:24px; margin-top:20px; position:relative;
+    }
+    .preview-box.hidden{display:none;}
+    .page-preview {
+      width:100%; aspect-ratio:3/4; background:#fff; border-radius:8px;
+      position:relative; max-width:200px; margin:0 auto;
+    }
+    .num-dot {
+      position:absolute; width:36px; height:20px; border-radius:6px;
+      background:var(--a1); display:flex; align-items:center; justify-content:center;
+      font-size:10px; font-weight:800; color:white; transition:all 0.3s;
+    }
+    .pos-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:16px; }
+    .pos-btn {
+      padding:10px 6px; border-radius:10px; border:1px solid var(--border);
+      background:transparent; color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif;
+      font-size:12px; font-weight:600; text-align:center; transition:all 0.2s;
+    }
+    .pos-btn:hover,.pos-btn.active{border-color:var(--a1);background:color-mix(in srgb,var(--a1) 10%,transparent);color:var(--a1);}
+    .input-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:16px; }
+    .input-row label { color:var(--muted); font-size:13px; font-weight:600; }
+    .num-input {
+      padding:8px 14px; border-radius:10px; border:1px solid var(--border);
+      background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif;
+      font-size:14px; width:80px; outline:none;
+    }
+    .num-input:focus { border-color:var(--a1); }
+    .font-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .font-chip {
+      padding:7px 14px; border-radius:20px; border:1px solid var(--border);
+      background:transparent; color:var(--muted); cursor:pointer; font-size:13px; font-weight:600;
+      font-family:'DM Sans',sans-serif; transition:all 0.2s;
+    }
+    .font-chip:hover,.font-chip.active{border-color:var(--a1);color:var(--a1);background:color-mix(in srgb,var(--a1) 8%,transparent);}
+  </style>
+</head>
+<body class="theme-green">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text">Adding page numbers...</p><p class="loader-sub">Please wait</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+</header>
+<main>
+  <h1 class="page-title">Add <span>Page Numbers</span></h1>
+  <p class="page-subtitle">Automatically number every page of your PDF</p>
+
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">🔢</div>
+    <h3>Drop your PDF file here</h3>
+    <p>Page numbers will be added to every page</p>
+    <label class="select-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Select PDF File
+      <input type="file" id="pdfInput" accept="application/pdf">
+    </label>
+  </div>
+
+  <div id="fileInfo"></div>
+
+  <div class="option-card hidden" id="optCard">
+    <h4>Position</h4>
+    <div class="pos-grid">
+      <button class="pos-btn" data-pos="top-left"     onclick="pickPos(this)">↖ Top Left</button>
+      <button class="pos-btn active" data-pos="top-center"  onclick="pickPos(this)">⬆ Top Center</button>
+      <button class="pos-btn" data-pos="top-right"    onclick="pickPos(this)">↗ Top Right</button>
+      <button class="pos-btn" data-pos="bottom-left"  onclick="pickPos(this)">↙ Bottom Left</button>
+      <button class="pos-btn" data-pos="bottom-center"onclick="pickPos(this)">⬇ Bottom Center</button>
+      <button class="pos-btn" data-pos="bottom-right" onclick="pickPos(this)">↘ Bottom Right</button>
+    </div>
+
+    <div class="input-row" style="margin-top:20px">
+      <label>Start from page:</label>
+      <input class="num-input" type="number" id="startNum" value="1" min="1">
+      <label>Font size:</label>
+      <input class="num-input" type="number" id="fontSize" value="12" min="6" max="36">
+    </div>
+
+    <h4 style="margin-top:20px">Format</h4>
+    <div class="font-row">
+      <button class="font-chip active" data-fmt="1" onclick="pickFmt(this)">1, 2, 3...</button>
+      <button class="font-chip" data-fmt="page" onclick="pickFmt(this)">Page 1, Page 2...</button>
+      <button class="font-chip" data-fmt="of" onclick="pickFmt(this)">1 of 10, 2 of 10...</button>
+    </div>
+  </div>
+
+  <button class="action-btn hidden" id="actionBtn" onclick="addPageNumbers()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+    Add Page Numbers
+  </button>
+
+  <div id="successMsg" class="success-msg hidden">
+    <div class="s-icon">✅</div><h3>Done!</h3><p>PDF with page numbers downloaded.</p>
+  </div>
+</main>
+<script>
+const inp=document.getElementById('pdfInput');
+const drop=document.getElementById('dropArea');
+const info=document.getElementById('fileInfo');
+const btn=document.getElementById('actionBtn');
+const ok=document.getElementById('successMsg');
+const ldr=document.getElementById('loader');
+const optCard=document.getElementById('optCard');
+let pdfBuf=null, pos='top-center', fmt='1';
+
+inp.addEventListener('change',()=>{if(inp.files[0])loadFile(inp.files[0]);});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.classList.remove('over');
+  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf');
+  if(f){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;loadFile(f);}
+});
+
+function pickPos(el){document.querySelectorAll('.pos-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');pos=el.dataset.pos;}
+function pickFmt(el){document.querySelectorAll('.font-chip').forEach(b=>b.classList.remove('active'));el.classList.add('active');fmt=el.dataset.fmt;}
+function fmtSize(b){return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';}
+
+async function loadFile(file){
+  ok.classList.add('hidden');info.innerHTML='';
+  pdfBuf=await file.arrayBuffer();
+  const pdf=await PDFLib.PDFDocument.load(pdfBuf);
+  info.innerHTML=`<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fc">${pdf.getPageCount()} pages</span><span class="fs">${fmtSize(file.size)}</span></div>`;
+  optCard.classList.remove('hidden');
+  btn.classList.remove('hidden');
+}
+
+async function addPageNumbers(){
+  if(!pdfBuf){alert('Select a PDF');return;}
+  ldr.classList.add('active');ok.classList.add('hidden');
+  try{
+    const {PDFDocument,rgb,StandardFonts}=PDFLib;
+    const pdf=await PDFDocument.load(pdfBuf);
+    const font=await pdf.embedFont(StandardFonts.Helvetica);
+    const pages=pdf.getPages();
+    const total=pages.length;
+    const startNum=parseInt(document.getElementById('startNum').value)||1;
+    const fontSize=parseInt(document.getElementById('fontSize').value)||12;
+    const margin=24;
+
+    pages.forEach((page,i)=>{
+      const {width,height}=page.getSize();
+      const num=startNum+i;
+      let text;
+      if(fmt==='1') text=`${num}`;
+      else if(fmt==='page') text=`Page ${num}`;
+      else text=`${num} of ${total}`;
+      const tw=font.widthOfTextAtSize(text,fontSize);
+
+      let x,y;
+      if(pos.includes('left')) x=margin;
+      else if(pos.includes('right')) x=width-tw-margin;
+      else x=(width-tw)/2;
+      if(pos.includes('top')) y=height-margin-fontSize;
+      else y=margin;
+
+      page.drawText(text,{x,y,size:fontSize,font,color:rgb(0.3,0.3,0.3)});
+    });
+
+    const bytes=await pdf.save();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    a.download='numbered.pdf';document.body.appendChild(a);a.click();document.body.removeChild(a);
+    ldr.classList.remove('active');ok.classList.remove('hidden');
+  }catch(e){ldr.classList.remove('active');alert('Error: '+e.message);}
+}
+</script>
+</body>
+</html>

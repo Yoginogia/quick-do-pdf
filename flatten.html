@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flatten PDF Forms – Quick Do PDF</title>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <link rel="stylesheet" href="tools.css">
+    <style>
+        /* Orange theme overrides for Flatten PDF */
+        body.theme-orange {
+            --a1: #f97316;
+            --a2: #ea580c;
+        }
+
+        .theme-orange .orb1 {
+            background: rgba(249, 115, 22, 0.12);
+        }
+
+        .theme-orange .orb2 {
+            background: rgba(234, 88, 12, 0.12);
+        }
+    </style>
+</head>
+
+<body class="theme-orange">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Flattening Forms...</p>
+        <p class="loader-sub">Making inputs un-editable</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">Flatten <span>PDF Forms</span></h1>
+        <p class="page-subtitle">Convert fillable interactive form fields (inputs, checkboxes, dropdowns) into
+            permanent, un-editable text.</p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">🖨️</div>
+            <h3>Drop your PDF file here</h3>
+            <p>We'll lock all interactive elements into the page</p>
+            <label class="select-btn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Select PDF File
+                <input type="file" id="pdfInput" accept="application/pdf">
+            </label>
+        </div>
+
+        <div id="fileInfo"></div>
+
+        <div class="option-card hidden" id="infoCard">
+            <div
+                style="display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-size: 32px;">📑</div>
+                <div>
+                    <h4 style="margin-bottom: 4px;">Form Fields Detected</h4>
+                    <p style="color: var(--muted); font-size: 14px;" id="fieldSummary">Loading analysis...</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="action-btn hidden" id="actionBtn" onclick="flattenPDF()">
+            <span><svg style="margin-right:8px; vertical-align:text-bottom" width="20" height="20" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg> Flatten PDF Forms</span>
+        </button>
+
+        <div class="success-msg hidden" id="successMsg">
+            <div class="s-icon">✅</div>
+            <h3>PDF Flattened</h3>
+            <p>All forms have been permanently stamped onto the document.</p>
+        </div>
+    </main>
+
+    <script>
+        const inp = document.getElementById('pdfInput');
+        const drop = document.getElementById('dropArea');
+        const info = document.getElementById('fileInfo');
+        const infoCard = document.getElementById('infoCard');
+        const summary = document.getElementById('fieldSummary');
+        const btn = document.getElementById('actionBtn');
+        const ldr = document.getElementById('loader');
+        const sMsg = document.getElementById('successMsg');
+        let origBuf = null;
+
+        inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+            if (f) loadFile(f);
+        });
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+        async function loadFile(file) {
+            sMsg.classList.add('hidden');
+            infoCard.classList.add('hidden');
+            info.innerHTML = '';
+
+            try {
+                origBuf = await file.arrayBuffer();
+                info.innerHTML = `<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fs">${fmt(file.size)}</span></div>`;
+
+                // Extract info using pdf-lib
+                const { PDFDocument } = PDFLib;
+                const pdfDocLib = await PDFDocument.load(origBuf);
+
+                const form = pdfDocLib.getForm();
+                const fields = form.getFields();
+
+                let stats = { Text: 0, Checkbox: 0, Dropdown: 0, Button: 0, Other: 0 };
+                fields.forEach(f => {
+                    const type = f.constructor.name;
+                    if (type.includes('TextField')) stats.Text++;
+                    else if (type.includes('CheckBox')) stats.Checkbox++;
+                    else if (type.includes('Dropdown')) stats.Dropdown++;
+                    else if (type.includes('Button')) stats.Button++;
+                    else stats.Other++;
+                });
+
+                const total = fields.length;
+                if (total === 0) {
+                    summary.innerHTML = `<b style="color: #ef4444;">No interactive form fields found</b> in this document. Flattening is not necessary.`;
+                    // Still allow them to click it, as flatten() might also merge annotations, depends on the library version
+                } else {
+                    summary.innerHTML = `Found <b style="color: #f97316;">${total}</b> total fields: ${stats.Text} Text, ${stats.Checkbox} Checkboxes, ${stats.Dropdown} Dropdowns, ${stats.Button} Buttons.`;
+                }
+
+                infoCard.classList.remove('hidden');
+                btn.classList.remove('hidden');
+
+            } catch (e) {
+                alert('Failed to read PDF: ' + e.message);
+            }
+        }
+
+        async function flattenPDF() {
+            if (!origBuf) return;
+            ldr.classList.add('active');
+
+            try {
+                const { PDFDocument } = PDFLib;
+                const pdfDocLib = await PDFDocument.load(origBuf);
+
+                // Flatten form fields into standard appearance streams on the page layout
+                const form = pdfDocLib.getForm();
+                form.flatten();
+
+                const pdfBytes = await pdfDocLib.save();
+
+                await new Promise(r => setTimeout(r, 1000));
+
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+                a.download = 'flattened.pdf';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+                sMsg.classList.remove('hidden');
+            } catch (e) {
+                alert('Flattening Error: ' + e.message);
+            }
+
+            ldr.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Pages – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .page-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px; margin-top:20px; width:100%; max-width:580px; }
+    .page-thumb {
+      border-radius:12px; border:2px solid var(--border); background:var(--surface);
+      padding:10px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative;
+      animation:slideUp 0.3s ease forwards; opacity:0;
+    }
+    .page-thumb canvas { width:100%; border-radius:6px; display:block; }
+    .page-thumb .p-num { font-size:12px; font-weight:700; margin-top:6px; color:var(--muted); }
+    .page-thumb .delete-badge {
+      position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%;
+      background:#ef4444; color:white; font-size:14px; display:none;
+      align-items:center; justify-content:center; font-weight:800; z-index:2;
+    }
+    .page-thumb.marked { border-color:#ef4444; background:rgba(239,68,68,0.08); }
+    .page-thumb.marked .delete-badge { display:flex; }
+    .page-thumb.marked .p-num { color:#ef4444; }
+    .counter-bar {
+      width:100%; max-width:580px; margin-top:16px; padding:14px 18px;
+      background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);
+      border-radius:12px; display:none; justify-content:space-between; align-items:center;
+      font-size:14px;
+    }
+    .counter-bar.show { display:flex; }
+    .counter-bar span { color:#ef4444; font-weight:700; font-family:'Syne',sans-serif; }
+    .mini-row { display:flex; gap:10px; width:100%; max-width:580px; margin-top:12px; }
+    .mini-btn { padding:8px 16px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:13px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
+    .mini-btn:hover { border-color:var(--a1); color:var(--a1); }
+    .mini-btn.danger:hover { border-color:#ef4444; color:#ef4444; }
+  </style>
+</head>
+<body class="theme-rose" style="--a1:#f43f5e;--a2:#e11d48;">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text">Deleting pages...</p><p class="loader-sub">Saving updated PDF</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+</header>
+<main>
+  <h1 class="page-title">Delete <span>PDF Pages</span></h1>
+  <p class="page-subtitle">Click pages to mark them for deletion, then save</p>
+
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">🗑️</div>
+    <h3>Drop your PDF file here</h3>
+    <p>Select pages you want to remove</p>
+    <label class="select-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Select PDF File
+      <input type="file" id="pdfInput" accept="application/pdf">
+    </label>
+  </div>
+
+  <div class="mini-row" id="miniRow" style="display:none">
+    <button class="mini-btn danger" onclick="markAll()">Mark All</button>
+    <button class="mini-btn" onclick="clearAll()">Clear All</button>
+  </div>
+
+  <div class="counter-bar" id="counterBar">
+    <div>🗑️ <span id="delCount">0</span> page(s) marked for deletion</div>
+    <div style="color:var(--muted);font-size:13px" id="remainCount"></div>
+  </div>
+
+  <div class="page-grid" id="pageGrid"></div>
+
+  <button class="action-btn hidden" id="actionBtn" onclick="deletePages()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    Delete Marked Pages & Save
+  </button>
+
+  <div id="successMsg" class="success-msg hidden">
+    <div class="s-icon">✅</div><h3>Done!</h3><p id="successDetail">Pages deleted and PDF saved.</p>
+  </div>
+</main>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const inp=document.getElementById('pdfInput');
+const drop=document.getElementById('dropArea');
+const grid=document.getElementById('pageGrid');
+const btn=document.getElementById('actionBtn');
+const ok=document.getElementById('successMsg');
+const ldr=document.getElementById('loader');
+const counterBar=document.getElementById('counterBar');
+const miniRow=document.getElementById('miniRow');
+let pdfBuf=null, totalPages=0;
+
+inp.addEventListener('change',()=>{if(inp.files[0])loadPDF(inp.files[0]);});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.classList.remove('over');
+  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf');
+  if(f){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;loadPDF(f);}
+});
+
+function markAll(){document.querySelectorAll('.page-thumb').forEach(t=>t.classList.add('marked'));updateCounter();}
+function clearAll(){document.querySelectorAll('.page-thumb').forEach(t=>t.classList.remove('marked'));updateCounter();}
+
+function updateCounter(){
+  const marked=document.querySelectorAll('.page-thumb.marked').length;
+  const remain=totalPages-marked;
+  document.getElementById('delCount').textContent=marked;
+  document.getElementById('remainCount').textContent=`${remain} page(s) will remain`;
+  marked>0 ? counterBar.classList.add('show') : counterBar.classList.remove('show');
+  marked>0 && remain>0 ? btn.classList.remove('hidden') : btn.classList.add('hidden');
+}
+
+async function loadPDF(file){
+  grid.innerHTML=''; ok.classList.add('hidden'); btn.classList.add('hidden');
+  counterBar.classList.remove('show');
+  pdfBuf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:pdfBuf.slice(0)}).promise;
+  totalPages=pdf.numPages;
+  miniRow.style.display='flex';
+
+  for(let i=1;i<=totalPages;i++){
+    const page=await pdf.getPage(i);
+    const vp=page.getViewport({scale:0.5});
+    const canvas=document.createElement('canvas');
+    canvas.width=vp.width; canvas.height=vp.height;
+    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+
+    const card=document.createElement('div');
+    card.className='page-thumb'; card.dataset.page=i;
+    card.style.animationDelay=(i-1)*50+'ms';
+    const badge=document.createElement('div'); badge.className='delete-badge'; badge.textContent='✕';
+    const num=document.createElement('div'); num.className='p-num'; num.textContent=`Page ${i}`;
+    card.appendChild(canvas); card.appendChild(badge); card.appendChild(num);
+    card.addEventListener('click',()=>{card.classList.toggle('marked');updateCounter();});
+    grid.appendChild(card);
+  }
+}
+
+async function deletePages(){
+  if(!pdfBuf){alert('Select a PDF');return;}
+  const marked=[...document.querySelectorAll('.page-thumb.marked')].map(t=>parseInt(t.dataset.page));
+  if(!marked.length){alert('Mark at least one page');return;}
+  const remain=totalPages-marked.length;
+  if(remain===0){alert('Cannot delete all pages! At least 1 must remain.');return;}
+  ldr.classList.add('active'); ok.classList.add('hidden');
+  try{
+    const {PDFDocument}=PDFLib;
+    const src=await PDFDocument.load(pdfBuf.slice(0));
+    const out=await PDFDocument.create();
+    const keep=[...Array(totalPages).keys()].filter(i=>!marked.includes(i+1));
+    const pages=await out.copyPages(src,keep);
+    pages.forEach(p=>out.addPage(p));
+    const bytes=await out.save();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    a.download='edited.pdf'; document.body.appendChild(a);a.click();document.body.removeChild(a);
+    ldr.classList.remove('active');
+    document.getElementById('successDetail').textContent=`${marked.length} page(s) deleted. ${remain} page(s) saved.`;
+    ok.classList.remove('hidden');
+  }catch(e){ldr.classList.remove('active');alert('Error: '+e.message);}
+}
+</script>
+</body>
+</html>

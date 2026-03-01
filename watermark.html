@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Watermark – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .wm-preview {
+      width:200px; aspect-ratio:3/4; background:white; border-radius:10px;
+      display:flex; align-items:center; justify-content:center; margin:16px auto 0;
+      border:1px solid var(--border); overflow:hidden; position:relative;
+    }
+    .wm-text-preview {
+      font-weight:800; color:rgba(180,0,60,0.25); transform:rotate(-45deg);
+      font-size:20px; white-space:nowrap; pointer-events:none; user-select:none;
+      text-align:center; letter-spacing:2px;
+    }
+    .color-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:center; }
+    .color-swatch {
+      width:28px; height:28px; border-radius:50%; cursor:pointer; border:2px solid transparent;
+      transition:all 0.2s; flex-shrink:0;
+    }
+    .color-swatch.active { border-color:white; transform:scale(1.15); }
+    .wm-input {
+      width:100%; padding:12px 16px; border-radius:12px; border:1px solid var(--border);
+      background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif;
+      font-size:16px; outline:none; margin-top:12px;
+    }
+    .wm-input:focus { border-color:var(--a1); }
+    .slider-row { display:flex; align-items:center; gap:12px; margin-top:12px; }
+    .slider-row label { color:var(--muted); font-size:13px; font-weight:600; min-width:80px; }
+    input[type=range] { flex:1; accent-color:var(--a1); }
+    .slider-val { color:var(--a1); font-weight:700; font-size:13px; min-width:36px; }
+    .pos-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+    .pos-chip {
+      padding:8px 4px; border-radius:10px; border:1px solid var(--border);
+      background:transparent; color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif;
+      font-size:12px; font-weight:600; text-align:center; transition:all 0.2s;
+    }
+    .pos-chip:hover,.pos-chip.active{border-color:var(--a1);color:var(--a1);background:color-mix(in srgb,var(--a1) 8%,transparent);}
+  </style>
+</head>
+<body class="theme-purple">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text">Adding watermark...</p><p class="loader-sub">Processing all pages</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+</header>
+<main>
+  <h1 class="page-title">Add <span>Watermark</span></h1>
+  <p class="page-subtitle">Stamp custom text on every page of your PDF</p>
+
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">💧</div>
+    <h3>Drop your PDF file here</h3>
+    <p>Watermark will appear on every page</p>
+    <label class="select-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Select PDF File
+      <input type="file" id="pdfInput" accept="application/pdf">
+    </label>
+  </div>
+
+  <div id="fileInfo"></div>
+
+  <div class="option-card hidden" id="optCard">
+    <h4>Watermark Text</h4>
+    <input class="wm-input" type="text" id="wmText" placeholder="e.g. CONFIDENTIAL, DRAFT..." value="CONFIDENTIAL" oninput="updatePreview()">
+
+    <h4 style="margin-top:20px">Color</h4>
+    <div class="color-row">
+      <div class="color-swatch active" style="background:#cc0033" data-r="0.8" data-g="0" data-b="0.2" onclick="pickColor(this)"></div>
+      <div class="color-swatch" style="background:#1a56db" data-r="0.1" data-g="0.34" data-b="0.86" onclick="pickColor(this)"></div>
+      <div class="color-swatch" style="background:#057a55" data-r="0.02" data-g="0.48" data-b="0.33" onclick="pickColor(this)"></div>
+      <div class="color-swatch" style="background:#6b21a8" data-r="0.42" data-g="0.13" data-b="0.66" onclick="pickColor(this)"></div>
+      <div class="color-swatch" style="background:#333" data-r="0.2" data-g="0.2" data-b="0.2" onclick="pickColor(this)"></div>
+    </div>
+
+    <div class="slider-row">
+      <label>Opacity</label>
+      <input type="range" id="opacity" min="5" max="60" value="20" oninput="updatePreview()">
+      <span class="slider-val" id="opVal">20%</span>
+    </div>
+
+    <div class="slider-row">
+      <label>Font Size</label>
+      <input type="range" id="fontSize" min="20" max="80" value="48" oninput="updatePreview()">
+      <span class="slider-val" id="fsVal">48</span>
+    </div>
+
+    <h4 style="margin-top:20px">Position</h4>
+    <div class="pos-row">
+      <button class="pos-chip" data-pos="center" onclick="pickWMPos(this)">⊕ Center (diagonal)</button>
+      <button class="pos-chip active" data-pos="diagonal" onclick="pickWMPos(this)">↗ Full Diagonal</button>
+      <button class="pos-chip" data-pos="bottom" onclick="pickWMPos(this)">⬇ Bottom</button>
+    </div>
+
+    <h4 style="margin-top:20px">Preview</h4>
+    <div class="wm-preview" id="wmPreview">
+      <div class="wm-text-preview" id="wmPrev">CONFIDENTIAL</div>
+    </div>
+  </div>
+
+  <button class="action-btn hidden" id="actionBtn" onclick="addWatermark()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+    Add Watermark
+  </button>
+
+  <div id="successMsg" class="success-msg hidden">
+    <div class="s-icon">✅</div><h3>Done!</h3><p>Watermarked PDF downloaded.</p>
+  </div>
+</main>
+<script>
+const inp=document.getElementById('pdfInput');
+const drop=document.getElementById('dropArea');
+const info=document.getElementById('fileInfo');
+const btn=document.getElementById('actionBtn');
+const ok=document.getElementById('successMsg');
+const ldr=document.getElementById('loader');
+const optCard=document.getElementById('optCard');
+let pdfBuf=null,cr=0.8,cg=0,cb=0.2,wmPos='diagonal';
+
+inp.addEventListener('change',()=>{if(inp.files[0])loadFile(inp.files[0]);});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.classList.remove('over');
+  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf');
+  if(f){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;loadFile(f);}
+});
+
+function pickColor(el){
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  cr=parseFloat(el.dataset.r);cg=parseFloat(el.dataset.g);cb=parseFloat(el.dataset.b);
+  updatePreview();
+}
+function pickWMPos(el){
+  document.querySelectorAll('.pos-chip').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');wmPos=el.dataset.pos;
+}
+
+function updatePreview(){
+  const t=document.getElementById('wmText').value||'WATERMARK';
+  const op=parseInt(document.getElementById('opacity').value);
+  const fs=parseInt(document.getElementById('fontSize').value);
+  document.getElementById('opVal').textContent=op+'%';
+  document.getElementById('fsVal').textContent=fs;
+  const prev=document.getElementById('wmPrev');
+  const r=Math.round(cr*255),g=Math.round(cg*255),b=Math.round(cb*255);
+  prev.textContent=t;
+  prev.style.color=`rgba(${r},${g},${b},${op/100})`;
+  prev.style.fontSize=Math.max(10,fs/3)+'px';
+}
+
+function fmtSize(b){return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';}
+
+async function loadFile(file){
+  ok.classList.add('hidden');info.innerHTML='';
+  pdfBuf=await file.arrayBuffer();
+  const pdf=await PDFLib.PDFDocument.load(pdfBuf);
+  info.innerHTML=`<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fc">${pdf.getPageCount()} pages</span><span class="fs">${fmtSize(file.size)}</span></div>`;
+  optCard.classList.remove('hidden');btn.classList.remove('hidden');
+}
+
+async function addWatermark(){
+  if(!pdfBuf){alert('Select a PDF');return;}
+  const text=document.getElementById('wmText').value.trim();
+  if(!text){alert('Enter watermark text');return;}
+  ldr.classList.add('active');ok.classList.add('hidden');
+  try{
+    const {PDFDocument,rgb,degrees,StandardFonts}=PDFLib;
+    const pdf=await PDFDocument.load(pdfBuf);
+    const font=await pdf.embedFont(StandardFonts.HelveticaBold);
+    const op=parseInt(document.getElementById('opacity').value)/100;
+    const fs=parseInt(document.getElementById('fontSize').value);
+    const color=rgb(cr,cg,cb);
+    const pages=pdf.getPages();
+
+    pages.forEach(page=>{
+      const {width,height}=page.getSize();
+      const tw=font.widthOfTextAtSize(text,fs);
+      let x,y,rot;
+      if(wmPos==='diagonal'){x=(width-tw)/2;y=height/2;rot=degrees(45);}
+      else if(wmPos==='center'){x=(width-tw)/2;y=(height-fs)/2;rot=degrees(0);}
+      else{x=(width-tw)/2;y=30;rot=degrees(0);}
+      page.drawText(text,{x,y,size:fs,font,color,opacity:op,rotate:rot});
+    });
+
+    const bytes=await pdf.save();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    a.download='watermarked.pdf';document.body.appendChild(a);a.click();document.body.removeChild(a);
+    ldr.classList.remove('active');ok.classList.remove('hidden');
+  }catch(e){ldr.classList.remove('active');alert('Error: '+e.message);}
+}
+</script>
+</body>
+</html>

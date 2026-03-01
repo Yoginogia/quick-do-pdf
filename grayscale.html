@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grayscale PDF – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .preview-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+      max-width: 580px;
+      margin-top: 20px;
+    }
+
+    .prev-box {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .prev-box canvas {
+      width: 100%;
+      display: block;
+    }
+
+    .prev-label {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+      font-family: 'Syne', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .prev-label.color {
+      color: #f59e0b;
+    }
+
+    .prev-label.bw {
+      color: var(--a1);
+    }
+
+    .quality-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .q-chip {
+      padding: 9px 18px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .q-chip:hover,
+    .q-chip.active {
+      border-color: var(--a1);
+      color: var(--a1);
+      background: color-mix(in srgb, var(--a1) 8%, transparent);
+    }
+
+    .progress-bar {
+      width: 100%;
+      max-width: 580px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .progress-bar.show {
+      display: block;
+    }
+
+    .prog-track {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--a1), var(--a2));
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .prog-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body class="theme-green" style="--a1:#6b7280;--a2:#374151;">
+  <div id="loader">
+    <div class="loader-ring"></div>
+    <p class="loader-text" id="ldrTxt">Converting to B&W...</p>
+    <p class="loader-sub" id="ldrSub">Processing pages</p>
+  </div>
+  <header>
+    <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg> Back</a>
+    <span class="logo"
+      style="background:linear-gradient(135deg,#6b7280,#374151);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Quick
+      Do PDF</span>
+  </header>
+  <main>
+    <h1 class="page-title">PDF to <span
+        style="background:linear-gradient(135deg,#6b7280,#374151);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Black
+        & White</span></h1>
+    <p class="page-subtitle">Convert your colorful PDF to grayscale</p>
+
+    <div class="upload-zone" id="dropArea" style="--a1:#6b7280">
+      <div class="upload-icon">🖤</div>
+      <h3>Drop your PDF file here</h3>
+      <p>Every page will be converted to grayscale</p>
+      <label class="select-btn" style="--a1:#6b7280">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Select PDF File
+        <input type="file" id="pdfInput" accept="application/pdf">
+      </label>
+    </div>
+
+    <div id="fileInfo"></div>
+
+    <div class="option-card hidden" id="optCard" style="--a1:#6b7280">
+      <h4>Render Quality</h4>
+      <div class="quality-row">
+        <button class="q-chip" data-scale="1" onclick="pickQ(this)" style="--a1:#6b7280">Standard</button>
+        <button class="q-chip active" data-scale="2" onclick="pickQ(this)" style="--a1:#6b7280">High</button>
+        <button class="q-chip" data-scale="3" onclick="pickQ(this)" style="--a1:#6b7280">Ultra</button>
+      </div>
+      <p style="color:var(--muted);font-size:12px;margin-top:10px">Higher quality = larger file size & slower conversion
+      </p>
+    </div>
+
+    <div class="preview-row" id="previewRow" style="display:none">
+      <div class="prev-box">
+        <div class="prev-label color">🎨 Original</div>
+        <canvas id="colorCanvas"></canvas>
+      </div>
+      <div class="prev-box">
+        <div class="prev-label bw">⬛ Grayscale</div>
+        <canvas id="bwCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="progress-bar" id="progBar">
+      <div class="prog-track">
+        <div class="prog-fill" id="progFill"></div>
+      </div>
+      <div class="prog-label" id="progLabel">Processing...</div>
+    </div>
+
+    <button class="action-btn hidden" id="actionBtn" onclick="convertBW()"
+      style="background:linear-gradient(135deg,#6b7280,#374151)">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+      </svg>
+      Convert to Grayscale
+    </button>
+
+    <div id="successMsg" class="success-msg hidden">
+      <div class="s-icon">⬛</div>
+      <h3>Done!</h3>
+      <p id="successDetail">Grayscale PDF downloaded.</p>
+    </div>
+  </main>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const inp = document.getElementById('pdfInput');
+    const drop = document.getElementById('dropArea');
+    const info = document.getElementById('fileInfo');
+    const btn = document.getElementById('actionBtn');
+    const ok = document.getElementById('successMsg');
+    const ldr = document.getElementById('loader');
+    const optCard = document.getElementById('optCard');
+    const previewRow = document.getElementById('previewRow');
+    const progBar = document.getElementById('progBar');
+    let pdfBuf = null, scale = 2, totalPages = 0;
+
+    inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', e => {
+      e.preventDefault(); drop.classList.remove('over');
+      const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+      if (f) { const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; loadFile(f); }
+    });
+
+    function pickQ(el) { document.querySelectorAll('.q-chip').forEach(b => b.classList.remove('active')); el.classList.add('active'); scale = parseInt(el.dataset.scale); showPreview(); }
+    function fmtSize(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+    async function loadFile(file) {
+      ok.classList.add('hidden'); info.innerHTML = ''; previewRow.style.display = 'none';
+      pdfBuf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: pdfBuf.slice(0) }).promise;
+      totalPages = pdf.numPages;
+      info.innerHTML = `<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fc">${totalPages} pages</span><span class="fs">${fmtSize(file.size)}</span></div>`;
+      optCard.classList.remove('hidden');
+      btn.classList.remove('hidden');
+      showPreview();
+    }
+
+    async function showPreview() {
+      if (!pdfBuf) return;
+      const pdf = await pdfjsLib.getDocument({ data: pdfBuf.slice(0) }).promise;
+      const page = await pdf.getPage(1);
+      const vp = page.getViewport({ scale: 1 });
+
+      // Color
+      const cc = document.getElementById('colorCanvas');
+      cc.width = vp.width; cc.height = vp.height;
+      await page.render({ canvasContext: cc.getContext('2d'), viewport: vp }).promise;
+
+      // BW
+      const bc = document.getElementById('bwCanvas');
+      bc.width = vp.width; bc.height = vp.height;
+      const ctx = bc.getContext('2d');
+      await page.render({ canvasContext: ctx, viewport: vp }).promise;
+      const id = ctx.getImageData(0, 0, bc.width, bc.height);
+      for (let i = 0; i < id.data.length; i += 4) {
+        const g = 0.299 * id.data[i] + 0.587 * id.data[i + 1] + 0.114 * id.data[i + 2];
+        id.data[i] = id.data[i + 1] = id.data[i + 2] = g;
+      }
+      ctx.putImageData(id, 0, 0);
+      previewRow.style.display = 'grid';
+    }
+
+    async function convertBW() {
+      if (!pdfBuf) { alert('Select a PDF'); return; }
+      ok.classList.add('hidden');
+      progBar.classList.add('show');
+      const fill = document.getElementById('progFill');
+      const label = document.getElementById('progLabel');
+
+      try {
+        const pdf = await pdfjsLib.getDocument({ data: pdfBuf.slice(0) }).promise;
+        const { PDFDocument } = PDFLib;
+        const outPdf = await PDFDocument.create();
+        const total = pdf.numPages;
+
+        for (let i = 1; i <= total; i++) {
+          label.textContent = `Converting page ${i} of ${total}...`;
+          fill.style.width = ((i / total) * 100) + '%';
+
+          const page = await pdf.getPage(i);
+          const vp = page.getViewport({ scale });
+          const canvas = document.createElement('canvas');
+          canvas.width = vp.width; canvas.height = vp.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+          // Apply grayscale
+          const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          for (let j = 0; j < id.data.length; j += 4) {
+            const g = Math.round(0.299 * id.data[j] + 0.587 * id.data[j + 1] + 0.114 * id.data[j + 2]);
+            id.data[j] = id.data[j + 1] = id.data[j + 2] = g;
+          }
+          ctx.putImageData(id, 0, 0);
+
+          // Embed as JPEG in PDF
+          const imgData = canvas.toDataURL('image/jpeg', 0.92);
+          const base64 = imgData.split(',')[1];
+          const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+          const img = await outPdf.embedJpg(bytes);
+          const pg = outPdf.addPage([img.width / scale * 72 / 96, img.height / scale * 72 / 96]);
+          pg.drawImage(img, { x: 0, y: 0, width: pg.getWidth(), height: pg.getHeight() });
+
+          await new Promise(r => setTimeout(r, 10));
+        }
+
+        fill.style.width = '100%';
+        label.textContent = 'Saving PDF...';
+        const pdfBytes = await outPdf.save();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+        a.download = 'grayscale.pdf'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        progBar.classList.remove('show');
+        document.getElementById('successDetail').textContent = `${total} pages converted to grayscale.`;
+        ok.classList.remove('hidden');
+      } catch (e) { progBar.classList.remove('show'); alert('Error: ' + e.message); console.error(e); }
+    }
+  </script>
+</body>
+
+</html>

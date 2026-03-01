@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract Images from PDF – Quick Do PDF</title>
+    <!-- Load PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Load JSZip for downloading all images -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="tools.css">
+    <style>
+        /* Violet theme overrides for Extract Images */
+        body.theme-violet {
+            --a1: #8b5cf6;
+            --a2: #6d28d9;
+        }
+
+        .theme-violet .orb1 {
+            background: rgba(139, 92, 246, 0.12);
+        }
+
+        .theme-violet .orb2 {
+            background: rgba(109, 40, 217, 0.12);
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .img-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 8px;
+        }
+
+        .img-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            background: #fff;
+            /* checkered bg could go here */
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 8px;
+        }
+
+        .img-card span {
+            font-size: 11px;
+            color: var(--muted);
+            font-family: monospace;
+        }
+
+        #extractControls {
+            margin-top: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class="theme-violet">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Extracting Images...</p>
+        <p class="loader-sub">Scanning all PDF resources</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">Extract <span>Images</span></h1>
+        <p class="page-subtitle">Instantly pull every embedded picture out of your PDF file and download them as
+            high-quality JPGs.</p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">📸</div>
+            <h3>Drop your PDF file here</h3>
+            <p>We'll locally scan the file and pull out all pictures</p>
+            <label class="select-btn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Select PDF File
+                <input type="file" id="pdfInput" accept="application/pdf">
+            </label>
+        </div>
+
+        <div id="fileInfo"></div>
+
+        <div class="option-card hidden" id="infoCard">
+            <h4 style="margin-bottom: 12px;">Extracted Images Found (<span id="imgCount">0</span>)</h4>
+            <div class="gallery" id="galleryContainer"></div>
+
+            <div id="extractControls" class="hidden">
+                <button class="action-btn" onclick="downloadAllImages()">
+                    <span><svg style="margin-right:8px; vertical-align:text-bottom" width="20" height="20" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg> Download All as ZIP</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="success-msg hidden" id="successMsg" style="margin-top: 24px;">
+            <div class="s-icon">✅</div>
+            <h3>Extraction Complete</h3>
+            <p>Your ZIP file full of images has been downloaded.</p>
+        </div>
+    </main>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const inp = document.getElementById('pdfInput');
+        const drop = document.getElementById('dropArea');
+        const info = document.getElementById('fileInfo');
+        const infoCard = document.getElementById('infoCard');
+        const gallery = document.getElementById('galleryContainer');
+        const imgCountTxt = document.getElementById('imgCount');
+        const extCtrls = document.getElementById('extractControls');
+        const ldr = document.getElementById('loader');
+        const sMsg = document.getElementById('successMsg');
+
+        let extractedImages = []; // store blobs { blob, name }
+        let fileName = "document";
+
+        inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+            if (f) loadFile(f);
+        });
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+        async function loadFile(file) {
+            sMsg.classList.add('hidden');
+            infoCard.classList.add('hidden');
+            extCtrls.classList.add('hidden');
+            gallery.innerHTML = '';
+            extractedImages = [];
+            imgCountTxt.textContent = "0";
+
+            try {
+                const buf = await file.arrayBuffer();
+                fileName = file.name.replace(/\.pdf$/i, '');
+                info.innerHTML = `<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fs">${fmt(file.size)}</span></div>`;
+
+                await scanForImages(buf);
+            } catch (e) {
+                alert('Failed to read PDF: ' + e.message);
+            }
+        }
+
+        async function scanForImages(buffer) {
+            ldr.classList.add('active');
+
+            try {
+                const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+                const totalPages = pdf.numPages;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const ops = await page.getOperatorList();
+
+                    for (let j = 0; j < ops.fnArray.length; j++) {
+                        // PDFJS operator for drawing an image (paintImageXObject, etc)
+                        if (
+                            ops.fnArray[j] === pdfjsLib.OPS.paintImageXObject ||
+                            ops.fnArray[j] === pdfjsLib.OPS.paintInlineImageXObject
+                        ) {
+                            const objId = ops.argsArray[j][0];
+                            try {
+                                const imgData = await page.objs.get(objId);
+
+                                // Convert Image Data to Blob/DataURL
+                                const canvas = document.createElement('canvas');
+                                canvas.width = imgData.width;
+                                canvas.height = imgData.height;
+                                const ctx = canvas.getContext('2d');
+
+                                let imageDataObj;
+                                if (imgData.kind === 1) { // Grayscale
+                                    imageDataObj = ctx.createImageData(canvas.width, canvas.height);
+                                    let data = imageDataObj.data;
+                                    for (let p = 0, k = 0; p < data.length; p += 4, k++) {
+                                        let val = imgData.data[k];
+                                        data[p] = val;     // R
+                                        data[p + 1] = val;   // G
+                                        data[p + 2] = val;   // B
+                                        data[p + 3] = 255;   // A
+                                    }
+                                } else if (imgData.kind === 2) { // RGB
+                                    imageDataObj = ctx.createImageData(canvas.width, canvas.height);
+                                    let data = imageDataObj.data;
+                                    for (let p = 0, k = 0; p < data.length; p += 4, k += 3) {
+                                        data[p] = imgData.data[k];
+                                        data[p + 1] = imgData.data[k + 1];
+                                        data[p + 2] = imgData.data[k + 2];
+                                        data[p + 3] = 255;
+                                    }
+                                } else if (imgData.kind === 3) { // RGBA
+                                    imageDataObj = new ImageData(new Uint8ClampedArray(imgData.data), canvas.width, canvas.height);
+                                } else {
+                                    // Try fallback or just use what we have, pdf.js handles a lot of pre-processing
+                                    imageDataObj = new ImageData(new Uint8ClampedArray(imgData.data), canvas.width, canvas.height);
+                                }
+
+                                if (imageDataObj) {
+                                    ctx.putImageData(imageDataObj, 0, 0);
+                                }
+
+                                // Generate blob from canvas
+                                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+                                if (blob) {
+                                    const imgName = `image_P${i}_${extractedImages.length + 1}.jpg`;
+                                    extractedImages.push({ name: imgName, blob: blob, width: canvas.width, height: canvas.height });
+
+                                    // Add to UI
+                                    const url = URL.createObjectURL(blob);
+                                    const card = document.createElement('div');
+                                    card.className = 'img-card';
+                                    card.innerHTML = `<img src="${url}"><span>${canvas.width}x${canvas.height}</span>`;
+                                    gallery.appendChild(card);
+                                }
+
+                            } catch (err) {
+                                console.warn("Could not extract an image object:", err);
+                            }
+                        }
+                    }
+                }
+
+                infoCard.classList.remove('hidden');
+                imgCountTxt.textContent = extractedImages.length;
+
+                if (extractedImages.length > 0) {
+                    extCtrls.classList.remove('hidden');
+                } else {
+                    gallery.innerHTML = '<p style="color:var(--muted); font-size:14px; grid-column: 1/-1;">No standard images were found embedded in this PDF.</p>';
+                }
+
+            } catch (e) {
+                alert('Extraction error: ' + e.message);
+            }
+
+            ldr.classList.remove('active');
+        }
+
+        async function downloadAllImages() {
+            if (extractedImages.length === 0) return;
+            ldr.classList.add('active');
+
+            try {
+                const zip = new JSZip();
+
+                // Add all blobs to zip
+                extractedImages.forEach((img, index) => {
+                    // pad number for sorting, e.g 001, 002
+                    const num = String(index + 1).padStart(3, '0');
+                    zip.file(`${fileName}_img_${num}.jpg`, img.blob);
+                });
+
+                const zipBlob = await zip.generateAsync({ type: "blob" });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(zipBlob);
+                a.download = `${fileName}_images.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                sMsg.classList.remove('hidden');
+            } catch (e) {
+                alert("Zip Error: " + e.message);
+            }
+
+            ldr.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

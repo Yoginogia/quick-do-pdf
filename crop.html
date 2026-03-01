@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop PDF – Quick Do PDF</title>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="tools.css">
+    <style>
+        /* Lime theme overrides for Crop PDF */
+        body.theme-lime {
+            --a1: #84cc16;
+            --a2: #22c55e;
+        }
+
+        .theme-lime .orb1 {
+            background: rgba(132, 204, 22, 0.12);
+        }
+
+        .theme-lime .orb2 {
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        /* Crop Editor Layout */
+        .editor-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 32px;
+            align-items: center;
+        }
+
+        .editor-layout.hidden {
+            display: none !important;
+        }
+
+        /* Document Preview */
+        .doc-preview-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            padding: 24px;
+            border-radius: 12px;
+            backdrop-filter: var(--glass-blur);
+        }
+
+        /* Inner relative wrapper for accurate overlay positioning */
+        .crop-container {
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        #pdf-canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Crop Bounding Box */
+        #crop-box {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            border: 3px dashed var(--a1);
+            background: rgba(132, 204, 22, 0.15);
+            cursor: move;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+            /* darkened outside */
+            z-index: 10;
+            display: none;
+        }
+
+        .c-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 3px solid var(--a1);
+            border-radius: 50%;
+        }
+
+        .c-tl {
+            top: -8px;
+            left: -8px;
+            cursor: nwse-resize;
+        }
+
+        .c-tr {
+            top: -8px;
+            right: -8px;
+            cursor: nesw-resize;
+        }
+
+        .c-bl {
+            bottom: -8px;
+            left: -8px;
+            cursor: nesw-resize;
+        }
+
+        .c-br {
+            bottom: -8px;
+            right: -8px;
+            cursor: nwse-resize;
+        }
+
+        .doc-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .page-info {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .ctrl-btn {
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Outfit';
+            font-weight: 600;
+        }
+
+        .ctrl-btn:hover:not(:disabled) {
+            background: var(--a1);
+        }
+
+        .ctrl-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body class="theme-lime">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Cropping...</p>
+        <p class="loader-sub">Trimming all pages</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">Crop <span>PDF File</span></h1>
+        <p class="page-subtitle">Remove margins or extract specific parts. Trims all pages based on the selected area.
+        </p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">✂️</div>
+            <h3>Drop your PDF file here</h3>
+            <p>Adjust the bounding box to crop the document</p>
+            <label class="select-btn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Select PDF File
+                <input type="file" id="pdfInput" accept="application/pdf">
+            </label>
+        </div>
+
+        <div class="editor-layout hidden" id="editorLayout">
+            <div class="doc-controls">
+                <button class="ctrl-btn" id="prevPage" onclick="changePage(-1)">← Prev</button>
+                <span class="page-info">Previewing Page <span id="pageNum">1</span></span>
+                <button class="ctrl-btn" id="nextPage" onclick="changePage(1)">Next →</button>
+            </div>
+
+            <div class="doc-preview-wrapper">
+                <div class="crop-container" id="crop-container">
+                    <canvas id="pdf-canvas"></canvas>
+                    <div id="crop-box">
+                        <div class="c-handle c-tl" data-handle="tl"></div>
+                        <div class="c-handle c-tr" data-handle="tr"></div>
+                        <div class="c-handle c-bl" data-handle="bl"></div>
+                        <div class="c-handle c-br" data-handle="br"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="action-btn" id="actionBtn" onclick="cropPDF()">
+                <span><svg style="margin-right:8px; vertical-align:text-bottom" width="20" height="20" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14.121 14.121L19 19m-4.879-4.879l-4.242-4.242A5.5 5.5 0 0019 19m-4.879-4.879l4.242-4.242A5.5 5.5 0 0014.121 14.121zm-8.242 8.242L1 23m4.879-4.879l-4.242-4.242A5.5 5.5 0 001 23m4.879-4.879L1 1m4.879 4.879A5.5 5.5 0 001 1" />
+                    </svg> Crop PDF</span>
+            </button>
+        </div>
+    </main>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const inp = document.getElementById('pdfInput');
+        const drop = document.getElementById('dropArea');
+        const editor = document.getElementById('editorLayout');
+        const ldr = document.getElementById('loader');
+
+        // Viewer state
+        let pdfDoc = null;
+        let pageNum = 1;
+        let currentScale = 1.0;
+        const canvas = document.getElementById('pdf-canvas');
+        const ctx = canvas.getContext('2d');
+        let origPdfBytes = null;
+
+        // Crop Box State
+        const cropBox = document.getElementById('crop-box');
+        const container = document.getElementById('crop-container');
+
+        inp.addEventListener('change', () => { if (inp.files[0]) loadPDF(inp.files[0]); });
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+            if (f) loadPDF(f);
+        });
+
+        async function loadPDF(file) {
+            drop.classList.add('hidden');
+            ldr.classList.add('active');
+            try {
+                origPdfBytes = new Uint8Array(await file.arrayBuffer());
+                pdfDoc = await pdfjsLib.getDocument({ data: origPdfBytes.slice() }).promise;
+                editor.classList.remove('hidden');
+                await renderPage(pageNum);
+                cropBox.style.display = 'block';
+            } catch (e) {
+                alert('Failed to load PDF: ' + e.message);
+                drop.classList.remove('hidden');
+            }
+            ldr.classList.remove('active');
+        }
+
+        async function renderPage(num) {
+            const page = await pdfDoc.getPage(num);
+
+            const viewportUnscaled = page.getViewport({ scale: 1 });
+            const maxW = window.innerWidth - 60; // safe padding
+
+            // Calculate best scale
+            if (viewportUnscaled.width > maxW) {
+                currentScale = maxW / viewportUnscaled.width;
+            } else {
+                currentScale = 1.0;
+            }
+
+            const viewport = page.getViewport({ scale: currentScale });
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            container.style.width = viewport.width + 'px';
+            container.style.height = viewport.height + 'px';
+
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+            document.getElementById('pageNum').textContent = num;
+            document.getElementById('prevPage').disabled = num <= 1;
+            document.getElementById('nextPage').disabled = num >= pdfDoc.numPages;
+        }
+
+        function changePage(delta) {
+            if (pageNum + delta < 1 || pageNum + delta > pdfDoc.numPages) return;
+            pageNum += delta;
+            renderPage(pageNum);
+        }
+
+        /* --- Drag and Resize Logic for Crop Box --- */
+        let cropState = { dragging: false, resizing: false, handle: null, startX: 0, startY: 0, startLeft: 0, startTop: 0, startW: 0, startH: 0 };
+
+        cropBox.addEventListener('mousedown', e => {
+            if (e.target.classList.contains('c-handle')) {
+                cropState.resizing = true;
+                cropState.handle = e.target.dataset.handle;
+            } else {
+                cropState.dragging = true;
+            }
+
+            cropState.startX = e.clientX;
+            cropState.startY = e.clientY;
+            cropState.startLeft = cropBox.offsetLeft;
+            cropState.startTop = cropBox.offsetTop;
+            cropState.startW = cropBox.offsetWidth;
+            cropState.startH = cropBox.offsetHeight;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', e => {
+            if (!cropState.dragging && !cropState.resizing) return;
+
+            const dx = e.clientX - cropState.startX;
+            const dy = e.clientY - cropState.startY;
+
+            const maxW = container.clientWidth;
+            const maxH = container.clientHeight;
+
+            if (cropState.dragging) {
+                let newLeft = cropState.startLeft + dx;
+                let newTop = cropState.startTop + dy;
+
+                // Bounds check
+                if (newLeft < 0) newLeft = 0;
+                if (newTop < 0) newTop = 0;
+                if (newLeft + cropState.startW > maxW) newLeft = maxW - cropState.startW;
+                if (newTop + cropState.startH > maxH) newTop = maxH - cropState.startH;
+
+                cropBox.style.left = newLeft + 'px';
+                cropBox.style.top = newTop + 'px';
+            } else if (cropState.resizing) {
+                let newL = cropState.startLeft;
+                let newT = cropState.startTop;
+                let newW = cropState.startW;
+                let newH = cropState.startH;
+
+                if (cropState.handle.includes('l')) { newL += dx; newW -= dx; }
+                if (cropState.handle.includes('r')) { newW += dx; }
+                if (cropState.handle.includes('t')) { newT += dy; newH -= dy; }
+                if (cropState.handle.includes('b')) { newH += dy; }
+
+                // Limits
+                if (newW < 50) { newW = 50; if (cropState.handle.includes('l')) newL = cropState.startLeft + cropState.startW - 50; }
+                if (newH < 50) { newH = 50; if (cropState.handle.includes('t')) newT = cropState.startTop + cropState.startH - 50; }
+
+                // Container Bounds Check for resize
+                if (newL < 0) { newW += newL; newL = 0; }
+                if (newT < 0) { newH += newT; newT = 0; }
+                if (newL + newW > maxW) { newW = maxW - newL; }
+                if (newT + newH > maxH) { newH = maxH - newT; }
+
+                cropBox.style.left = newL + 'px';
+                cropBox.style.top = newT + 'px';
+                cropBox.style.width = newW + 'px';
+                cropBox.style.height = newH + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => { cropState.dragging = false; cropState.resizing = false; });
+
+        /* --- Crop Execution --- */
+        async function cropPDF() {
+            ldr.classList.add('active');
+            try {
+                const { PDFDocument } = PDFLib;
+                const pdfDocLib = await PDFDocument.load(origPdfBytes.slice());
+                const pages = pdfDocLib.getPages();
+
+                // Convert cropBox CSS coords -> Unscaled PDF Points
+                const cssL = parseFloat(cropBox.style.left) || (container.clientWidth * 0.1);
+                const cssT = parseFloat(cropBox.style.top) || (container.clientHeight * 0.1);
+                const cssW = parseFloat(cropBox.style.width) || (container.clientWidth * 0.8);
+                const cssH = parseFloat(cropBox.style.height) || (container.clientHeight * 0.8);
+
+                const scale = currentScale;
+                const ptW = cssW / scale;
+                const ptH = cssH / scale;
+                const ptX = cssL / scale;
+                const ptY = cssT / scale;
+
+                // Apply to all pages. 
+                // Remember PDF point (0,0) is bottom left. HTML is top left.
+                for (const page of pages) {
+                    const { height } = page.getSize();
+                    // Convert top-Y to bottom-Y
+                    const pdfBottomY = height - ptY - ptH;
+
+                    page.setCropBox(ptX, pdfBottomY, ptW, ptH);
+                }
+
+                const pdfBytes = await pdfDocLib.save();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+                a.download = 'cropped.pdf';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+            } catch (e) {
+                alert('Cropping error: ' + e.message);
+            }
+            ldr.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

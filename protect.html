@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protect PDF – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .pass-input-wrap {
+      position: relative;
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .pass-input {
+      width: 100%;
+      padding: 14px 48px 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .pass-input:focus {
+      border-color: var(--a1);
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 18px;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .eye-btn:hover {
+      color: var(--text);
+    }
+
+    .strength-bar {
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s, background 0.3s;
+      width: 0;
+    }
+
+    .strength-label {
+      font-size: 12px;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .perm-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .perm-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .perm-item input[type=checkbox] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--a1);
+      cursor: pointer;
+    }
+
+    .perm-item label {
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .info-box {
+      width: 100%;
+      max-width: 580px;
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: rgba(255, 200, 0, 0.06);
+      border: 1px solid rgba(255, 200, 0, 0.2);
+      border-radius: 12px;
+      font-size: 13px;
+      color: #f5c842;
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+
+<body class="theme-red">
+  <div id="loader">
+    <div class="loader-ring"></div>
+    <p class="loader-text">Protecting PDF...</p>
+    <p class="loader-sub">Applying encryption</p>
+  </div>
+  <header>
+    <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg> Back</a>
+    <span class="logo">Quick Do PDF</span>
+  </header>
+  <main>
+    <h1 class="page-title">Protect <span>PDF</span></h1>
+    <p class="page-subtitle">Add a password to secure your PDF document</p>
+
+    <div class="upload-zone" id="dropArea">
+      <div class="upload-icon">🔐</div>
+      <h3>Drop your PDF file here</h3>
+      <p>A password will be required to open the file</p>
+      <label class="select-btn">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Select PDF File
+        <input type="file" id="pdfInput" accept="application/pdf">
+      </label>
+    </div>
+
+    <div id="fileInfo"></div>
+
+    <div class="info-box">
+      <span>⚠️</span>
+      <span>Note: This adds owner-level permissions metadata. For strong encryption, use Adobe Acrobat or a server-based
+        tool. Remember your password — it cannot be recovered!</span>
+    </div>
+
+    <div class="option-card hidden" id="optCard">
+      <h4>User Password (required to open)</h4>
+      <div class="pass-input-wrap">
+        <input class="pass-input" type="password" id="userPass" placeholder="Enter password..."
+          oninput="checkStrength()">
+        <button class="eye-btn" onclick="toggleEye('userPass',this)">👁</button>
+      </div>
+      <div class="strength-bar">
+        <div class="strength-fill" id="strFill"></div>
+      </div>
+      <div class="strength-label" id="strLabel" style="color:var(--muted)">Enter a password</div>
+
+      <h4 style="margin-top:20px">Confirm Password</h4>
+      <div class="pass-input-wrap">
+        <input class="pass-input" type="password" id="confirmPass" placeholder="Repeat password...">
+        <button class="eye-btn" onclick="toggleEye('confirmPass',this)">👁</button>
+      </div>
+
+      <button class="action-btn" id="actionBtn" onclick="protectPDF()" style="margin-top:24px; width:100%">
+        <span><svg style="margin-right:8px; vertical-align:text-bottom" width="20" height="20" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg> Protect & Download PDF</span>
+      </button>
+    </div>
+
+    <div id="successMsg" class="success-msg hidden">
+      <div class="s-icon">🔐</div>
+      <h3>PDF Protected!</h3>
+      <p>Your password-protected PDF has been downloaded.</p>
+    </div>
+  </main>
+  <script>
+    const inp = document.getElementById('pdfInput');
+    const drop = document.getElementById('dropArea');
+    const info = document.getElementById('fileInfo');
+    const btn = document.getElementById('actionBtn');
+    const ok = document.getElementById('successMsg');
+    const ldr = document.getElementById('loader');
+    const optCard = document.getElementById('optCard');
+    let pdfBuf = null;
+
+    inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', e => {
+      e.preventDefault(); drop.classList.remove('over');
+      const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+      if (f) { const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; loadFile(f); }
+    });
+
+    function toggleEye(id, btn) {
+      const el = document.getElementById(id);
+      el.type = el.type === 'password' ? 'text' : 'password';
+      btn.textContent = el.type === 'password' ? '👁' : '🔒';
+    }
+
+    function checkStrength() {
+      const p = document.getElementById('userPass').value;
+      const fill = document.getElementById('strFill');
+      const label = document.getElementById('strLabel');
+      let score = 0, msg = '', color = '';
+      if (p.length >= 8) score++;
+      if (/[A-Z]/.test(p)) score++;
+      if (/[0-9]/.test(p)) score++;
+      if (/[^A-Za-z0-9]/.test(p)) score++;
+      if (p.length === 0) { fill.style.width = '0'; label.textContent = 'Enter a password'; label.style.color = 'var(--muted)'; return; }
+      const map = [{ w: '20%', c: '#ef4444', m: 'Weak' }, { w: '45%', c: '#f97316', m: 'Fair' }, { w: '70%', c: '#eab308', m: 'Good' }, { w: '100%', c: '#22c55e', m: 'Strong' }];
+      const s = map[Math.min(score - 1, 3)] || map[0];
+      fill.style.width = s.w; fill.style.background = s.c; label.textContent = s.m; label.style.color = s.c;
+    }
+
+    function fmtSize(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+    async function loadFile(file) {
+      ok.classList.add('hidden'); info.innerHTML = '';
+      pdfBuf = new Uint8Array(await file.arrayBuffer());
+      const { PDFDocument } = PDFLib;
+      const pdf = await PDFDocument.load(pdfBuf.slice());
+      info.innerHTML = `<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fc">${pdf.getPageCount()} pages</span><span class="fs">${fmtSize(file.size)}</span></div>`;
+      optCard.classList.remove('hidden'); btn.classList.remove('hidden');
+    }
+
+    async function protectPDF() {
+      if (!pdfBuf) { alert('Select a PDF'); return; }
+      const pass = document.getElementById('userPass').value;
+      const conf = document.getElementById('confirmPass').value;
+      if (!pass) { alert('Enter a password'); return; }
+      if (pass !== conf) { alert('Passwords do not match!'); return; }
+      if (pass.length < 4) { alert('Password must be at least 4 characters'); return; }
+      ldr.classList.add('active'); ok.classList.add('hidden');
+      try {
+        // Use pdf.js to render pages, then jsPDF to create encrypted PDF
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const pdfDoc = await pdfjsLib.getDocument({ data: pdfBuf.slice() }).promise;
+        const numPages = pdfDoc.numPages;
+
+        // Get first page to determine orientation
+        const firstPage = await pdfDoc.getPage(1);
+        const firstVP = firstPage.getViewport({ scale: 1.0 });
+        const isLandscape = firstVP.width > firstVP.height;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: isLandscape ? 'landscape' : 'portrait',
+          unit: 'pt',
+          format: [firstVP.width, firstVP.height],
+          encryption: {
+            userPassword: pass,
+            ownerPassword: pass + '_owner_key',
+            userPermissions: []
+          }
+        });
+
+        for (let i = 1; i <= numPages; i++) {
+          const page = await pdfDoc.getPage(i);
+          const scale = 2.0; // High quality render
+          const viewport = page.getViewport({ scale });
+
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({ canvasContext: ctx, viewport }).promise;
+
+          const imgData = canvas.toDataURL('image/jpeg', 0.92);
+          const pageW = viewport.width / scale;
+          const pageH = viewport.height / scale;
+
+          if (i > 1) {
+            doc.addPage([pageW, pageH], pageW > pageH ? 'landscape' : 'portrait');
+          }
+
+          doc.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
+        }
+
+        const pdfBlob = doc.output('blob');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(pdfBlob);
+        a.download = 'protected.pdf';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        ldr.classList.remove('active'); ok.classList.remove('hidden');
+      } catch (e) { ldr.classList.remove('active'); alert('Error: ' + e.message); }
+    }
+  </script>
+</body>
+
+</html>

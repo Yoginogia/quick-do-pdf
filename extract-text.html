@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extract Text – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .text-output {
+      width:100%; max-width:580px; margin-top:20px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:16px; overflow:hidden; display:none;
+    }
+    .text-output.show { display:block; }
+    .text-toolbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 16px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px;
+    }
+    .text-toolbar h4 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+    .toolbar-btns { display:flex; gap:8px; }
+    .tb-btn {
+      padding:7px 14px; border-radius:10px; border:1px solid var(--border);
+      background:transparent; color:var(--muted); font-size:12px; font-weight:600;
+      cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; white-space:nowrap;
+    }
+    .tb-btn:hover { border-color:var(--a1); color:var(--a1); }
+    .tb-btn.copied { border-color:#22c55e; color:#22c55e; }
+    textarea#textArea {
+      width:100%; min-height:300px; padding:16px; background:transparent;
+      color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;
+      line-height:1.7; border:none; outline:none; resize:vertical;
+    }
+    .text-footer {
+      padding:10px 16px; border-top:1px solid var(--border);
+      font-size:12px; color:var(--muted); display:flex; gap:16px; flex-wrap:wrap;
+    }
+    .text-footer span { display:flex; align-items:center; gap:4px; }
+    .stat-pill { color:var(--a1); font-weight:700; }
+    .page-tabs { display:flex; gap:8px; flex-wrap:wrap; width:100%; max-width:580px; margin-top:12px; }
+    .page-tab {
+      padding:7px 14px; border-radius:20px; border:1px solid var(--border);
+      background:var(--surface); color:var(--muted); font-size:12px; font-weight:600;
+      cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s;
+    }
+    .page-tab:hover,.page-tab.active{border-color:var(--a1);color:var(--a1);background:color-mix(in srgb,var(--a1) 8%,transparent);}
+    .search-row { display:flex; gap:10px; align-items:center; width:100%; max-width:580px; margin-top:16px; }
+    .search-input {
+      flex:1; padding:10px 16px; border-radius:12px; border:1px solid var(--border);
+      background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif;
+      font-size:14px; outline:none;
+    }
+    .search-input:focus { border-color:var(--a1); }
+    .search-btn {
+      padding:10px 18px; border-radius:12px; border:none;
+      background:linear-gradient(135deg,var(--a1),var(--a2));
+      color:white; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer;
+    }
+    .match-count { font-size:13px; color:var(--muted); margin-top:8px; }
+  </style>
+</head>
+<body class="theme-gold">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text" id="ldrTxt">Extracting text...</p><p class="loader-sub">Reading all pages</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+</header>
+<main>
+  <h1 class="page-title">Extract <span>PDF Text</span></h1>
+  <p class="page-subtitle">Copy all text content from your PDF instantly</p>
+
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">📝</div>
+    <h3>Drop your PDF file here</h3>
+    <p>All text will be extracted and shown below</p>
+    <label class="select-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Select PDF File
+      <input type="file" id="pdfInput" accept="application/pdf">
+    </label>
+  </div>
+
+  <div id="fileInfo"></div>
+
+  <!-- Page filter tabs -->
+  <div class="page-tabs" id="pageTabs"></div>
+
+  <!-- Search -->
+  <div class="search-row" id="searchRow" style="display:none">
+    <input class="search-input" type="text" id="searchInp" placeholder="Search in extracted text..." oninput="searchText()">
+  </div>
+  <div class="match-count" id="matchCount"></div>
+
+  <!-- Text output -->
+  <div class="text-output" id="textOutput">
+    <div class="text-toolbar">
+      <h4>📋 Extracted Text</h4>
+      <div class="toolbar-btns">
+        <button class="tb-btn" onclick="copyAll()">📋 Copy All</button>
+        <button class="tb-btn" onclick="downloadTxt()">⬇ Download .txt</button>
+      </div>
+    </div>
+    <textarea id="textArea" readonly placeholder="Text will appear here..."></textarea>
+    <div class="text-footer">
+      <span>Words: <span class="stat-pill" id="wordCount">0</span></span>
+      <span>Characters: <span class="stat-pill" id="charCount">0</span></span>
+      <span>Pages: <span class="stat-pill" id="pageCount">0</span></span>
+    </div>
+  </div>
+</main>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const inp=document.getElementById('pdfInput');
+const drop=document.getElementById('dropArea');
+const info=document.getElementById('fileInfo');
+const ldr=document.getElementById('loader');
+const textOutput=document.getElementById('textOutput');
+const textArea=document.getElementById('textArea');
+const pageTabs=document.getElementById('pageTabs');
+const searchRow=document.getElementById('searchRow');
+let allPageTexts=[], currentFile='';
+
+inp.addEventListener('change',()=>{if(inp.files[0])extractText(inp.files[0]);});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.classList.remove('over');
+  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf');
+  if(f){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;extractText(f);}
+});
+
+function fmtSize(b){return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';}
+
+async function extractText(file){
+  info.innerHTML=''; pageTabs.innerHTML=''; textOutput.classList.remove('show');
+  searchRow.style.display='none'; allPageTexts=[];
+  currentFile=file.name.replace('.pdf','');
+  ldr.classList.add('active');
+  try{
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    const total=pdf.numPages;
+    info.innerHTML=`<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fc">${total} pages</span><span class="fs">${fmtSize(file.size)}</span></div>`;
+
+    for(let i=1;i<=total;i++){
+      document.getElementById('ldrTxt').textContent=`Extracting page ${i} of ${total}...`;
+      const page=await pdf.getPage(i);
+      const content=await page.getTextContent();
+      const text=content.items.map(item=>item.str).join(' ').replace(/\s+/g,' ').trim();
+      allPageTexts.push({page:i, text});
+    }
+
+    ldr.classList.remove('active');
+    renderTabs(total);
+    showAll();
+    textOutput.classList.add('show');
+    searchRow.style.display='flex';
+  }catch(e){ldr.classList.remove('active');alert('Error: '+e.message);}
+}
+
+function renderTabs(total){
+  pageTabs.innerHTML='';
+  const allTab=document.createElement('button');
+  allTab.className='page-tab active'; allTab.textContent='All Pages';
+  allTab.onclick=()=>{document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('active'));allTab.classList.add('active');showAll();};
+  pageTabs.appendChild(allTab);
+  for(let i=1;i<=total;i++){
+    const tab=document.createElement('button');
+    tab.className='page-tab'; tab.textContent=`Page ${i}`;
+    const pageNum=i;
+    tab.onclick=()=>{document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');showPage(pageNum);};
+    pageTabs.appendChild(tab);
+  }
+}
+
+function showAll(){
+  const text=allPageTexts.map((p,i)=>`--- Page ${p.page} ---\n${p.text||'(No text found on this page)'}`).join('\n\n');
+  textArea.value=text;
+  updateStats(text,allPageTexts.length);
+}
+
+function showPage(num){
+  const p=allPageTexts.find(x=>x.page===num);
+  const text=p?p.text:'(No text found)';
+  textArea.value=text;
+  updateStats(text,1);
+}
+
+function updateStats(text,pages){
+  const words=text.trim()?text.trim().split(/\s+/).length:0;
+  document.getElementById('wordCount').textContent=words.toLocaleString();
+  document.getElementById('charCount').textContent=text.length.toLocaleString();
+  document.getElementById('pageCount').textContent=pages;
+}
+
+function searchText(){
+  const q=document.getElementById('searchInp').value.trim().toLowerCase();
+  const matchEl=document.getElementById('matchCount');
+  if(!q){matchEl.textContent='';return;}
+  const fullText=textArea.value;
+  const matches=[...fullText.toLowerCase().matchAll(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'))].length;
+  matchEl.textContent=matches>0?`✅ ${matches} match${matches>1?'es':''} found`:`❌ No matches for "${q}"`;
+  matchEl.style.color=matches>0?'#22c55e':'#ef4444';
+}
+
+function copyAll(){
+  navigator.clipboard.writeText(textArea.value).then(()=>{
+    const btn=document.querySelector('.tb-btn');
+    btn.textContent='✅ Copied!'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 Copy All';btn.classList.remove('copied');},2000);
+  });
+}
+
+function downloadTxt(){
+  const blob=new Blob([textArea.value],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=currentFile+'_text.txt';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+</script>
+</body>
+</html>

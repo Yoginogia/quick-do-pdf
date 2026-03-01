@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word to PDF – Quick Do PDF</title>
+    <!-- Load mammoth for extracting text from docx -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <!-- Load pdf-lib for PDF generation -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <link rel="stylesheet" href="tools.css">
+    <style>
+        /* Sky Blue theme overrides for Word to PDF */
+        body.theme-w2p {
+            --a1: #0284c7;
+            --a2: #0369a1;
+        }
+
+        .theme-w2p .orb1 {
+            background: rgba(2, 132, 199, 0.12);
+        }
+
+        .theme-w2p .orb2 {
+            background: rgba(3, 105, 161, 0.12);
+        }
+    </style>
+</head>
+
+<body class="theme-w2p">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Converting to PDF...</p>
+        <p class="loader-sub">Extracting text and generating document</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">Word to <span>PDF</span></h1>
+        <p class="page-subtitle">Convert your Microsoft Word (.docx) files into clean, universal PDF documents.</p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">📄</div>
+            <h3>Drop your Word file here (.docx)</h3>
+            <p>We'll convert the text into a PDF directly in your browser</p>
+            <label class="select-btn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Select Word File
+                <input type="file" id="wordInput"
+                    accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            </label>
+        </div>
+
+        <div id="fileInfo"></div>
+
+        <div class="option-card hidden" id="infoCard">
+            <div
+                style="display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-size: 32px;">📑</div>
+                <div>
+                    <h4 style="margin-bottom: 4px;">Ready to Convert</h4>
+                    <p style="color: var(--muted); font-size: 14px;">The document text will be parsed and formatted into
+                        standard PDF pages.</p>
+                    <p style="color: var(--a1); font-size: 11px; margin-top:5px;">Note: Images inside the word file
+                        might not be retained.</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="action-btn hidden" id="actionBtn" onclick="convertToPDF()">
+            <span><svg style="margin-right:8px; vertical-align:text-bottom" width="20" height="20" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg> Download PDF Document</span>
+        </button>
+
+        <div class="success-msg hidden" id="successMsg">
+            <div class="s-icon">✅</div>
+            <h3>Conversion Successful</h3>
+            <p>Your PDF document is ready.</p>
+        </div>
+    </main>
+
+    <script>
+        const inp = document.getElementById('wordInput');
+        const drop = document.getElementById('dropArea');
+        const info = document.getElementById('fileInfo');
+        const infoCard = document.getElementById('infoCard');
+        const btn = document.getElementById('actionBtn');
+        const ldr = document.getElementById('loader');
+        const sMsg = document.getElementById('successMsg');
+        let origBuf = null;
+        let fileName = "document";
+
+        inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const f = [...e.dataTransfer.files][0];
+            if (f) loadFile(f);
+        });
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+        async function loadFile(file) {
+            sMsg.classList.add('hidden');
+            infoCard.classList.add('hidden');
+            info.innerHTML = '';
+
+            try {
+                origBuf = await file.arrayBuffer();
+                fileName = file.name.replace(/\.docx?$/i, '');
+                info.innerHTML = `<div class="file-item"><span class="fi">📝</span><span class="fn">${file.name}</span><span class="fs">${fmt(file.size)}</span></div>`;
+
+                infoCard.classList.remove('hidden');
+                btn.classList.remove('hidden');
+            } catch (e) {
+                alert('Failed to read file: ' + e.message);
+            }
+        }
+
+        async function convertToPDF() {
+            if (!origBuf) return;
+            ldr.classList.add('active');
+
+            try {
+                // 1. Extract raw text from docx using mammoth
+                const result = await mammoth.extractRawText({ arrayBuffer: origBuf });
+                const textData = result.value;
+
+                // 2. Generate PDF using pdf-lib
+                const { PDFDocument, StandardFonts, rgb } = PDFLib;
+                const pdfDocLib = await PDFDocument.create();
+                const font = await pdfDocLib.embedFont(StandardFonts.Helvetica);
+                const fontSize = 12;
+                const padding = 50;
+
+                let page = pdfDocLib.addPage();
+                const { width, height } = page.getSize();
+                let currentY = height - padding;
+
+                const lines = textData.split('\n');
+
+                // Loop through paragraphs and word-wrap lines
+                for (let para of lines) {
+                    if (para.trim() === "") {
+                        currentY -= fontSize * 1.5; // empty space
+                        if (currentY < padding) { page = pdfDocLib.addPage(); currentY = height - padding; }
+                        continue;
+                    }
+
+                    const words = para.split(' ');
+                    let currentLine = '';
+
+                    for (let i = 0; i < words.length; i++) {
+                        const word = words[i];
+                        const testLine = currentLine + word + ' ';
+                        const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+                        if (testWidth > width - padding * 2) {
+                            // Draw current line
+                            page.drawText(currentLine, { x: padding, y: currentY, size: fontSize, font: font, color: rgb(0, 0, 0) });
+                            currentLine = word + ' ';
+                            currentY -= (fontSize + 6);
+
+                            if (currentY < padding) {
+                                page = pdfDocLib.addPage();
+                                currentY = height - padding;
+                            }
+                        } else {
+                            currentLine = testLine;
+                        }
+                    }
+
+                    // Draw remainder of the paragraph
+                    if (currentLine.trim() !== "") {
+                        page.drawText(currentLine, { x: padding, y: currentY, size: fontSize, font: font, color: rgb(0, 0, 0) });
+                        currentY -= (fontSize + 12); // paragraph spacing
+
+                        if (currentY < padding) {
+                            page = pdfDocLib.addPage();
+                            currentY = height - padding;
+                        }
+                    }
+                }
+
+                const pdfBytes = await pdfDocLib.save();
+
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+                a.download = `${fileName}.pdf`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+                sMsg.classList.remove('hidden');
+            } catch (e) {
+                alert('Conversion Error: ' + e.message);
+            }
+
+            ldr.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

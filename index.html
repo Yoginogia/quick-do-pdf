@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Do PDF – Ultra-Fast & Free PDF Tools</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #03040b;
+      --surface: rgba(18, 19, 28, 0.6);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      --text: #f8f9fc;
+      --muted: #8b92a5;
+      --glass-blur: blur(24px);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Dynamic Mesh Background Glows */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb1 {
+      width: 600px;
+      height: 600px;
+      top: -150px;
+      left: -100px;
+      background: rgba(255, 42, 95, 0.12);
+      animation: float1 15s ease-in-out infinite alternate;
+    }
+
+    .orb2 {
+      width: 500px;
+      height: 500px;
+      bottom: -100px;
+      right: -100px;
+      background: rgba(139, 77, 255, 0.12);
+      animation: float2 18s ease-in-out infinite alternate;
+    }
+
+    .orb3 {
+      width: 400px;
+      height: 400px;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 223, 162, 0.08);
+      animation: float3 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes float1 {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      100% {
+        transform: translate(15%, 15%) scale(1.2);
+      }
+    }
+
+    @keyframes float2 {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      100% {
+        transform: translate(-15%, -15%) scale(1.1);
+      }
+    }
+
+    @keyframes float3 {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      100% {
+        transform: translate(-40%, -60%) scale(1.3);
+      }
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px;
+      background: rgba(3, 4, 11, 0.5);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-weight: 900;
+      font-size: 24px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ff2a5f, #ff6b3d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-tag {
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: 1px solid rgba(0, 223, 162, 0.3);
+      background: rgba(0, 223, 162, 0.05);
+      font-size: 13px;
+      font-weight: 600;
+      color: #00dfa2;
+      box-shadow: 0 0 20px rgba(0, 223, 162, 0.1);
+    }
+
+    .hero {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 160px 24px 60px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 24px;
+      animation: slideDown .6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    .hero-badge span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff2a5f;
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 0 10px #ff2a5f;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(.8)
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 80px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+      animation: slideDown .6s .1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    .g1 {
+      background: linear-gradient(135deg, #fff, #8b92a5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .g2 {
+      background: linear-gradient(135deg, #2a8bff, #8b4dff, #2a8bff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmerText 4s linear infinite;
+    }
+
+    @keyframes shimmerText {
+      to {
+        background-position: 200% center;
+      }
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 540px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+      font-weight: 400;
+      animation: slideDown .6s .2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    .hero-pills {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      animation: slideDown .6s .3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    .pill {
+      padding: 10px 20px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      backdrop-filter: var(--glass-blur);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .stats-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+      flex-wrap: wrap;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.02), transparent);
+      margin-bottom: 60px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 40px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      letter-spacing: -1px;
+    }
+
+    .v1 {
+      background: linear-gradient(135deg, #ff2a5f, #ff6b3d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .v2 {
+      background: linear-gradient(135deg, #2a8bff, #8b4dff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .v3 {
+      background: linear-gradient(135deg, #00dfa2, #00b4d8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .section {
+      position: relative;
+      z-index: 10;
+      padding: 0 24px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .divider {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto 32px;
+      padding: 0 24px;
+    }
+
+    .divider-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .divider hr {
+      flex: 1;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .divider-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      backdrop-filter: var(--glass-blur);
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      text-decoration: none;
+      color: var(--text);
+      transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: var(--glass-blur);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      opacity: 0;
+      transition: opacity .4s;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .tool-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: skewX(-20deg);
+      transition: .6s;
+      z-index: 1;
+    }
+
+    .tool-card:hover {
+      border-color: var(--c1);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px color-mix(in srgb, var(--c1) 20%, transparent);
+    }
+
+    .tool-card:hover::before {
+      opacity: .1;
+    }
+
+    .tool-card:hover::after {
+      left: 200%;
+    }
+
+    .card-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 10px 20px color-mix(in srgb, var(--c1) 30%, transparent);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .tool-card:hover .card-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .card-desc {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 24px;
+    }
+
+    .card-arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      position: relative;
+      z-index: 2;
+      color: var(--text);
+      transition: all .3s;
+      padding: 8px 16px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tool-card:hover .card-arrow {
+      background: var(--c1);
+      color: #fff;
+      border-color: var(--c1);
+      gap: 12px;
+      box-shadow: 0 5px 15px color-mix(in srgb, var(--c1) 40%, transparent);
+    }
+
+    /* Premium Colors */
+    .c-red {
+      --c1: #ff2a5f;
+      --c2: #ff6b3d;
+    }
+
+    .c-blue {
+      --c1: #2a8bff;
+      --c2: #8b4dff;
+    }
+
+    .c-green {
+      --c1: #00dfa2;
+      --c2: #00b4d8;
+    }
+
+    .c-gold {
+      --c1: #fbbf24;
+      --c2: #f97316;
+    }
+
+    .c-purple {
+      --c1: #c026d3;
+      --c2: #db2777;
+    }
+
+    .c-teal {
+      --c1: #2dd4bf;
+      --c2: #0ea5e9;
+    }
+
+    .c-lime {
+      --c1: #a3e635;
+      --c2: #22c55e;
+    }
+
+    .c-rose {
+      --c1: #fb7185;
+      --c2: #e11d48;
+    }
+
+    .c-amber {
+      --c1: #fbbf24;
+      --c2: #d97706;
+    }
+
+    .c-indigo {
+      --c1: #818cf8;
+      --c2: #6366f1;
+    }
+
+    .c-gray {
+      --c1: #9ca3af;
+      --c2: #4b5563;
+    }
+
+    .c-sky {
+      --c1: #38bdf8;
+      --c2: #0284c7;
+    }
+
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 32px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 40px;
+      background: rgba(3, 4, 11, 0.8);
+      backdrop-filter: var(--glass-blur);
+    }
+
+    footer span {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    @media(max-width:768px) {
+      header {
+        padding: 16px 20px;
+      }
+
+      .hero {
+        padding: 120px 20px 40px;
+      }
+
+      .stats-bar {
+        gap: 40px;
+        padding: 32px 20px;
+      }
+
+      .stat-val {
+        font-size: 32px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <header>
+    <div class="logo">Quick Do PDF</div>
+    <div class="header-tag">🔒 100% Private, No Upload</div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-badge"><span></span> 25 Free PDF Tools — No signup needed</div>
+    <h1><span class="g1">PDF Tools</span><br><span class="g2">That Actually Work</span></h1>
+    <p>Merge, split, compress, protect, edit and more — entirely within your browser. Powerful tools with zero cloud
+      uploads required.</p>
+    <div class="hero-pills">
+      <div class="pill">⚡ Instant Processing</div>
+      <div class="pill">🔒 File Never Leaves Device</div>
+      <div class="pill">🆓 100% Free Forever</div>
+    </div>
+  </section>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-val v1">14</div>
+      <div class="stat-label">Pro Tools</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val v2">0 MB</div>
+      <div class="stat-label">Data Uploaded</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val v3">Unlimited</div>
+      <div class="stat-label">Usage Free</div>
+    </div>
+  </div>
+
+  <!-- BASIC -->
+  <div class="divider">
+    <div class="divider-content">
+      <hr>
+      <div class="divider-label">📄 Core Essentials</div>
+      <hr>
+    </div>
+  </div>
+  <section class="section">
+    <div class="tools-grid">
+      <a href="merge.html" class="tool-card c-red">
+        <div class="card-icon">📂</div>
+        <div class="card-title">Merge PDF</div>
+        <div class="card-desc">Combine multiple PDFs into one polished document.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="split.html" class="tool-card c-blue">
+        <div class="card-icon">✂️</div>
+        <div class="card-title">Split PDF</div>
+        <div class="card-desc">Extract every single page as a standalone PDF file.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="compress.html" class="tool-card c-green">
+        <div class="card-icon">🗜️</div>
+        <div class="card-title">Compress PDF</div>
+        <div class="card-desc">Drastically reduce file size whilst keeping pristine quality.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="pdf-to-word.html" class="tool-card c-sky">
+        <div class="card-icon">📄</div>
+        <div class="card-title">PDF to Word</div>
+        <div class="card-desc">Extract text from your document into an editable .docx file instantly.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="word-to-pdf.html" class="tool-card c-sky">
+        <div class="card-icon">📝</div>
+        <div class="card-title">Word to PDF</div>
+        <div class="card-desc">Convert your Microsoft Word (.docx) files into clean PDF documents.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="pdf-to-excel.html" class="tool-card c-emerald">
+        <div class="card-icon">📊</div>
+        <div class="card-title">PDF to Excel</div>
+        <div class="card-desc">Convert document data and tables into an interactive .xlsx spreadsheet.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="jpg-to-pdf.html" class="tool-card c-gold">
+        <div class="card-icon">🖼️</div>
+        <div class="card-title">JPG to PDF</div>
+        <div class="card-desc">Stitch JPG/PNG images into a single beautiful PDF.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="pdf-to-jpg.html" class="tool-card c-purple">
+        <div class="card-icon">📸</div>
+        <div class="card-title">PDF to JPG</div>
+        <div class="card-desc">Convert every PDF page perfectly into crisp JPG images.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ADVANCED -->
+  <div class="divider">
+    <div class="divider-content">
+      <hr>
+      <div class="divider-label">⚡ Pro Utilities</div>
+      <hr>
+    </div>
+  </div>
+  <section class="section">
+    <div class="tools-grid">
+      <a href="rotate.html" class="tool-card c-teal">
+        <div class="card-icon">🔄</div>
+        <div class="card-title">Rotate PDF</div>
+        <div class="card-desc">Adjust orientations by 90°, 180° or 270°.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="page-numbers.html" class="tool-card c-lime">
+        <div class="card-icon">🔢</div>
+        <div class="card-title">Add Page Numbers</div>
+        <div class="card-desc">Inject elegant numbering with custom positioning.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="crop.html" class="tool-card c-lime">
+        <div class="card-icon">✂️</div>
+        <div class="card-title">Crop PDF</div>
+        <div class="card-desc">Visually remove margins or extract specific parts perfectly.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="watermark.html" class="tool-card c-indigo">
+        <div class="card-icon">💧</div>
+        <div class="card-title">Add Watermark</div>
+        <div class="card-desc">Stamp custom text elegantly over your documents.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="sanitize.html" class="tool-card c-emerald">
+        <div class="card-icon">🧹</div>
+        <div class="card-title">Remove Metadata</div>
+        <div class="card-desc">Clean identifying information and properties for true privacy.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="flatten.html" class="tool-card c-orange">
+        <div class="card-icon">🖨️</div>
+        <div class="card-title">Flatten Forms</div>
+        <div class="card-desc">Make all interactive fields permanent text that cannot be changed.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="extract-images.html" class="tool-card c-violet">
+        <div class="card-icon">📸</div>
+        <div class="card-title">Extract Images</div>
+        <div class="card-desc">Instantly pull every embedded picture out of your PDF file as a ZIP.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="compare-pdfs.html" class="tool-card c-cyan">
+        <div class="card-icon">🕵️‍♂️</div>
+        <div class="card-title">Compare PDFs</div>
+        <div class="card-desc">Upload two versions of a document to highlight text differences.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="pdf-to-ocr.html" class="tool-card c-slate">
+        <div class="card-icon">👁️</div>
+        <div class="card-title">PDF OCR Scanner</div>
+        <div class="card-desc">Extract text from scanned documents and images natively using local AI.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="add-background.html" class="tool-card c-indigo">
+        <div class="card-icon">🎨</div>
+        <div class="card-title">Add Background</div>
+        <div class="card-desc">Instantly apply a solid background color to every page of your PDF.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="protect.html" class="tool-card c-rose">
+        <div class="card-icon">🔐</div>
+        <div class="card-title">Protect PDF</div>
+        <div class="card-desc">Encrypt your PDF with a strong password.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="unlock.html" class="tool-card c-amber">
+        <div class="card-icon">🔓</div>
+        <div class="card-title">Unlock PDF</div>
+        <div class="card-desc">Strips password restrictions seamlessly from your PDFs.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- EDIT & EXTRACT -->
+  <div class="divider">
+    <div class="divider-content">
+      <hr>
+      <div class="divider-label">✏️ Master Edits</div>
+      <hr>
+    </div>
+  </div>
+  <section class="section">
+    <div class="tools-grid">
+      <a href="sign.html" class="tool-card c-teal">
+        <div class="card-icon">✍️</div>
+        <div class="card-title">Sign PDF</div>
+        <div class="card-desc">Draw a signature or stamp an image directly onto your PDF.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="delete-pages.html" class="tool-card c-rose">
+        <div class="card-icon">🗑️</div>
+        <div class="card-title">Delete Pages</div>
+        <div class="card-desc">Selectively remove any page you don't need anymore.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="reorder.html" class="tool-card c-sky">
+        <div class="card-icon">🔀</div>
+        <div class="card-title">Reorder Pages</div>
+        <div class="card-desc">Drag, drop and reorganize pages visually.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="grayscale.html" class="tool-card c-gray">
+        <div class="card-icon">🖤</div>
+        <div class="card-title">PDF to Grayscale</div>
+        <div class="card-desc">Strips out colors for a clean black-and-white look.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+      <a href="extract-text.html" class="tool-card c-gold">
+        <div class="card-icon">📝</div>
+        <div class="card-title">Extract Text</div>
+        <div class="card-desc">Lift entire text segments effortlessly for reuse.</div>
+        <div class="card-arrow">Launch App →</div>
+      </a>
+    </div>
+  </section>
+
+  <footer>Built with ❤️ by <span>Yogesh</span> · Quick Do PDF · The Future of Client-Side Editing</footer>
+</body>
+
+</html>

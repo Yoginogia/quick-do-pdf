@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF OCR Scanner – Quick Do PDF</title>
+    <!-- Load PDF.js for rendering pages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Load Tesseract.js for Offline OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <link rel="stylesheet" href="tools.css">
+    <style>
+        /* Slate/Cyber theme overrides for OCR */
+        body.theme-ocr {
+            --a1: #64748b;
+            --a2: #334155;
+        }
+
+        .theme-ocr .orb1 {
+            background: rgba(100, 116, 139, 0.12);
+        }
+
+        .theme-ocr .orb2 {
+            background: rgba(51, 65, 85, 0.12);
+        }
+
+        #resultBox {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            margin-top: 16px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255Flexible, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--a1), var(--a2));
+            transition: width 0.3s ease;
+        }
+
+        #ocrStatus {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 8px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body class="theme-ocr">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Loading OCR Engine...</p>
+        <p class="loader-sub">Downloading language data</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">PDF <span>OCR Scanner</span></h1>
+        <p class="page-subtitle">Extract text from scanned documents and images natively in your browser using local AI.
+        </p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">👁️</div>
+            <h3>Drop your scanned PDF or Image</h3>
+            <p>We'll read the text securely without uploading</p>
+            <label class="select-btn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Select File
+                <input type="file" id="pdfInput" accept="application/pdf,image/png,image/jpeg">
+            </label>
+        </div>
+
+        <div id="fileInfo"></div>
+
+        <div class="option-card hidden" id="infoCard">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 style="margin: 0;">OCR Output</h4>
+                <button id="copyBtn" onclick="copyText()"
+                    style="background:var(--surface); border:1px solid var(--border); color:#fff; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; display:none;">Copy
+                    Text</button>
+            </div>
+
+            <div id="progressCont" class="hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="pFill"></div>
+                </div>
+                <div id="ocrStatus">Initializing...</div>
+            </div>
+
+            <div id="resultBox">Waiting for document...</div>
+        </div>
+
+        <div class="success-msg hidden" id="successMsg" style="margin-top: 24px;">
+            <div class="s-icon">📝</div>
+            <h3>Text Copied</h3>
+            <p>The extracted text is in your clipboard.</p>
+        </div>
+    </main>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const inp = document.getElementById('pdfInput');
+        const drop = document.getElementById('dropArea');
+        const info = document.getElementById('fileInfo');
+        const infoCard = document.getElementById('infoCard');
+        const resultBox = document.getElementById('resultBox');
+        const progressCont = document.getElementById('progressCont');
+        const pFill = document.getElementById('pFill');
+        const ocrStatus = document.getElementById('ocrStatus');
+        const copyBtn = document.getElementById('copyBtn');
+        const ldr = document.getElementById('loader');
+        const sMsg = document.getElementById('successMsg');
+
+        inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const f = [...e.dataTransfer.files][0];
+            if (f) loadFile(f);
+        });
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+        async function loadFile(file) {
+            sMsg.classList.add('hidden');
+            infoCard.classList.remove('hidden');
+            progressCont.classList.remove('hidden');
+            copyBtn.style.display = 'none';
+            resultBox.textContent = '';
+            pFill.style.width = '0%';
+
+            info.innerHTML = `<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fs">${fmt(file.size)}</span></div>`;
+
+            try {
+                if (file.type === 'application/pdf') {
+                    await processPDF(file);
+                } else if (file.type.startsWith('image/')) {
+                    await runOCR(file);
+                }
+            } catch (e) {
+                alert('Processing Error: ' + e.message);
+            }
+        }
+
+        async function processPDF(file) {
+            const buf = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+
+            // For simplicity, we only OCR the first page of the PDF to avoid crashing the browser memory
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({ scale: 2.0 }); // scale up for better OCR
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+            // get image
+            const dataUrl = canvas.toDataURL('image/png');
+            await runOCR(dataUrl);
+        }
+
+        async function runOCR(imageSource) {
+            ocrStatus.textContent = "Loading Tesseract OCR Core...";
+
+            try {
+                const worker = await Tesseract.createWorker("eng", 1, {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            pFill.style.width = `${Math.floor(m.progress * 100)}%`;
+                            ocrStatus.textContent = `Scanning: ${Math.floor(m.progress * 100)}%`;
+                        } else {
+                            ocrStatus.textContent = m.status;
+                        }
+                    }
+                });
+
+                const ret = await worker.recognize(imageSource);
+
+                progressCont.classList.add('hidden');
+                resultBox.textContent = ret.data.text || "No text could be interpreted.";
+                copyBtn.style.display = 'block';
+
+                await worker.terminate();
+            } catch (err) {
+                progressCont.classList.add('hidden');
+                resultBox.textContent = "OCR failed. " + err;
+            }
+        }
+
+        function copyText() {
+            navigator.clipboard.writeText(resultBox.textContent).then(() => {
+                sMsg.classList.remove('hidden');
+                setTimeout(() => sMsg.classList.add('hidden'), 3000);
+            });
+        }
+    </script>
+</body>
+
+</html>
