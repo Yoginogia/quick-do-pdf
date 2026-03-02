@@ -281,6 +281,24 @@
 
         <div class="gallery-grid" id="galleryGrid"></div>
 
+        <div class="settings-bar hidden" id="settingsBar"
+            style="display:flex; justify-content:center; gap:16px; margin-bottom:24px;">
+            <label
+                style="color:var(--text); font-weight:600; font-size: 15px; display:flex; align-items:center; gap:12px;">
+                Page Size:
+                <select id="pageSize"
+                    style="padding:10px 16px; border-radius:12px; font-weight:500; font-family:inherit; font-size:14px; background:var(--surface); border:1px solid var(--border); color:var(--text); cursor:pointer;">
+                    <optgroup label="Auto Format">
+                        <option value="fit" selected>Fit to Image (Best)</option>
+                    </optgroup>
+                    <optgroup label="Standard Document">
+                        <option value="a4">A4 (Standard)</option>
+                        <option value="letter">US Letter</option>
+                    </optgroup>
+                </select>
+            </label>
+        </div>
+
         <button class="action-btn hidden" id="actionBtn" onclick="generatePDF()">
             <span><svg style="margin-right: 8px; vertical-align: text-bottom;" width="20" height="20" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -420,9 +438,11 @@
 
             if (scans.length > 0) {
                 actionBtn.classList.remove('hidden');
+                document.getElementById('settingsBar').classList.remove('hidden');
                 scanCountEl.textContent = scans.length;
             } else {
                 actionBtn.classList.add('hidden');
+                document.getElementById('settingsBar').classList.add('hidden');
             }
 
             scans.forEach((dataUrl, index) => {
@@ -463,18 +483,17 @@
 
             try {
                 // Initialize jsPDF
-                // It's attached to window.jspdf.jsPDF when used via umd
                 const { jsPDF } = window.jspdf;
+                const pageSizeType = document.getElementById('pageSize').value;
 
-                // We don't know the exact orientation upfront for all images, 
-                // so we create a blank PDF and will add sizing dynamically page by page
+                // Create a blank PDF with the requested format
                 const pdf = new jsPDF({
                     orientation: 'p',
                     unit: 'px',
-                    format: 'a4'
+                    format: pageSizeType === 'fit' ? 'a4' : pageSizeType
                 });
 
-                // Remove the default empty first page since we will add pages per image dimensions
+                // Remove the default empty first page
                 pdf.deletePage(1);
 
                 for (let i = 0; i < scans.length; i++) {
@@ -487,12 +506,32 @@
                         img.src = dataUrl;
                     });
 
-                    // Add a new page matching the image exactly
-                    const orientation = img.width > img.height ? 'l' : 'p';
-                    pdf.addPage([img.width, img.height], orientation);
+                    if (pageSizeType === 'fit') {
+                        // Fit to Image: Add a new page matching the image dimensions exactly
+                        const orientation = img.width > img.height ? 'l' : 'p';
+                        pdf.addPage([img.width, img.height], orientation);
+                        pdf.addImage(dataUrl, 'JPEG', 0, 0, img.width, img.height);
+                    } else {
+                        // Standard Page: A4 or US Letter
+                        pdf.addPage(pageSizeType, 'p');
 
-                    // Place image stretching precisely to page bounds
-                    pdf.addImage(dataUrl, 'JPEG', 0, 0, img.width, img.height);
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+                        // Calculate scale to fit image within page constraints centrally
+                        const ratio = Math.min(pdfWidth / img.width, pdfHeight / img.height);
+
+                        // We apply a slight 0.95 multiplier to give the standard doc a nice small margin
+                        const finalRatio = ratio * 0.95;
+
+                        const scaledW = img.width * finalRatio;
+                        const scaledH = img.height * finalRatio;
+
+                        const x = (pdfWidth - scaledW) / 2;
+                        const y = (pdfHeight - scaledH) / 2;
+
+                        pdf.addImage(dataUrl, 'JPEG', x, y, scaledW, scaledH);
+                    }
                 }
 
                 // Trigger Download
