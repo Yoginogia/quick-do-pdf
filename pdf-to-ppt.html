@@ -163,9 +163,24 @@
                         let pres = new PptxGenJS();
                         pres.title = file.name.replace('.pdf', '');
 
+                        // Pre-calculate layout based on first page
+                        const firstPage = await pdf.getPage(1);
+                        const firstViewport = firstPage.getViewport({ scale: 1.0 });
+                        const ratio = firstViewport.width / firstViewport.height;
+
+                        // Set layout globally
+                        if (ratio < 1) {
+                            pres.layout = 'LAYOUT_16x9'; // A4/Letter fits better on 16:9 with contain
+                        } else {
+                            pres.layout = 'LAYOUT_16x9';
+                        }
+
                         // Generate slides from pages
                         for (let i = 1; i <= totalPages; i++) {
                             updateProgress((i / totalPages) * 90, `Processing page ${i} of ${totalPages}...`);
+
+                            // Add a small delay so UI can update
+                            await new Promise(r => setTimeout(r, 50));
 
                             const page = await pdf.getPage(i);
                             const scale = 2.0; // Higher scale for better PPT quality
@@ -178,25 +193,12 @@
 
                             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
 
-                            // Determine PPT size based on PDF aspect ratio
-                            // Default pptxgenjs layout is exactly 10x5.625 inches (16:9).
-                            // We can use custom layout if desired, but centering an image is safer.
-                            // Let's configure layout to match 4:3 or 16:9 roughly based on first page if we want,
-                            // but covering the whole slide with w:'100%', h:'100%' and sizing='contain' is best practice.
-
-                            if (i === 1) {
-                                const ratio = canvas.width / canvas.height;
-                                if (ratio < 1) {
-                                    // Portrait (e.g. Letter/A4) -> 8.5 x 11
-                                    pres.layout = 'LAYOUT_PORTRAIT';
-                                } else {
-                                    pres.layout = 'LAYOUT_16x9';
-                                }
-                            }
+                            // Convert canvas to base64 data URL
+                            const imgData = canvas.toDataURL('image/jpeg', 0.85);
 
                             let slide = pres.addSlide();
                             slide.addImage({
-                                data: canvas.toDataURL('image/jpeg', 0.8),
+                                data: imgData,
                                 x: 0,
                                 y: 0,
                                 w: '100%',
@@ -206,6 +208,8 @@
                         }
 
                         updateProgress(95, 'Saving PPTX file...');
+                        await new Promise(r => setTimeout(r, 100)); // allow UI update
+
                         await pres.writeFile({ fileName: file.name.replace('.pdf', '.pptx') });
 
                         ldr.classList.remove('active');
@@ -213,7 +217,10 @@
                         resetProgress();
 
                     } catch (err) {
-                        throw new Error("Failed to process PDF: " + err.message);
+                        ldr.classList.remove('active');
+                        alert("Failed to process PDF: " + err.message);
+                        resetProgress();
+                        console.error(err);
                     }
                 };
                 fileReader.readAsArrayBuffer(file);
