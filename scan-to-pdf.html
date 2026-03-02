@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://quickdopdf.com/scan-to-pdf.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Scan to PDF – Quick Do PDF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <!-- Unpkg jsPDF for creating PDF from images -->
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="tools.css?v=2">
+
+    <style>
+        .camera-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 32px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: var(--glass-blur);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        #camVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            transform: scaleX(-1);
+            /* Mirror view for natural feel */
+        }
+
+        .cam-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            z-index: 2;
+        }
+
+        .cam-controls {
+            position: absolute;
+            bottom: 24px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            z-index: 10;
+        }
+
+        .capture-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 4px solid #fff;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: none;
+            backdrop-filter: blur(8px);
+        }
+
+        .capture-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .capture-btn:active {
+            transform: scale(0.95);
+            background: #fff;
+        }
+
+        .cam-init-btn {
+            padding: 12px 24px;
+            border-radius: 100px;
+            background: linear-gradient(135deg, #2dd4bf, #0ea5e9);
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s;
+            box-shadow: 0 10px 20px rgba(45, 212, 191, 0.2);
+        }
+
+        .cam-init-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(45, 212, 191, 0.3);
+        }
+
+        .cam-switch-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+
+        .cam-switch-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .scan-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 3/4;
+            background: #1a1b26;
+            border: 1px solid var(--border);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .scan-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scan-item .del-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scan-item .scan-num {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pulse-flash {
+            animation: flash 0.3s ease-out;
+        }
+
+        @keyframes flash {
+            0% {
+                background: rgba(255, 255, 255, 0.8);
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+    </style>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-KXQBGLEXZ6');</script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021"
+        crossorigin="anonymous"></script>
+    <script src="theme.js"></script>
+</head>
+
+<body class="theme-teal">
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Generating PDF...</p>
+        <p class="loader-sub">Stitching scans natively</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+        <div class="header-right">
+            <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                    </path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="page-title">Scan <span>to PDF</span></h1>
+        <p class="page-subtitle">Use your device camera to securely scan physical documents directly into a PDF.</p>
+
+        <div class="camera-container" id="camContainer">
+            <video id="camVideo" autoplay playsinline></video>
+            <div class="cam-overlay"></div>
+
+            <button class="cam-switch-btn" id="switchCamBtn" title="Swap Camera (Front/Back)">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+
+            <button class="cam-init-btn" id="initBtn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Enable Camera
+            </button>
+
+            <div class="cam-controls">
+                <button class="capture-btn" id="captureBtn" title="Take Scan"></button>
+            </div>
+        </div>
+
+        <!-- Hidden Canvas for frame extraction -->
+        <canvas id="hiddenCanvas" style="display:none;"></canvas>
+
+        <div class="gallery-grid" id="galleryGrid"></div>
+
+        <button class="action-btn hidden" id="actionBtn" onclick="generatePDF()">
+            <span><svg style="margin-right: 8px; vertical-align: text-bottom;" width="20" height="20" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg> Generate PDF (<span id="scanCount">0</span> pages)</span>
+        </button>
+
+    </main>
+
+    <script>
+        const video = document.getElementById('camVideo');
+        const canvas = document.getElementById('hiddenCanvas');
+        const ctx = canvas.getContext('2d');
+        const initBtn = document.getElementById('initBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const switchCamBtn = document.getElementById('switchCamBtn');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const actionBtn = document.getElementById('actionBtn');
+        const scanCountEl = document.getElementById('scanCount');
+        const ldr = document.getElementById('loader');
+        const camContainer = document.getElementById('camContainer');
+
+        let stream = null;
+        let scans = []; // Array to hold base64 image data URIs
+        let facingMode = "environment"; // Try rear camera first on mobile
+
+        // Check platform capability
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            initBtn.textContent = 'Camera not supported in this browser';
+            initBtn.disabled = true;
+            initBtn.style.background = '#666';
+        }
+
+        initBtn.addEventListener('click', async () => {
+            await startCamera(facingMode);
+        });
+
+        switchCamBtn.addEventListener('click', async () => {
+            facingMode = facingMode === "environment" ? "user" : "environment";
+            await startCamera(facingMode);
+        });
+
+        async function startCamera(desiredMode) {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: desiredMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+                    audio: false
+                });
+                video.srcObject = stream;
+
+                // Adjust mirror effect if front loaded
+                const track = stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                if (settings.facingMode === 'user' || desiredMode === 'user') {
+                    video.style.transform = 'scaleX(-1)';
+                } else {
+                    video.style.transform = 'scaleX(1)';
+                }
+
+                video.style.display = 'block';
+                initBtn.style.display = 'none';
+                captureBtn.style.display = 'block';
+
+                // Check if multiple cameras available to show switch button
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoInputs = devices.filter(d => d.kind === 'videoinput');
+                if (videoInputs.length > 1) {
+                    switchCamBtn.style.display = 'flex';
+                }
+
+            } catch (err) {
+                console.error("Camera access denied or failed", err);
+                alert("Could not access camera. Please check permissions and ensure you are on HTTPS.");
+            }
+        }
+
+        captureBtn.addEventListener('click', () => {
+            if (!stream) return;
+
+            // Visual feedback
+            camContainer.classList.remove('pulse-flash');
+            void camContainer.offsetWidth; // trigger reflow
+            camContainer.classList.add('pulse-flash');
+
+            // Draw current video frame to hidden canvas to extract data
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Handle mirroring in the canvas context if needed
+            if (video.style.transform === 'scaleX(-1)') {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9); // High quality JPEG
+            scans.push(dataUrl);
+            renderGallery();
+        });
+
+        function renderGallery() {
+            galleryGrid.innerHTML = '';
+
+            if (scans.length > 0) {
+                actionBtn.classList.remove('hidden');
+                scanCountEl.textContent = scans.length;
+            } else {
+                actionBtn.classList.add('hidden');
+            }
+
+            scans.forEach((dataUrl, index) => {
+                const item = document.createElement('div');
+                item.className = 'scan-item';
+
+                const img = document.createElement('img');
+                img.src = dataUrl;
+
+                const num = document.createElement('div');
+                num.className = 'scan-num';
+                num.textContent = index + 1;
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'del-btn';
+                delBtn.innerHTML = '✕';
+                delBtn.title = 'Remove scan';
+                delBtn.onclick = () => {
+                    scans.splice(index, 1);
+                    renderGallery();
+                };
+
+                item.appendChild(img);
+                item.appendChild(num);
+                item.appendChild(delBtn);
+                galleryGrid.appendChild(item);
+            });
+
+            // Scroll down a bit automatically to show new scans
+            if (scans.length > 0) {
+                galleryGrid.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+        }
+
+        async function generatePDF() {
+            if (scans.length === 0) return;
+            ldr.classList.add('active');
+
+            try {
+                // Initialize jsPDF
+                // It's attached to window.jspdf.jsPDF when used via umd
+                const { jsPDF } = window.jspdf;
+
+                // We don't know the exact orientation upfront for all images, 
+                // so we create a blank PDF and will add sizing dynamically page by page
+                const pdf = new jsPDF({
+                    orientation: 'p',
+                    unit: 'px',
+                    format: 'a4'
+                });
+
+                // Remove the default empty first page since we will add pages per image dimensions
+                pdf.deletePage(1);
+
+                for (let i = 0; i < scans.length; i++) {
+                    const dataUrl = scans[i];
+
+                    // Create an Image object to read its natural width/height
+                    const img = new Image();
+                    await new Promise(resolve => {
+                        img.onload = resolve;
+                        img.src = dataUrl;
+                    });
+
+                    // Add a new page matching the image exactly
+                    const orientation = img.width > img.height ? 'l' : 'p';
+                    pdf.addPage([img.width, img.height], orientation);
+
+                    // Place image stretching precisely to page bounds
+                    pdf.addImage(dataUrl, 'JPEG', 0, 0, img.width, img.height);
+                }
+
+                // Trigger Download
+                pdf.save('QuickDoPDF-Scans.pdf');
+                ldr.classList.remove('active');
+
+            } catch (err) {
+                console.error(err);
+                ldr.classList.remove('active');
+                alert("Error generating PDF. Make sure your browser supports this operation.");
+            }
+        }
+    </script>
+</body>
+
+</html>
