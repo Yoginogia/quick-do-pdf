@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Convert Excel spreadsheets (XLSX, XLS, CSV) to PDF online for free. No upload needed, 100% private in your browser.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://quickdopdf.com/excel-to-pdf.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Excel to PDF Converter – Quick Do PDF</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="tools.css?v=2">
+
+    <!-- SheetJS for reading Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF and AutoTable for creating PDF from data -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-KXQBGLEXZ6');</script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021"
+        crossorigin="anonymous"></script>
+
+    <style>
+        .theme-green .drop-zone.over {
+            border-color: #00dfa2;
+            background: rgba(0, 223, 162, 0.1);
+        }
+
+        .hidden-table {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="theme-green">
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Converting Excel to PDF...</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">Excel to <span>PDF</span></h1>
+        <p class="page-subtitle">Convert spreadsheets into clean, printable PDFs</p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">📊</div>
+            <h3>Drop Excel file here</h3>
+            <p>Supports .xlsx, .xls, .csv</p>
+            <label class="select-btn">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg> Select Excel File
+                <input type="file" id="excelInput" accept=".xlsx, .xls, .csv">
+            </label>
+        </div>
+
+        <div id="fileList"></div>
+
+        <button class="action-btn hidden" id="actionBtn" onclick="convertToPDF()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg> Download PDF
+        </button>
+
+        <div id="successMsg" class="success-msg hidden">
+            <div class="s-icon">✅</div>
+            <h3>Done!</h3>
+            <p>Your PDF has been downloaded successfully.</p>
+        </div>
+    </main>
+
+    <script>
+        const inp = document.getElementById('excelInput');
+        const drop = document.getElementById('dropArea');
+        const list = document.getElementById('fileList');
+        const btn = document.getElementById('actionBtn');
+        const ok = document.getElementById('successMsg');
+        const ldr = document.getElementById('loader');
+
+        // Ensure jsPDF globals
+        window.jsPDF = window.jspdf.jsPDF;
+
+        inp.addEventListener('change', () => render(inp.files));
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const dt = new DataTransfer();
+            const validExts = ['.xlsx', '.xls', '.csv'];
+            [...e.dataTransfer.files].filter(f => {
+                let ext = f.name.substring(f.name.lastIndexOf('.')).toLowerCase();
+                return validExts.includes(ext);
+            }).forEach(f => dt.items.add(f));
+
+            inp.files = dt.files; render(inp.files);
+        });
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB'; }
+
+        function render(files) {
+            list.innerHTML = ''; ok.classList.add('hidden');
+            if (!files.length) { btn.classList.add('hidden'); return; }
+
+            const f = files[0];
+            const d = document.createElement('div');
+            d.className = 'file-item';
+            d.innerHTML = `<span class="fi">📊</span><span class="fn">${f.name}</span><span class="fs">${fmt(f.size)}</span>`;
+            list.appendChild(d);
+            btn.classList.remove('hidden');
+        }
+
+        function convertToPDF() {
+            if (!inp.files || !inp.files.length) return;
+            const file = inp.files[0];
+
+            ldr.classList.add('active');
+            ok.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = e.target.result;
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    const doc = new jsPDF('p', 'pt', 'a4');
+                    let isFirstSheet = true;
+
+                    // Process each sheet
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+
+                        // Convert sheet to JSON array of arrays
+                        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                        if (json.length === 0) return; // Skip empty sheets
+
+                        if (!isFirstSheet) {
+                            doc.addPage();
+                        }
+                        isFirstSheet = false;
+
+                        // Extract headers from first row
+                        let headers = json[0] || [];
+                        let dataRows = json.slice(1);
+
+                        // If sheet is just numbers/data without explicit headers, create generic ones
+                        if (headers.length === 0 && dataRows.length > 0) {
+                            headers = dataRows[0].map((_, i) => 'Col ' + (i + 1));
+                        }
+
+                        doc.text(sheetName, 40, 40);
+
+                        doc.autoTable({
+                            head: [headers],
+                            body: dataRows,
+                            startY: 60,
+                            styles: { fontSize: 8, font: "helvetica", cellPadding: 4 },
+                            headStyles: { fillColor: [0, 223, 162], textColor: 255, fontStyle: 'bold' },
+                            alternateRowStyles: { fillColor: [245, 245, 245] },
+                            margin: { top: 60 },
+                            showHead: 'firstPage'
+                        });
+                    });
+
+                    let outName = file.name.replace(/\.[^/.]+$/, "") + ".pdf";
+                    doc.save(outName);
+
+                    ldr.classList.remove('active');
+                    ok.classList.remove('hidden');
+
+                } catch (err) {
+                    ldr.classList.remove('active');
+                    alert('Error parsing Excel file: ' + err.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    </script>
+</body>
+
+</html>

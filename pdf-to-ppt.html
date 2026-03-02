@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Convert PDF to PowerPoint (PPTX) online for free. No upload needed, 100% private in your browser.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://quickdopdf.com/pdf-to-ppt.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>PDF to PowerPoint (PPTX) Converter – Quick Do PDF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- PDF.js for rendering PDF pages to images -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';</script>
+
+    <!-- PptxGenJS for creating PowerPoint files -->
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+
+    <link rel="stylesheet" href="tools.css?v=2">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-KXQBGLEXZ6');</script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021"
+        crossorigin="anonymous"></script>
+    <style>
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            margin-top: 16px;
+            overflow: hidden;
+            height: 8px;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--a1);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 8px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="theme-orange">
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Converting to PPTX...</p>
+        <div class="progress-container" id="progCont">
+            <div class="progress-bar" id="progBar"></div>
+        </div>
+        <p class="progress-text" id="progText">Initializing...</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">PDF to <span>PowerPoint</span></h1>
+        <p class="page-subtitle">Convert PDF pages into PPTX slides instantly</p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">📊</div>
+            <h3>Drop PDF file here</h3>
+            <p>Drag & drop or click the button below</p>
+            <label class="select-btn">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg> Select PDF File
+                <input type="file" id="pdfInput" accept="application/pdf">
+            </label>
+        </div>
+
+        <div id="fileList"></div>
+
+        <button class="action-btn hidden" id="actionBtn" onclick="convertToPPTX()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg> Convert to PPTX
+        </button>
+
+        <div id="successMsg" class="success-msg hidden">
+            <div class="s-icon">✅</div>
+            <h3>Done!</h3>
+            <p>Your presentation has been downloaded.</p>
+        </div>
+    </main>
+
+    <script>
+        const inp = document.getElementById('pdfInput');
+        const drop = document.getElementById('dropArea');
+        const list = document.getElementById('fileList');
+        const btn = document.getElementById('actionBtn');
+        const ok = document.getElementById('successMsg');
+        const ldr = document.getElementById('loader');
+        const progCont = document.getElementById('progCont');
+        const progBar = document.getElementById('progBar');
+        const progText = document.getElementById('progText');
+
+        inp.addEventListener('change', () => render(inp.files));
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const dt = new DataTransfer();
+            [...e.dataTransfer.files].filter(f => f.type === 'application/pdf').forEach(f => dt.items.add(f));
+            inp.files = dt.files; render(inp.files);
+        });
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB'; }
+
+        function render(files) {
+            list.innerHTML = ''; ok.classList.add('hidden');
+            if (!files.length) { btn.classList.add('hidden'); return; }
+
+            const f = files[0];
+            const d = document.createElement('div');
+            d.className = 'file-item';
+            d.innerHTML = `<span class="fi">📄</span><span class="fn">${f.name}</span><span class="fs">${fmt(f.size)}</span>`;
+            list.appendChild(d);
+            btn.classList.remove('hidden');
+        }
+
+        async function convertToPPTX() {
+            if (!inp.files || !inp.files.length) return;
+            const file = inp.files[0];
+
+            ldr.classList.add('active');
+            ok.classList.add('hidden');
+            progCont.style.display = 'block';
+            progText.style.display = 'block';
+            updateProgress(0, 'Reading PDF...');
+
+            try {
+                const fileReader = new FileReader();
+                fileReader.onload = async function () {
+                    const typedarray = new Uint8Array(this.result);
+
+                    try {
+                        const loadingTask = pdfjsLib.getDocument(typedarray);
+                        const pdf = await loadingTask.promise;
+                        const totalPages = pdf.numPages;
+
+                        let pres = new PptxGenJS();
+                        pres.title = file.name.replace('.pdf', '');
+
+                        // Generate slides from pages
+                        for (let i = 1; i <= totalPages; i++) {
+                            updateProgress((i / totalPages) * 90, `Processing page ${i} of ${totalPages}...`);
+
+                            const page = await pdf.getPage(i);
+                            const scale = 2.0; // Higher scale for better PPT quality
+                            const viewport = page.getViewport({ scale: scale });
+
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+
+                            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                            // Determine PPT size based on PDF aspect ratio
+                            // Default pptxgenjs layout is exactly 10x5.625 inches (16:9).
+                            // We can use custom layout if desired, but centering an image is safer.
+                            // Let's configure layout to match 4:3 or 16:9 roughly based on first page if we want,
+                            // but covering the whole slide with w:'100%', h:'100%' and sizing='contain' is best practice.
+
+                            if (i === 1) {
+                                const ratio = canvas.width / canvas.height;
+                                if (ratio < 1) {
+                                    // Portrait (e.g. Letter/A4) -> 8.5 x 11
+                                    pres.layout = 'LAYOUT_PORTRAIT';
+                                } else {
+                                    pres.layout = 'LAYOUT_16x9';
+                                }
+                            }
+
+                            let slide = pres.addSlide();
+                            slide.addImage({
+                                data: canvas.toDataURL('image/jpeg', 0.8),
+                                x: 0,
+                                y: 0,
+                                w: '100%',
+                                h: '100%',
+                                sizing: { type: 'contain' } // Ensures no stretching
+                            });
+                        }
+
+                        updateProgress(95, 'Saving PPTX file...');
+                        await pres.writeFile({ fileName: file.name.replace('.pdf', '.pptx') });
+
+                        ldr.classList.remove('active');
+                        ok.classList.remove('hidden');
+                        resetProgress();
+
+                    } catch (err) {
+                        throw new Error("Failed to process PDF: " + err.message);
+                    }
+                };
+                fileReader.readAsArrayBuffer(file);
+
+            } catch (e) {
+                ldr.classList.remove('active');
+                alert('Error: ' + e.message);
+                resetProgress();
+            }
+        }
+
+        function updateProgress(percent, text) {
+            progBar.style.width = percent + '%';
+            progText.innerText = text;
+        }
+
+        function resetProgress() {
+            progCont.style.display = 'none';
+            progText.style.display = 'none';
+            progBar.style.width = '0%';
+        }
+    </script>
+</body>
+
+</html>

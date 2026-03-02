@@ -15,6 +15,9 @@
   <url><loc>https://quickdopdf.com/pdf-to-jpg.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/jpg-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/word-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/pdf-to-ppt.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/excel-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/extract-pages.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/extract-text.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/extract-images.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-ocr.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>

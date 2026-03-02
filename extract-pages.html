@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Extract specific pages from a PDF file for free online. Split PDF and save only the pages you need. No upload required.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://quickdopdf.com/extract-pages.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Extract PDF Pages – Quick Do PDF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <link rel="stylesheet" href="tools.css?v=2">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-KXQBGLEXZ6');</script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021"
+        crossorigin="anonymous"></script>
+    <style>
+        .theme-purple .drop-zone.over {
+            border-color: #8b4dff;
+            background: rgba(139, 77, 255, 0.1);
+        }
+
+        .options-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            display: none;
+            text-align: left;
+        }
+
+        .options-panel label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .options-panel input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .options-panel input[type="text"]:focus {
+            border-color: #8b4dff;
+            box-shadow: 0 0 0 3px rgba(139, 77, 255, 0.15);
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 8px;
+            display: block;
+        }
+
+        .page-count-badge {
+            display: inline-block;
+            background: rgba(139, 77, 255, 0.2);
+            color: #c4a1ff;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body class="theme-purple">
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Extracting pages...</p>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back</a>
+        <span class="logo">Quick Do PDF</span>
+    </header>
+
+    <main>
+        <h1 class="page-title">Extract <span>PDF Pages</span></h1>
+        <p class="page-subtitle">Select and save specific pages from your document</p>
+
+        <div class="upload-zone" id="dropArea">
+            <div class="upload-icon">📄</div>
+            <h3>Drop PDF file here</h3>
+            <p>Drag & drop or click the button below</p>
+            <label class="select-btn">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg> Select PDF File
+                <input type="file" id="pdfInput" accept="application/pdf">
+            </label>
+        </div>
+
+        <div id="fileList"></div>
+
+        <div id="optionsPanel" class="options-panel">
+            <label for="pageRanges">Pages to extract <span id="pageCountBadge" class="page-count-badge"></span></label>
+            <input type="text" id="pageRanges" placeholder="e.g., 1, 3, 5-10" />
+            <span class="helper-text">Enter page numbers and/or ranges separated by commas.</span>
+        </div>
+
+        <button class="action-btn hidden" id="actionBtn" onclick="extractPages()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg> Extract Pages
+        </button>
+
+        <div id="successMsg" class="success-msg hidden">
+            <div class="s-icon">✅</div>
+            <h3>Done!</h3>
+            <p>Your extracted PDF is ready.</p>
+        </div>
+    </main>
+
+    <script>
+        const inp = document.getElementById('pdfInput');
+        const drop = document.getElementById('dropArea');
+        const list = document.getElementById('fileList');
+        const btn = document.getElementById('actionBtn');
+        const ok = document.getElementById('successMsg');
+        const ldr = document.getElementById('loader');
+        const opts = document.getElementById('optionsPanel');
+        const badge = document.getElementById('pageCountBadge');
+        const rangeInput = document.getElementById('pageRanges');
+
+        let totalPdfPages = 0;
+        let uploadedPdfBytes = null;
+
+        inp.addEventListener('change', () => loadFile(inp.files));
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault(); drop.classList.remove('over');
+            const dt = new DataTransfer();
+            [...e.dataTransfer.files].filter(f => f.type === 'application/pdf').forEach(f => dt.items.add(f));
+            inp.files = dt.files; loadFile(inp.files);
+        });
+
+        function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB'; }
+
+        async function loadFile(files) {
+            list.innerHTML = ''; ok.classList.add('hidden'); opts.style.display = 'none'; btn.classList.add('hidden');
+            if (!files.length) return;
+
+            const f = files[0];
+            const d = document.createElement('div'); d.className = 'file-item';
+            d.innerHTML = `<span class="fi">📄</span><span class="fn">${f.name}</span><span class="fs">${fmt(f.size)}</span>`;
+            list.appendChild(d);
+
+            try {
+                const arrayBuffer = await f.arrayBuffer();
+                uploadedPdfBytes = arrayBuffer;
+                const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                totalPdfPages = pdfDoc.getPageCount();
+
+                badge.innerText = `(Total: ${totalPdfPages} pages)`;
+                opts.style.display = 'block';
+                btn.classList.remove('hidden');
+            } catch (e) {
+                alert("Error reading PDF: " + e.message);
+            }
+        }
+
+        function parsePageRanges(rangeStr, maxPages) {
+            const pages = new Set();
+            const parts = rangeStr.split(',');
+
+            for (let part of parts) {
+                part = part.trim();
+                if (!part) continue;
+
+                if (part.includes('-')) {
+                    const bounds = part.split('-');
+                    if (bounds.length === 2) {
+                        const start = parseInt(bounds[0], 10);
+                        const end = parseInt(bounds[1], 10);
+
+                        if (!isNaN(start) && !isNaN(end) && start <= end && start >= 1 && end <= maxPages) {
+                            for (let i = start; i <= end; i++) {
+                                pages.add(i);
+                            }
+                        }
+                    }
+                } else {
+                    const pageNum = parseInt(part, 10);
+                    if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= maxPages) {
+                        pages.add(pageNum);
+                    }
+                }
+            }
+
+            return Array.from(pages).sort((a, b) => a - b);
+        }
+
+        async function extractPages() {
+            const rangeStr = rangeInput.value;
+            if (!rangeStr.trim()) {
+                alert("Please enter the pages you want to extract.");
+                return;
+            }
+
+            const pagesToExtract = parsePageRanges(rangeStr, totalPdfPages);
+
+            if (pagesToExtract.length === 0) {
+                alert(`Invalid page range. Please enter numbers between 1 and ${totalPdfPages}.`);
+                return;
+            }
+
+            ldr.classList.add('active'); ok.classList.add('hidden');
+
+            try {
+                const { PDFDocument } = PDFLib;
+
+                // Convert 1-indexed natural pages to 0-indexed array for pdf-lib
+                const pageIndices = pagesToExtract.map(p => p - 1);
+
+                const originalPdf = await PDFDocument.load(uploadedPdfBytes);
+                const newPdf = await PDFDocument.create();
+
+                const copiedPages = await newPdf.copyPages(originalPdf, pageIndices);
+                copiedPages.forEach(p => newPdf.addPage(p));
+
+                const bytes = await newPdf.save();
+
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+                a.download = inp.files[0].name.replace('.pdf', '') + '_extracted.pdf';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+                ldr.classList.remove('active'); ok.classList.remove('hidden');
+            } catch (e) {
+                ldr.classList.remove('active');
+                alert('Error: ' + e.message);
+            }
+        }
+    </script>
+</body>
+
+</html>
