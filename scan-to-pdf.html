@@ -294,7 +294,16 @@
                     <optgroup label="Standard Document">
                         <option value="a4">A4 (Standard)</option>
                         <option value="letter">US Letter</option>
-                    </optgroup>
+                </select>
+            </label>
+            <label
+                style="color:var(--text); font-weight:600; font-size: 15px; display:flex; align-items:center; gap:12px;">
+                PDF Target Size:
+                <select id="compressionLevel"
+                    style="padding:10px 16px; border-radius:12px; font-weight:500; font-family:inherit; font-size:14px; background:var(--surface); border:1px solid var(--border); color:var(--text); cursor:pointer;">
+                    <option value="1.0" selected>High Quality (Large File)</option>
+                    <option value="0.7">Medium (~1.5 MB)</option>
+                    <option value="0.4">Small (~500 KB)</option>
                 </select>
             </label>
         </div>
@@ -482,24 +491,40 @@
             ldr.classList.add('active');
 
             try {
-                // Initialize jsPDF
                 const { jsPDF } = window.jspdf;
                 const pageSizeType = document.getElementById('pageSize').value;
+                const compLevel = parseFloat(document.getElementById('compressionLevel').value);
 
-                // Create a blank PDF with the requested format
                 const pdf = new jsPDF({
                     orientation: 'p',
                     unit: 'px',
                     format: pageSizeType === 'fit' ? 'a4' : pageSizeType
                 });
 
-                // Remove the default empty first page
                 pdf.deletePage(1);
 
                 for (let i = 0; i < scans.length; i++) {
-                    const dataUrl = scans[i];
+                    let dataUrl = scans[i];
 
-                    // Create an Image object to read its natural width/height
+                    // Process compression if requested
+                    if (compLevel < 1.0) {
+                        const compImg = new Image();
+                        await new Promise(res => { compImg.onload = res; compImg.src = dataUrl; });
+
+                        const compCanvas = document.createElement('canvas'); // Temp canvas
+                        // Scale down resolution along with quality for smaller file size chunks
+                        const scale = compLevel === 0.4 ? 0.6 : 0.8;
+                        compCanvas.width = compImg.width * scale;
+                        compCanvas.height = compImg.height * scale;
+
+                        const compCtx = compCanvas.getContext('2d');
+                        compCtx.drawImage(compImg, 0, 0, compCanvas.width, compCanvas.height);
+
+                        // Re-export with target jpeg quality
+                        dataUrl = compCanvas.toDataURL('image/jpeg', compLevel);
+                    }
+
+                    // Create final Image object for PDF insertion
                     const img = new Image();
                     await new Promise(resolve => {
                         img.onload = resolve;
