@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="canonical" href="https://quickdopdf.com/compress.html">
+  <link rel="canonical" href="https://quickdopdf.com/compress.html">
   <link rel="icon" type="image/png" href="favicon.png">
   <title>Compress PDF – Quick Do PDF</title>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -37,10 +37,12 @@
       animation: float2 18s ease-in-out infinite alternate;
     }
   </style>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-KXQBGLEXZ6');</script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021" crossorigin="anonymous"></script>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
+  <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-KXQBGLEXZ6');</script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021"
+    crossorigin="anonymous"></script>
+  <script src="theme.js"></script>
 </head>
 
 <body class="theme-green">
@@ -50,7 +52,10 @@
   <div id="loader">
     <div class="loader-ring"></div>
     <p class="loader-text">Compressing PDF...</p>
-    <p class="loader-sub">Optimizing file size</p>
+    <p class="loader-sub" id="progText">Optimizing file size...</p>
+    <div class="progress-container" id="progCont" style="display:block;">
+      <div class="progress-bar" id="progBar"></div>
+    </div>
   </div>
 
   <header>
@@ -59,6 +64,15 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg> Back</a>
     <span class="logo">Quick Do PDF</span>
+    <div class="header-right">
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+        <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+          </path>
+        </svg>
+      </button>
+    </div>
   </header>
 
   <main>
@@ -128,6 +142,8 @@
     const ldr = document.getElementById('loader');
     const lvlCard = document.getElementById('levelCard');
     const cmpCard = document.getElementById('compareCard');
+    const progBar = document.getElementById('progBar');
+    const progText = document.getElementById('progText');
     let origSize = 0;
     let origBuf = null;
 
@@ -166,13 +182,18 @@
         const bytes = await pdf.save({ useObjectStreams: true });
 
         // Simulate delay to show premium loader to user since JS processing is too fast
-        await new Promise(r => setTimeout(r, 1200));
+        if (progText) progText.innerText = "Applying compression algorithms...";
+        for (let i = 0; i <= 100; i += 5) {
+          if (progBar) progBar.style.width = i + '%';
+          await new Promise(r => setTimeout(r, 60)); // Total ~1200ms
+        }
 
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
         a.download = 'compressed.pdf';
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         ldr.classList.remove('active');
+        if (progBar) progBar.style.width = '0%'; // reset
 
         const saved = origSize - bytes.length;
         document.getElementById('sz1').textContent = fmt(origSize);

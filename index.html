@@ -47,6 +47,32 @@
       --glass-blur: blur(24px);
     }
 
+    /* Light Mode Overrides */
+    body.theme-light {
+      --bg: #f8fafc;
+      --surface: rgba(255, 255, 255, 0.85);
+      --border: rgba(0, 0, 0, 0.08);
+      --border-hover: rgba(0, 0, 0, 0.15);
+      --text: #0f172a;
+      --muted: #64748b;
+      --glass-blur: blur(24px);
+    }
+
+    body.theme-light header {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    body.theme-light footer {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-light .g1 {
+      background: linear-gradient(135deg, #0f172a, #334155);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
     body {
       background: var(--bg);
       color: var(--text);
@@ -136,6 +162,31 @@
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       border-bottom: 1px solid var(--border);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .theme-toggle-btn:hover {
+      transform: rotate(15deg) scale(1.1);
+      background: color-mix(in srgb, var(--text) 5%, transparent);
     }
 
     .logo {
@@ -601,6 +652,7 @@
   <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-KXQBGLEXZ6');</script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021"
     crossorigin="anonymous"></script>
+  <script src="theme.js"></script>
 </head>
 
 <body>
@@ -611,10 +663,19 @@
   <header>
     <div class="logo">Quick Do PDF</div>
     <div class="header-tag">🔒 100% Private, No Upload</div>
+    <div class="header-right">
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+        <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+          </path>
+        </svg>
+      </button>
+    </div>
   </header>
 
   <section class="hero">
-    <div class="hero-badge"><span></span> 25 Free PDF Tools — No signup needed</div>
+    <div class="hero-badge"><span></span> 28 Free PDF Tools — No signup needed</div>
     <h1><span class="g1">PDF Tools</span><br><span class="g2">That Actually Work</span></h1>
     <p>Merge, split, compress, protect, edit and more — entirely within your browser. Powerful tools with zero cloud
       uploads required.</p>
