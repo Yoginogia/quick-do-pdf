@@ -474,6 +474,55 @@
       z-index: 1;
     }
 
+    .card-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 10px 20px color-mix(in srgb, var(--c1) 30%, transparent);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .card-desc {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 24px;
+    }
+
+    .card-arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      position: relative;
+      z-index: 2;
+      color: var(--text);
+      transition: all .3s;
+      padding: 8px 16px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
     /* Only apply hover effects on devices with a mouse, fixes mobile double-tap bug */
     @media (hover: hover) {
       .tool-card:hover {
