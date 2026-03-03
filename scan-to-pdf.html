@@ -212,6 +212,67 @@
                 background: transparent;
             }
         }
+
+        /* 2-Column Premium Layout */
+        .scan-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media(min-width: 900px) {
+            .scan-layout {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+        }
+
+        .scan-step {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .step-num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--c1, #2dd4bf);
+            color: #fff;
+            border-radius: 50%;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .step-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+        }
+
+        /* Adjust existing container for new layout */
+        .camera-container {
+            margin-bottom: 0;
+            border: none;
+            box-shadow: none;
+            background: #111;
+            border-radius: 16px;
+        }
     </style>
 
     <!-- Google Analytics -->
@@ -250,72 +311,95 @@
         <h1 class="page-title">Scan <span>to PDF</span></h1>
         <p class="page-subtitle">Use your device camera to securely scan physical documents directly into a PDF.</p>
 
-        <div class="camera-container" id="camContainer">
-            <video id="camVideo" autoplay playsinline></video>
-            <div class="cam-overlay"></div>
+        <div class="scan-layout">
+            <!-- STEP 1 -->
+            <div class="scan-step">
+                <div class="step-header">
+                    <div class="step-num">1</div>
+                    <h2 class="step-title">Capture Documents</h2>
+                </div>
 
-            <button class="cam-switch-btn" id="switchCamBtn" title="Swap Camera (Front/Back)">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-            </button>
+                <div class="camera-container" id="camContainer">
+                    <video id="camVideo" autoplay playsinline></video>
+                    <div class="cam-overlay"></div>
 
-            <button class="cam-init-btn" id="initBtn">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Enable Camera
-            </button>
+                    <button class="cam-switch-btn" id="switchCamBtn" title="Swap Camera (Front/Back)">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
 
-            <div class="cam-controls">
-                <button class="capture-btn" id="captureBtn" title="Take Scan"></button>
+                    <button class="cam-init-btn" id="initBtn">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Enable Camera
+                    </button>
+
+                    <div class="cam-controls">
+                        <button class="capture-btn" id="captureBtn" title="Take Scan"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="scan-step">
+                <div class="step-header">
+                    <div class="step-num">2</div>
+                    <h2 class="step-title">Review & Generate</h2>
+                </div>
+
+                <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Scanned pages will appear here. You
+                    can remove unwanted scans.</p>
+
+                <!-- Hidden Canvas for frame extraction -->
+                <canvas id="hiddenCanvas" style="display:none;"></canvas>
+
+                <div class="gallery-grid" id="galleryGrid"
+                    style="min-height: 160px; align-content: start; border: 1px dashed var(--border); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                </div>
+
+                <div class="settings-bar hidden" id="settingsBar"
+                    style="display:flex; flex-direction:column; gap:16px; margin-bottom:24px;">
+                    <label
+                        style="color:var(--text); font-weight:600; font-size: 14px; display:flex; flex-direction:column; gap:8px;">
+                        Page Size:
+                        <select id="pageSize"
+                            style="padding:10px 16px; border-radius:12px; font-weight:500; font-family:inherit; font-size:14px; background:var(--surface); border:1px solid var(--border); color:var(--text); cursor:pointer;">
+                            <optgroup label="Auto Format">
+                                <option value="fit" selected>Fit to Image (Best)</option>
+                            </optgroup>
+                            <optgroup label="Standard Document">
+                                <option value="a4">A4 (Standard)</option>
+                                <option value="letter">US Letter</option>
+                            </optgroup>
+                        </select>
+                    </label>
+                    <label
+                        style="color:var(--text); font-weight:600; font-size: 14px; display:flex; flex-direction:column; gap:8px;">
+                        PDF Target Size:
+                        <select id="compressionLevel"
+                            style="padding:10px 16px; border-radius:12px; font-weight:500; font-family:inherit; font-size:14px; background:var(--surface); border:1px solid var(--border); color:var(--text); cursor:pointer;">
+                            <option value="1.0" selected>High Quality (Large File)</option>
+                            <option value="0.7">Medium (~1.5 MB)</option>
+                            <option value="0.4">Small (~500 KB)</option>
+                        </select>
+                    </label>
+                </div>
+
+                <button class="action-btn hidden" id="actionBtn" onclick="generatePDF()" style="width: 100%;">
+                    <span><svg style="margin-right: 8px; vertical-align: text-bottom;" width="20" height="20"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg> Generate PDF (<span id="scanCount">0</span> pages)</span>
+                </button>
             </div>
         </div>
-
-        <!-- Hidden Canvas for frame extraction -->
-        <canvas id="hiddenCanvas" style="display:none;"></canvas>
-
-        <div class="gallery-grid" id="galleryGrid"></div>
-
-        <div class="settings-bar hidden" id="settingsBar"
-            style="display:flex; justify-content:center; gap:16px; margin-bottom:24px;">
-            <label
-                style="color:var(--text); font-weight:600; font-size: 15px; display:flex; align-items:center; gap:12px;">
-                Page Size:
-                <select id="pageSize"
-                    style="padding:10px 16px; border-radius:12px; font-weight:500; font-family:inherit; font-size:14px; background:var(--surface); border:1px solid var(--border); color:var(--text); cursor:pointer;">
-                    <optgroup label="Auto Format">
-                        <option value="fit" selected>Fit to Image (Best)</option>
-                    </optgroup>
-                    <optgroup label="Standard Document">
-                        <option value="a4">A4 (Standard)</option>
-                        <option value="letter">US Letter</option>
-                </select>
-            </label>
-            <label
-                style="color:var(--text); font-weight:600; font-size: 15px; display:flex; align-items:center; gap:12px;">
-                PDF Target Size:
-                <select id="compressionLevel"
-                    style="padding:10px 16px; border-radius:12px; font-weight:500; font-family:inherit; font-size:14px; background:var(--surface); border:1px solid var(--border); color:var(--text); cursor:pointer;">
-                    <option value="1.0" selected>High Quality (Large File)</option>
-                    <option value="0.7">Medium (~1.5 MB)</option>
-                    <option value="0.4">Small (~500 KB)</option>
-                </select>
-            </label>
-        </div>
-
-        <button class="action-btn hidden" id="actionBtn" onclick="generatePDF()">
-            <span><svg style="margin-right: 8px; vertical-align: text-bottom;" width="20" height="20" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg> Generate PDF (<span id="scanCount">0</span> pages)</span>
-        </button>
-
     </main>
 
     <script>
