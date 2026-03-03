@@ -11,21 +11,24 @@
         rel="stylesheet">
     <!-- Unpkg jsPDF for creating PDF from images -->
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+
+    <!-- Cropper.js for Document Area Selection -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <link rel="stylesheet" href="tools.css?v=2">
 
     <style>
         .camera-container {
             width: 100%;
-            max-width: 600px;
+            height: 65vh;
+            min-height: 400px;
+            max-height: 600px;
             margin: 0 auto 32px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 24px;
+            background: #111;
+            border-radius: 16px;
             overflow: hidden;
             position: relative;
-            backdrop-filter: var(--glass-blur);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            aspect-ratio: 4/3;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -34,10 +37,9 @@
 
         @media(max-width: 768px) {
             .camera-container {
-                max-width: 100%;
                 border-radius: 12px;
-                aspect-ratio: 3/4;
-                /* Taller on mobile for document scanning */
+                height: 75vh;
+                max-height: calc(100vh - 160px);
             }
         }
 
@@ -212,6 +214,58 @@
                 background: transparent;
             }
         }
+
+        /* Cropper Modal */
+        #cropModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+        }
+
+        #cropContainer {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #cropImage {
+            display: block;
+            max-width: 100%;
+        }
+
+        .crop-controls {
+            padding: 24px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            background: #111;
+            border-top: 1px solid #333;
+        }
+
+        .crop-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .crop-cancel {
+            background: #333;
+            color: white;
+        }
+
+        .crop-save {
+            background: var(--c1, #2dd4bf);
+            color: white;
+        }
+
 
         /* 2-Column Premium Layout */
         .scan-layout {
@@ -402,6 +456,17 @@
         </div>
     </main>
 
+    <!-- Crop Modal Overlay -->
+    <div id="cropModal">
+        <div id="cropContainer">
+            <img id="cropImage" src="">
+        </div>
+        <div class="crop-controls">
+            <button class="crop-btn crop-cancel" id="cancelCropBtn">Cancel</button>
+            <button class="crop-btn crop-save" id="confirmCropBtn">Crop & Save</button>
+        </div>
+    </div>
+
     <script>
         const video = document.getElementById('camVideo');
         const canvas = document.getElementById('hiddenCanvas');
@@ -502,6 +567,12 @@
             }
         }
 
+        let cropperAPI = null;
+        const cropModal = document.getElementById('cropModal');
+        const cropImage = document.getElementById('cropImage');
+        const cancelCropBtn = document.getElementById('cancelCropBtn');
+        const confirmCropBtn = document.getElementById('confirmCropBtn');
+
         captureBtn.addEventListener('click', () => {
             if (!stream) return;
 
@@ -510,20 +581,60 @@
             void camContainer.offsetWidth; // trigger reflow
             camContainer.classList.add('pulse-flash');
 
-            // Draw current video frame to hidden canvas to extract data
+            // Draw current video frame to hidden canvas
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
 
-            // Handle mirroring in the canvas context if needed
             if (video.style.transform === 'scaleX(-1)') {
                 ctx.translate(canvas.width, 0);
                 ctx.scale(-1, 1);
             }
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.9); // High quality JPEG
-            scans.push(dataUrl);
-            renderGallery();
+            const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+
+            // Open Cropper
+            cropImage.src = dataUrl;
+            cropModal.style.display = 'flex';
+
+            if (cropperAPI) {
+                cropperAPI.destroy();
+            }
+
+            cropperAPI = new Cropper(cropImage, {
+                viewMode: 1,
+                dragMode: 'crop',
+                autoCropArea: 0.9,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
+        });
+
+        cancelCropBtn.addEventListener('click', () => {
+            cropModal.style.display = 'none';
+            if (cropperAPI) cropperAPI.destroy();
+        });
+
+        confirmCropBtn.addEventListener('click', () => {
+            if (!cropperAPI) return;
+            const croppedCanvas = cropperAPI.getCroppedCanvas({
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+
+            if (croppedCanvas) {
+                const finalDataUrl = croppedCanvas.toDataURL('image/jpeg', 0.95);
+                scans.push(finalDataUrl);
+                renderGallery();
+            }
+
+            cropModal.style.display = 'none';
+            cropperAPI.destroy();
         });
 
         function renderGallery() {
