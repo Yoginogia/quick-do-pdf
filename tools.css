@@ -38,6 +38,34 @@ body.theme-light {
   --glass-blur: blur(24px);
 }
 
+/* Light Mode: Action Button — override white-on-white */
+body.theme-light .action-btn {
+  background: linear-gradient(135deg, var(--a1), var(--a2));
+  color: #fff;
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--a1) 35%, transparent);
+}
+body.theme-light .action-btn span { color: #fff; }
+body.theme-light .action-btn::before { display: none; }
+body.theme-light .action-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--a1) 50%, transparent);
+  filter: brightness(1.08);
+}
+
+/* Light Mode: File item background */
+body.theme-light .file-item {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Light Mode: Option button text */
+body.theme-light .opt-btn { color: var(--text); }
+body.theme-light .opt-btn .on { color: var(--text); }
+
+/* Light Mode: Upload zone */
+body.theme-light .upload-zone {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
 body {
   background: var(--bg);
   color: var(--text);
