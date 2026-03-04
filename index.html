@@ -552,6 +552,45 @@
       }
     }
 
+    /* ===== LIGHT MODE overrides for Homepage Tool Cards ===== */
+    body.theme-light .tool-card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      color: #0f172a;
+    }
+
+    body.theme-light .card-title {
+      color: #0f172a;
+    }
+
+    body.theme-light .card-desc {
+      color: #64748b;
+    }
+
+    /* Card arrow visible in light mode */
+    body.theme-light .card-arrow {
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #334155;
+    }
+
+    @media (hover: hover) {
+      body.theme-light .tool-card:hover {
+        border-color: var(--c1);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15), 0 0 20px color-mix(in srgb, var(--c1) 20%, transparent);
+        transform: translateY(-6px);
+      }
+
+      body.theme-light .tool-card:hover .card-arrow {
+        background: var(--c1);
+        color: #fff;
+        border-color: var(--c1);
+        gap: 12px;
+        box-shadow: 0 5px 15px color-mix(in srgb, var(--c1) 40%, transparent);
+      }
+    }
+
     /* Premium Colors */
     .c-red {
       --c1: #ff2a5f;
