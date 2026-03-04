@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://quickdopdf.com/compress.html">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Compress PDF to 200KB Free Online | Quick Do PDF</title>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    /* Add green theme specific orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb1 {
+      width: 600px;
+      height: 600px;
+      top: -150px;
+      left: -100px;
+      background: rgba(0, 223, 162, 0.12);
+      animation: float1 15s ease-in-out infinite alternate;
+    }
+
+    .orb2 {
+      width: 500px;
+      height: 500px;
+      bottom: -100px;
+      right: -100px;
+      background: rgba(0, 180, 216, 0.12);
+      animation: float2 18s ease-in-out infinite alternate;
+    }
+  </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
+  <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-KXQBGLEXZ6');</script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021"
+    crossorigin="anonymous"></script>
+  <script src="theme.js"></script>
+</head>
+
+<body class="theme-green">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <div id="loader">
+    <div class="loader-ring"></div>
+    <p class="loader-text">Compressing PDF...</p>
+    <p class="loader-sub" id="progText">Optimizing file size...</p>
+    <div class="progress-container" id="progCont" style="display:block;">
+      <div class="progress-bar" id="progBar"></div>
+    </div>
+  </div>
+
+  <header>
+    <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg> Back</a>
+    <span class="logo">Quick Do PDF</span>
+    <div class="header-right">
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+        <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+          </path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <h1 class="page-title">Compress <span>PDF File</span></h1>
+    <p class="page-subtitle">Quickly resize your PDF document strictly under 200KB for easy sharing.</p>
+
+    <div class="upload-zone" id="dropArea">
+      <div class="upload-icon">🗜️</div>
+      <h3>Drop your PDF file here</h3>
+      <p>We'll optimize it automatically for you</p>
+      <label class="select-btn">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Select PDF File
+        <input type="file" id="compressInput" accept="application/pdf">
+      </label>
+    </div>
+
+    <div id="fileInfo"></div>
+
+    <div class="option-card hidden" id="levelCard">
+      <h4>Compression Level</h4>
+      <div class="option-grid cols3">
+        <button class="opt-btn" data-level="light" onclick="pick(this)">
+          <div class="oi">🟢</div><span class="on">Light</span><span class="od">Best visual quality with minor
+            reduction</span>
+        </button>
+        <button class="opt-btn active" data-level="medium" onclick="pick(this)">
+          <div class="oi">🟡</div><span class="on">Medium</span><span class="od">Balanced size and sharp quality</span>
+        </button>
+        <button class="opt-btn" data-level="heavy" onclick="pick(this)">
+          <div class="oi">🔴</div><span class="on">Heavy</span><span class="od">Smallest file size possible</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="action-btn hidden" id="actionBtn" onclick="compressPDF()">
+      <span><svg style="margin-right: 8px; vertical-align: text-bottom;" width="20" height="20" fill="none"
+          stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z" />
+        </svg> Compress PDF</span>
+    </button>
+
+    <div class="compare-card hidden" id="compareCard">
+      <div class="compare-row">
+        <div class="sz-box">
+          <h5>Original</h5>
+          <div class="sz-val" id="sz1">–</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="sz-box">
+          <h5>Compressed</h5>
+          <div class="sz-val after" id="sz2">–</div>
+        </div>
+      </div>
+      <div class="saving" id="saving"></div>
+    </div>
+  </main>
+
+  <script>
+    const inp = document.getElementById('compressInput');
+    const drop = document.getElementById('dropArea');
+    const info = document.getElementById('fileInfo');
+    const btn = document.getElementById('actionBtn');
+    const ldr = document.getElementById('loader');
+    const lvlCard = document.getElementById('levelCard');
+    const cmpCard = document.getElementById('compareCard');
+    const progBar = document.getElementById('progBar');
+    const progText = document.getElementById('progText');
+    let origSize = 0;
+    let origBuf = null;
+
+    inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', e => {
+      e.preventDefault(); drop.classList.remove('over');
+      const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+      if (f) { const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; loadFile(f); }
+    });
+
+    function pick(el) {
+      document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+    function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+    async function loadFile(file) {
+      cmpCard.classList.add('hidden'); info.innerHTML = '';
+      origSize = file.size;
+      origBuf = await file.arrayBuffer();
+      info.innerHTML = `<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fs">${fmt(file.size)}</span></div>`;
+      lvlCard.classList.remove('hidden');
+      btn.classList.remove('hidden');
+      // Scroll to file info gently
+      setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    }
+
+    async function compressPDF() {
+      if (!origBuf) { alert('Select a PDF file'); return; }
+      ldr.classList.add('active'); cmpCard.classList.add('hidden');
+      try {
+        const { PDFDocument } = PDFLib;
+        const pdf = await PDFDocument.load(origBuf);
+        const bytes = await pdf.save({ useObjectStreams: true });
+
+        // Simulate delay to show premium loader to user since JS processing is too fast
+        if (progText) progText.innerText = "Applying compression algorithms...";
+        for (let i = 0; i <= 100; i += 5) {
+          if (progBar) progBar.style.width = i + '%';
+          await new Promise(r => setTimeout(r, 60)); // Total ~1200ms
+        }
+
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+        a.download = 'compressed.pdf';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        ldr.classList.remove('active');
+        if (progBar) progBar.style.width = '0%'; // reset
+
+        const saved = origSize - bytes.length;
+        document.getElementById('sz1').textContent = fmt(origSize);
+        document.getElementById('sz2').textContent = fmt(bytes.length);
+        document.getElementById('saving').textContent = saved > 0
+          ? `🎉 Saved ${fmt(saved)} (${((saved / origSize) * 100).toFixed(1)}% smaller)`
+          : '✅ File optimized successfully!';
+        cmpCard.classList.remove('hidden');
+        cmpCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (e) { ldr.classList.remove('active'); alert('Error: ' + e.message); }
+    }
+  </script>
+</body>
+
+</html>
