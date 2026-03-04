@@ -568,26 +568,27 @@
       color: #64748b;
     }
 
-    /* Card arrow visible in light mode */
+    /* Card arrow visible in light mode — base */
     body.theme-light .card-arrow {
-      background: rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      color: #334155;
+      background: rgba(0, 0, 0, 0.05) !important;
+      border: 1px solid rgba(0, 0, 0, 0.18) !important;
+      color: #334155 !important;
+      transition: all 0.3s ease !important;
     }
 
     @media (hover: hover) {
       body.theme-light .tool-card:hover {
-        border-color: var(--c1);
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15), 0 0 20px color-mix(in srgb, var(--c1) 20%, transparent);
-        transform: translateY(-6px);
+        border-color: var(--c1) !important;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15), 0 0 20px color-mix(in srgb, var(--c1) 20%, transparent) !important;
+        transform: translateY(-6px) !important;
       }
 
       body.theme-light .tool-card:hover .card-arrow {
-        background: var(--c1);
-        color: #fff;
-        border-color: var(--c1);
-        gap: 12px;
-        box-shadow: 0 5px 15px color-mix(in srgb, var(--c1) 40%, transparent);
+        background: var(--c1) !important;
+        color: #fff !important;
+        border-color: var(--c1) !important;
+        gap: 12px !important;
+        box-shadow: 0 5px 15px color-mix(in srgb, var(--c1) 40%, transparent) !important;
       }
     }
 
