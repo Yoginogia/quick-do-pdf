@@ -155,31 +155,46 @@
             ldr.classList.add('active');
 
             try {
-                // Create a temporary hidden container to render the docx visually
-                const container = document.createElement('div');
-                container.style.position = 'absolute';
-                container.style.left = '-9999px';
-                container.style.width = '800px'; // A4 width proportion
-                container.style.backgroundColor = '#ffffff';
-                document.body.appendChild(container);
+                // Create a temporary hidden iframe to isolate the DOCX rendering 
+                // from the main document CSS (which crashes html2pdf due to color-mix support)
+                const iframe = document.createElement('iframe');
+                iframe.style.position = 'absolute';
+                iframe.style.left = '-9999px';
+                iframe.style.width = '800px'; // typical A4 width proportion
+                iframe.style.height = '1200px'; // Give it some initial height
+                document.body.appendChild(iframe);
 
-                // Use docx-preview to render the document with high visual fidelity
+                const iframeDoc = iframe.contentWindow.document;
+
+                // Establish a clean container inside the isolated iframe
+                const container = iframeDoc.createElement('div');
+                container.style.width = '100%';
+                container.style.backgroundColor = '#ffffff';
+                container.style.color = '#000000';
+                iframeDoc.body.appendChild(container);
+
+                // Initialize default styles for the iframe body
+                iframeDoc.body.style.margin = '0';
+                iframeDoc.body.style.padding = '0';
+                iframeDoc.body.style.backgroundColor = '#ffffff';
+
+                // Use docx-preview to render the document with high visual fidelity inside the iframe
                 await docx.renderAsync(origBuf, container, null, {
-                    className: 'docx', // Default
-                    inWrapper: false, // Don't wrap in docx-wrapper
-                    ignoreWidth: false, // Keep doc widths
+                    className: 'docx',
+                    inWrapper: false,
+                    ignoreWidth: false,
                     ignoreHeight: false,
-                    ignoreFonts: false, // Try to preserve fonts
-                    breakPages: true, // Keep page breaks
+                    ignoreFonts: false,
+                    breakPages: true,
                     renderHeaders: true,
                     renderFooters: true,
-                    renderBackground: false,
+                    renderBackground: true,
                     renderFootnotes: true
                 });
 
-                // Configure html2pdf to take a snapshot of the visually rendered doc
+                // Configure html2pdf to take a snapshot of the visually rendered doc from the iframe
                 const opt = {
-                    margin: 0, // docx-preview handles its own margins based on the docx
+                    margin: 0,
                     filename: `${fileName}.pdf`,
                     image: { type: 'jpeg', quality: 1.0 },
                     html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 800 },
@@ -189,8 +204,8 @@
                 // Generate and download PDF
                 await html2pdf().set(opt).from(container).save();
 
-                // Cleanup container
-                document.body.removeChild(container);
+                // Cleanup iframe
+                document.body.removeChild(iframe);
 
                 sMsg.classList.remove('hidden');
             } catch (e) {
