@@ -7,10 +7,10 @@
     <link rel="canonical" href="https://quickdopdf.com/word-to-pdf.html">
     <link rel="icon" type="image/png" href="favicon.png">
     <title>Word to PDF – Quick Do PDF</title>
-    <!-- Load mammoth for extracting text from docx -->
+    <!-- Load mammoth for extracting HTML from docx -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-    <!-- Load pdf-lib for PDF generation -->
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <!-- Load html2pdf for high fidelity HTML to PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="tools.css">
     <style>
         /* Sky Blue theme overrides for Word to PDF */
@@ -154,90 +154,51 @@
             ldr.classList.add('active');
 
             try {
-                // 1. Extract raw text from docx using mammoth
-                const result = await mammoth.extractRawText({ arrayBuffer: origBuf });
+                // Extract HTML from docx using mammoth to preserve formatting
+                const result = await mammoth.convertToHtml({ arrayBuffer: origBuf });
+                const htmlContent = result.value;
 
-                // Sanitize text for WinAnsi Encoding (StandardFonts.Helvetica)
-                const replaceMap = {
-                    '✓': '(V)', '✔': '(V)', '✅': '(V)', '☑': '(V)',
-                    '—': '-', '–': '-', '−': '-',
-                    '“': '"', '”': '"', "‘": "'", "’": "'",
-                    '…': '...',
-                    '•': '-', '◦': '-', '▪': '-', '■': '-',
-                    '©': '(c)', '®': '(r)', '™': '(tm)',
-                    '₹': 'Rs ', '€': 'EUR ', '£': 'GBP '
+                // Create a hidden container for rendering
+                const container = document.createElement('div');
+                container.style.width = '794px'; // A4 width at 96 DPI
+                container.style.padding = '40px';
+                container.style.backgroundColor = '#ffffff';
+                container.style.color = '#000000';
+                container.style.fontFamily = 'Arial, sans-serif';
+                container.style.fontSize = '14px';
+                container.style.lineHeight = '1.6';
+                container.style.boxSizing = 'border-box';
+                container.innerHTML = htmlContent;
+
+                // Optional: fix up mammoth lists to look better
+                const uls = container.querySelectorAll('ul');
+                uls.forEach(ul => {
+                    ul.style.paddingLeft = '20px';
+                    ul.style.marginBottom = '15px';
+                });
+
+                const ols = container.querySelectorAll('ol');
+                ols.forEach(ol => {
+                    ol.style.paddingLeft = '20px';
+                    ol.style.marginBottom = '15px';
+                });
+
+                document.body.appendChild(container);
+
+                // Configure html2pdf
+                const opt = {
+                    margin: 10, // 10mm margin
+                    filename: `${fileName}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // Convert to array to safely handle surrogate pairs (emojis)
-                let textData = Array.from(result.value).map(char => {
-                    if (replaceMap[char]) return replaceMap[char];
-                    // If character code is > 255, pdf-lib StandardFonts can't encode it.
-                    if (char.charCodeAt(0) > 255) return '';
-                    return char;
-                }).join('');
+                // Generate and download PDF
+                await html2pdf().set(opt).from(container).save();
 
-                // 2. Generate PDF using pdf-lib
-                const { PDFDocument, StandardFonts, rgb } = PDFLib;
-                const pdfDocLib = await PDFDocument.create();
-                const font = await pdfDocLib.embedFont(StandardFonts.Helvetica);
-                const fontSize = 12;
-                const padding = 50;
-
-                let page = pdfDocLib.addPage();
-                const { width, height } = page.getSize();
-                let currentY = height - padding;
-
-                const lines = textData.split('\n');
-
-                // Loop through paragraphs and word-wrap lines
-                for (let para of lines) {
-                    if (para.trim() === "") {
-                        currentY -= fontSize * 1.5; // empty space
-                        if (currentY < padding) { page = pdfDocLib.addPage(); currentY = height - padding; }
-                        continue;
-                    }
-
-                    const words = para.split(' ');
-                    let currentLine = '';
-
-                    for (let i = 0; i < words.length; i++) {
-                        const word = words[i];
-                        const testLine = currentLine + word + ' ';
-                        const testWidth = font.widthOfTextAtSize(testLine, fontSize);
-
-                        if (testWidth > width - padding * 2) {
-                            // Draw current line
-                            page.drawText(currentLine, { x: padding, y: currentY, size: fontSize, font: font, color: rgb(0, 0, 0) });
-                            currentLine = word + ' ';
-                            currentY -= (fontSize + 6);
-
-                            if (currentY < padding) {
-                                page = pdfDocLib.addPage();
-                                currentY = height - padding;
-                            }
-                        } else {
-                            currentLine = testLine;
-                        }
-                    }
-
-                    // Draw remainder of the paragraph
-                    if (currentLine.trim() !== "") {
-                        page.drawText(currentLine, { x: padding, y: currentY, size: fontSize, font: font, color: rgb(0, 0, 0) });
-                        currentY -= (fontSize + 12); // paragraph spacing
-
-                        if (currentY < padding) {
-                            page = pdfDocLib.addPage();
-                            currentY = height - padding;
-                        }
-                    }
-                }
-
-                const pdfBytes = await pdfDocLib.save();
-
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
-                a.download = `${fileName}.pdf`;
-                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                // Cleanup
+                document.body.removeChild(container);
 
                 sMsg.classList.remove('hidden');
             } catch (e) {
