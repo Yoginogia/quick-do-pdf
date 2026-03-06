@@ -7,12 +7,6 @@
     <link rel="canonical" href="https://quickdopdf.com/word-to-pdf.html">
     <link rel="icon" type="image/png" href="favicon.png">
     <title>Word to PDF – Quick Do PDF</title>
-    <!-- Load jszip and docx-preview for pixel-perfect docx rendering -->
-    <script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.2/dist/docx-preview.js"></script>
-    <!-- Robust SVG-based rendering to bypass HTML2Canvas color parsing crashes -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.1.6/dom-to-image-more.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="tools.css">
     <style>
         /* Sky Blue theme overrides for Word to PDF */
@@ -156,92 +150,63 @@
             ldr.classList.add('active');
 
             try {
-                // Use docx-preview to render the document with high visual fidelity
-                const container = document.createElement('div');
-                container.style.width = '800px';
-                container.style.padding = '0';
-                container.style.backgroundColor = '#ffffff';
-                container.style.color = '#000000';
+                // Prepare data for the Google Apps Script Backend
+                // Convert ArrayBuffer to Base64
+                let binary = '';
+                const bytes = new Uint8Array(origBuf);
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                const base64Data = window.btoa(binary);
 
-                // Hide it offscreen
-                container.style.position = 'absolute';
-                container.style.left = '-9999px';
-                document.body.appendChild(container);
+                const payload = {
+                    fileName: fileName + ".docx",
+                    base64: base64Data
+                };
 
-                await docx.renderAsync(origBuf, container, null, {
-                    className: 'docx',
-                    inWrapper: false,
-                    ignoreWidth: false,
-                    ignoreHeight: false,
-                    ignoreFonts: false,
-                    breakPages: true,
-                    renderHeaders: true,
-                    renderFooters: true,
-                    renderBackground: true,
-                    renderFootnotes: true
+                // Google Apps Script Web App URL provided by the admin
+                const scriptUrl = "https://script.google.com/macros/s/AKfycbytTW-r3CF-_3LEp_L_Oz1A7ivfzZXryB8pnH7zRx6iYm5dKP2eyP0vxOl5z8b5CwrN/exec";
+
+                // Send to backend
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
                 });
 
-                // Allow a brief moment for docx-preview rendering to settle
-                await new Promise(res => setTimeout(res, 500));
-
-                // 🌟 THE HARD SOLUTION: Bypass flaky HTML2Canvas entirely!
-                // We use dom-to-image-more which natively leverages the browser's own 
-                // SVG rendering engine. It NEVER crashes on modern CSS like color-mix.
-                const scale = 2; // High-res rendering
-                const dataUrl = await domtoimage.toPng(container, {
-                    bgcolor: '#ffffff',
-                    width: container.scrollWidth,
-                    height: container.scrollHeight,
-                    style: {
-                        transform: `scale(${scale})`,
-                        transformOrigin: 'top left',
-                        width: `${container.scrollWidth}px`,
-                        height: `${container.scrollHeight}px`
-                    },
-                    width: container.scrollWidth * scale,
-                    height: container.scrollHeight * scale
-                });
-
-                // Initialize jsPDF
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({
-                    orientation: 'portrait',
-                    unit: 'mm',
-                    format: 'a4'
-                });
-
-                // Calculate A4 dimensions
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-
-                // Get the actual image dimensions
-                const imgProps = pdf.getImageProperties(dataUrl);
-                const imgRatio = imgProps.width / imgProps.height;
-                const totalPdfHeight = pdfWidth / imgRatio;
-
-                // Handle multi-page PDFs
-                let heightLeft = totalPdfHeight;
-                let position = 0;
-
-                pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, totalPdfHeight);
-                heightLeft -= pdfHeight;
-
-                while (heightLeft > 0) {
-                    position = heightLeft - totalPdfHeight;
-                    pdf.addPage();
-                    pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, totalPdfHeight);
-                    heightLeft -= pdfHeight;
+                if (!response.ok) {
+                    throw new Error("Server communication failed.");
                 }
 
-                pdf.save(`${fileName}.pdf`);
+                const result = await response.json();
 
-                // Cleanup container
-                document.body.removeChild(container);
+                if (result.status !== "success") {
+                    throw new Error(result.message || "Conversion failed on server.");
+                }
+
+                // Decode the returned base64 PDF and create a download link
+                const pdfBase64 = result.base64;
+                const pdfBinary = window.atob(pdfBase64);
+                const pdfBytes = new Uint8Array(pdfBinary.length);
+                for (let i = 0; i < pdfBinary.length; i++) {
+                    pdfBytes[i] = pdfBinary.charCodeAt(i);
+                }
+
+                const blob = new Blob([pdfBytes], { type: "application/pdf" });
+                const downloadUrl = URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
+                a.href = downloadUrl;
+                a.download = `${fileName}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                URL.revokeObjectURL(downloadUrl);
 
                 sMsg.classList.remove('hidden');
             } catch (e) {
                 console.error(e);
-                alert('Conversion Error: ' + e.message);
+                alert('Conversion Error: ' + e.message + '\\n(Please check internet connection or script permissions)');
             }
 
             ldr.classList.remove('active');
