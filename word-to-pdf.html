@@ -10,8 +10,9 @@
     <!-- Load jszip and docx-preview for pixel-perfect docx rendering -->
     <script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.2/dist/docx-preview.js"></script>
-    <!-- Load html2pdf for high fidelity HTML to PDF generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Robust SVG-based rendering to bypass HTML2Canvas color parsing crashes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.1.6/dom-to-image-more.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="tools.css">
     <style>
         /* Sky Blue theme overrides for Word to PDF */
@@ -180,46 +181,66 @@
                     renderFootnotes: true
                 });
 
-                // CAITICAL FIX FOR HTML2CANVAS "unsupported color function" ERROR:
-                // html2canvas crashes if it encounters "color-mix()" anywhere in document.styleSheets
-                // We must temporarily disable our custom tools.css stylesheet during PDF generation
-                let disabledStyles = [];
-                for (let i = 0; i < document.styleSheets.length; i++) {
-                    try {
-                        let sheet = document.styleSheets[i];
-                        if (sheet.href && sheet.href.includes('tools.css')) {
-                            disabledStyles.push({ sheet: sheet, wasDisabled: sheet.disabled });
-                            sheet.disabled = true; // Disable offending CSS
-                        }
-                    } catch (e) { } // Ignore CORS stylesheet errors
+                // Allow a brief moment for docx-preview rendering to settle
+                await new Promise(res => setTimeout(res, 500));
+
+                // 🌟 THE HARD SOLUTION: Bypass flaky HTML2Canvas entirely!
+                // We use dom-to-image-more which natively leverages the browser's own 
+                // SVG rendering engine. It NEVER crashes on modern CSS like color-mix.
+                const scale = 2; // High-res rendering
+                const dataUrl = await domtoimage.toPng(container, {
+                    bgcolor: '#ffffff',
+                    width: container.scrollWidth,
+                    height: container.scrollHeight,
+                    style: {
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'top left',
+                        width: `${container.scrollWidth}px`,
+                        height: `${container.scrollHeight}px`
+                    },
+                    width: container.scrollWidth * scale,
+                    height: container.scrollHeight * scale
+                });
+
+                // Initialize jsPDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                // Calculate A4 dimensions
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+
+                // Get the actual image dimensions
+                const imgProps = pdf.getImageProperties(dataUrl);
+                const imgRatio = imgProps.width / imgProps.height;
+                const totalPdfHeight = pdfWidth / imgRatio;
+
+                // Handle multi-page PDFs
+                let heightLeft = totalPdfHeight;
+                let position = 0;
+
+                pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, totalPdfHeight);
+                heightLeft -= pdfHeight;
+
+                while (heightLeft > 0) {
+                    position = heightLeft - totalPdfHeight;
+                    pdf.addPage();
+                    pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, totalPdfHeight);
+                    heightLeft -= pdfHeight;
                 }
 
-                // Temporary fallback styles so the page doesn't look completely broken during the 2s generation
-                const tempStyle = document.createElement('style');
-                tempStyle.innerHTML = `body { background: #0f172a; color: white; font-family: sans-serif; } .loader-ring { display: block; }`;
-                document.head.appendChild(tempStyle);
-
-                // Configure html2pdf to take a snapshot of the visually rendered doc
-                const opt = {
-                    margin: 0,
-                    filename: `${fileName}.pdf`,
-                    image: { type: 'jpeg', quality: 1.0 },
-                    html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 800 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                // Generate and download PDF
-                await html2pdf().set(opt).from(container).save();
-
-                // RESTORE CSS AFTER GENERATION
-                document.head.removeChild(tempStyle);
-                disabledStyles.forEach(item => item.sheet.disabled = item.wasDisabled);
+                pdf.save(`${fileName}.pdf`);
 
                 // Cleanup container
                 document.body.removeChild(container);
 
                 sMsg.classList.remove('hidden');
             } catch (e) {
+                console.error(e);
                 alert('Conversion Error: ' + e.message);
             }
 
