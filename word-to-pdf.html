@@ -155,30 +155,18 @@
             ldr.classList.add('active');
 
             try {
-                // Create a temporary hidden iframe to isolate the DOCX rendering 
-                // from the main document CSS (which crashes html2pdf due to color-mix support)
-                const iframe = document.createElement('iframe');
-                iframe.style.position = 'absolute';
-                iframe.style.left = '-9999px';
-                iframe.style.width = '800px'; // typical A4 width proportion
-                iframe.style.height = '1200px'; // Give it some initial height
-                document.body.appendChild(iframe);
-
-                const iframeDoc = iframe.contentWindow.document;
-
-                // Establish a clean container inside the isolated iframe
-                const container = iframeDoc.createElement('div');
-                container.style.width = '100%';
+                // Use docx-preview to render the document with high visual fidelity
+                const container = document.createElement('div');
+                container.style.width = '800px';
+                container.style.padding = '0';
                 container.style.backgroundColor = '#ffffff';
                 container.style.color = '#000000';
-                iframeDoc.body.appendChild(container);
 
-                // Initialize default styles for the iframe body
-                iframeDoc.body.style.margin = '0';
-                iframeDoc.body.style.padding = '0';
-                iframeDoc.body.style.backgroundColor = '#ffffff';
+                // Hide it offscreen
+                container.style.position = 'absolute';
+                container.style.left = '-9999px';
+                document.body.appendChild(container);
 
-                // Use docx-preview to render the document with high visual fidelity inside the iframe
                 await docx.renderAsync(origBuf, container, null, {
                     className: 'docx',
                     inWrapper: false,
@@ -192,7 +180,26 @@
                     renderFootnotes: true
                 });
 
-                // Configure html2pdf to take a snapshot of the visually rendered doc from the iframe
+                // CAITICAL FIX FOR HTML2CANVAS "unsupported color function" ERROR:
+                // html2canvas crashes if it encounters "color-mix()" anywhere in document.styleSheets
+                // We must temporarily disable our custom tools.css stylesheet during PDF generation
+                let disabledStyles = [];
+                for (let i = 0; i < document.styleSheets.length; i++) {
+                    try {
+                        let sheet = document.styleSheets[i];
+                        if (sheet.href && sheet.href.includes('tools.css')) {
+                            disabledStyles.push({ sheet: sheet, wasDisabled: sheet.disabled });
+                            sheet.disabled = true; // Disable offending CSS
+                        }
+                    } catch (e) { } // Ignore CORS stylesheet errors
+                }
+
+                // Temporary fallback styles so the page doesn't look completely broken during the 2s generation
+                const tempStyle = document.createElement('style');
+                tempStyle.innerHTML = `body { background: #0f172a; color: white; font-family: sans-serif; } .loader-ring { display: block; }`;
+                document.head.appendChild(tempStyle);
+
+                // Configure html2pdf to take a snapshot of the visually rendered doc
                 const opt = {
                     margin: 0,
                     filename: `${fileName}.pdf`,
@@ -204,8 +211,12 @@
                 // Generate and download PDF
                 await html2pdf().set(opt).from(container).save();
 
-                // Cleanup iframe
-                document.body.removeChild(iframe);
+                // RESTORE CSS AFTER GENERATION
+                document.head.removeChild(tempStyle);
+                disabledStyles.forEach(item => item.sheet.disabled = item.wasDisabled);
+
+                // Cleanup container
+                document.body.removeChild(container);
 
                 sMsg.classList.remove('hidden');
             } catch (e) {
