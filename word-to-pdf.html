@@ -7,8 +7,9 @@
     <link rel="canonical" href="https://quickdopdf.com/word-to-pdf.html">
     <link rel="icon" type="image/png" href="favicon.png">
     <title>Word to PDF – Quick Do PDF</title>
-    <!-- Load mammoth for extracting HTML from docx -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <!-- Load jszip and docx-preview for pixel-perfect docx rendering -->
+    <script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.2/dist/docx-preview.js"></script>
     <!-- Load html2pdf for high fidelity HTML to PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="tools.css">
@@ -154,50 +155,41 @@
             ldr.classList.add('active');
 
             try {
-                // Extract HTML from docx using mammoth to preserve formatting
-                const result = await mammoth.convertToHtml({ arrayBuffer: origBuf });
-                const htmlContent = result.value;
-
-                // Create a hidden container for rendering
+                // Create a temporary hidden container to render the docx visually
                 const container = document.createElement('div');
-                container.style.width = '794px'; // A4 width at 96 DPI
-                container.style.padding = '40px';
+                container.style.position = 'absolute';
+                container.style.left = '-9999px';
+                container.style.width = '800px'; // A4 width proportion
                 container.style.backgroundColor = '#ffffff';
-                container.style.color = '#000000';
-                container.style.fontFamily = 'Arial, sans-serif';
-                container.style.fontSize = '14px';
-                container.style.lineHeight = '1.6';
-                container.style.boxSizing = 'border-box';
-                container.innerHTML = htmlContent;
-
-                // Optional: fix up mammoth lists to look better
-                const uls = container.querySelectorAll('ul');
-                uls.forEach(ul => {
-                    ul.style.paddingLeft = '20px';
-                    ul.style.marginBottom = '15px';
-                });
-
-                const ols = container.querySelectorAll('ol');
-                ols.forEach(ol => {
-                    ol.style.paddingLeft = '20px';
-                    ol.style.marginBottom = '15px';
-                });
-
                 document.body.appendChild(container);
 
-                // Configure html2pdf
+                // Use docx-preview to render the document with high visual fidelity
+                await docx.renderAsync(origBuf, container, null, {
+                    className: 'docx', // Default
+                    inWrapper: false, // Don't wrap in docx-wrapper
+                    ignoreWidth: false, // Keep doc widths
+                    ignoreHeight: false,
+                    ignoreFonts: false, // Try to preserve fonts
+                    breakPages: true, // Keep page breaks
+                    renderHeaders: true,
+                    renderFooters: true,
+                    renderBackground: false,
+                    renderFootnotes: true
+                });
+
+                // Configure html2pdf to take a snapshot of the visually rendered doc
                 const opt = {
-                    margin: 10, // 10mm margin
+                    margin: 0, // docx-preview handles its own margins based on the docx
                     filename: `${fileName}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    image: { type: 'jpeg', quality: 1.0 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 800 },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
                 // Generate and download PDF
                 await html2pdf().set(opt).from(container).save();
 
-                // Cleanup
+                // Cleanup container
                 document.body.removeChild(container);
 
                 sMsg.classList.remove('hidden');
