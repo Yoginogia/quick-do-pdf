@@ -5,3 +5,4 @@ pdf2docx
 pdfplumber
 pandas
 openpyxl
+pikepdf

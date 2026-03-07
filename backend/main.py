@@ -1,9 +1,10 @@
-from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException, Form
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pdf2docx import Converter
 import pdfplumber
 import pandas as pd
+import pikepdf
 import os
 import uuid
 import tempfile
@@ -151,6 +152,84 @@ async def convert_pdf_to_excel(background_tasks: BackgroundTasks, file: UploadFi
     except Exception as e:
         print(f"Error during Excel conversion: {e}")
         cleanup_files(pdf_path, xlsx_path)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/security/protect-pdf")
+async def protect_pdf(background_tasks: BackgroundTasks, file: UploadFile = File(...), password: str = Form(...)):
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="File must be a PDF")
+        
+    session_id = str(uuid.uuid4())
+    temp_dir = tempfile.gettempdir()
+    pdf_path = os.path.join(temp_dir, f"temp_protect_{session_id}.pdf")
+    out_path = os.path.join(temp_dir, f"protected_{session_id}.pdf")
+    
+    try:
+        contents = await file.read()
+        with open(pdf_path, "wb") as f:
+            f.write(contents)
+            
+        print(f"Applying password to {file.filename}...")
+        
+        pdf = pikepdf.Pdf.open(pdf_path)
+        # Apply 256-bit AES encryption
+        pdf.save(out_path, encryption=pikepdf.Encryption(user=password, owner=password, allow=pikepdf.Permissions(extract=False, print=False)))
+        pdf.close()
+            
+        background_tasks.add_task(cleanup_files, pdf_path, out_path)
+        final_filename = "protected_" + file.filename
+        
+        return FileResponse(
+            path=out_path, 
+            filename=final_filename,
+            media_type='application/pdf'
+        )
+    except Exception as e:
+        print(f"Error during protection: {e}")
+        cleanup_files(pdf_path, out_path)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/security/unlock-pdf")
+async def unlock_pdf(background_tasks: BackgroundTasks, file: UploadFile = File(...), password: str = Form(...)):
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="File must be a PDF")
+        
+    session_id = str(uuid.uuid4())
+    temp_dir = tempfile.gettempdir()
+    pdf_path = os.path.join(temp_dir, f"temp_unlock_{session_id}.pdf")
+    out_path = os.path.join(temp_dir, f"unlocked_{session_id}.pdf")
+    
+    try:
+        contents = await file.read()
+        with open(pdf_path, "wb") as f:
+            f.write(contents)
+            
+        print(f"Removing password from {file.filename}...")
+        
+        # Open with the provided password
+        try:
+            pdf = pikepdf.Pdf.open(pdf_path, password=password)
+        except pikepdf.PasswordError:
+            raise HTTPException(status_code=401, detail="Incorrect Password")
+            
+        # Saving without encryption parameter removes the password
+        pdf.save(out_path)
+        pdf.close()
+            
+        background_tasks.add_task(cleanup_files, pdf_path, out_path)
+        final_filename = "unlocked_" + file.filename
+        
+        return FileResponse(
+            path=out_path, 
+            filename=final_filename,
+            media_type='application/pdf'
+        )
+    except HTTPException:
+        cleanup_files(pdf_path, out_path)
+        raise
+    except Exception as e:
+        print(f"Error during unlocking: {e}")
+        cleanup_files(pdf_path, out_path)
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

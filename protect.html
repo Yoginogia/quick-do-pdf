@@ -4,129 +4,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="canonical" href="https://quickdopdf.com/protect.html">
-  <link rel="icon" type="image/png" href="favicon.png">
-  <title>Protect PDF – Quick Do PDF</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
-    rel="stylesheet">
-  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <link rel="stylesheet" href="tools.css?v=2">
-  <style>
-    .pass-input-wrap {
-      position: relative;
-      width: 100%;
-      margin-top: 12px;
-    }
+  <!DOCTYPE html>
+  <html lang="en">
 
-    .pass-input {
-      width: 100%;
-      padding: 14px 48px 14px 16px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      outline: none;
-    }
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://quickdopdf.com/protect.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Protect PDF – Quick Do PDF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet">
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <link rel="stylesheet" href="tools.css?v=2">
+    <style>
+      .pass-input-wrap {
+        position: relative;
+        width: 100%;
+        margin-top: 12px;
+      }
 
-    .pass-input:focus {
-      border-color: var(--a1);
-    }
+      .pass-input {
+        width: 100%;
+        padding: 14px 48px 14px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 15px;
+        outline: none;
+      }
 
-    .eye-btn {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--muted);
-      font-size: 18px;
-      padding: 0;
-      transition: color 0.2s;
-    }
+      .pass-input:focus {
+        border-color: var(--a1);
+      }
 
-    .eye-btn:hover {
-      color: var(--text);
-    }
+      .eye-btn {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 18px;
+        padding: 0;
+        transition: color 0.2s;
+      }
 
-    .strength-bar {
-      width: 100%;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--border);
-      margin-top: 8px;
-      overflow: hidden;
-    }
+      .eye-btn:hover {
+        color: var(--text);
+      }
 
-    .strength-fill {
-      height: 100%;
-      border-radius: 2px;
-      transition: width 0.3s, background 0.3s;
-      width: 0;
-    }
+      .strength-bar {
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--border);
+        margin-top: 8px;
+        overflow: hidden;
+      }
 
-    .strength-label {
-      font-size: 12px;
-      margin-top: 4px;
-      font-weight: 600;
-    }
+      .strength-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.3s, background 0.3s;
+        width: 0;
+      }
 
-    .perm-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
-    }
+      .strength-label {
+        font-size: 12px;
+        margin-top: 4px;
+        font-weight: 600;
+      }
 
-    .perm-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      cursor: pointer;
-    }
+      .perm-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
 
-    .perm-item input[type=checkbox] {
-      width: 16px;
-      height: 16px;
-      accent-color: var(--a1);
-      cursor: pointer;
-    }
+      .perm-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        cursor: pointer;
+      }
 
-    .perm-item label {
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+      .perm-item input[type=checkbox] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--a1);
+        cursor: pointer;
+      }
 
-    .info-box {
-      width: 100%;
-      max-width: 580px;
-      margin-top: 16px;
-      padding: 14px 18px;
-      background: rgba(255, 200, 0, 0.06);
-      border: 1px solid rgba(255, 200, 0, 0.2);
-      border-radius: 12px;
-      font-size: 13px;
-      color: #f5c842;
-      display: flex;
-      gap: 10px;
-    }
-  </style>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-KXQBGLEXZ6');</script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021" crossorigin="anonymous"></script>
+      .perm-item label {
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .info-box {
+        width: 100%;
+        max-width: 580px;
+        margin-top: 16px;
+        padding: 14px 18px;
+        background: rgba(255, 200, 0, 0.06);
+        border: 1px solid rgba(255, 200, 0, 0.2);
+        border-radius: 12px;
+        font-size: 13px;
+        color: #f5c842;
+        display: flex;
+        gap: 10px;
+      }
+    </style>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-KXQBGLEXZ6');</script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021"
+      crossorigin="anonymous"></script>
     <script src="theme.js"></script>
-</head>
+  </head>
 
 <body class="theme-red">
   <div id="loader">
@@ -140,12 +145,16 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg> Back</a>
     <span class="logo">Quick Do PDF</span>
-          <div class="header-right">
-            <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
-                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            </button>
-        </div>
-    </header>
+    <div class="header-right">
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+        <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+          </path>
+        </svg>
+      </button>
+    </div>
+  </header>
   <main>
     <h1 class="page-title">Protect <span>PDF</span></h1>
     <p class="page-subtitle">Add a password to secure your PDF document</p>
@@ -263,58 +272,43 @@
       if (pass !== conf) { alert('Passwords do not match!'); return; }
       if (pass.length < 4) { alert('Password must be at least 4 characters'); return; }
       ldr.classList.add('active'); ok.classList.add('hidden');
+
       try {
-        // Use pdf.js to render pages, then jsPDF to create encrypted PDF
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const pdfDoc = await pdfjsLib.getDocument({ data: pdfBuf.slice() }).promise;
-        const numPages = pdfDoc.numPages;
+        const API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:")
+          ? "http://localhost:8000"
+          : "https://quick-do-pdf.onrender.com";
 
-        // Get first page to determine orientation
-        const firstPage = await pdfDoc.getPage(1);
-        const firstVP = firstPage.getViewport({ scale: 1.0 });
-        const isLandscape = firstVP.width > firstVP.height;
+        const formData = new FormData();
+        const fileBlob = new Blob([pdfBuf], { type: 'application/pdf' });
+        const originalName = document.getElementById('pdfInput').files[0] ? document.getElementById('pdfInput').files[0].name : "document.pdf";
+        formData.append("file", fileBlob, originalName);
+        formData.append("password", pass);
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-          orientation: isLandscape ? 'landscape' : 'portrait',
-          unit: 'pt',
-          format: [firstVP.width, firstVP.height],
-          encryption: {
-            userPassword: pass,
-            ownerPassword: pass + '_owner_key',
-            userPermissions: []
-          }
+        const response = await fetch(`${API_URL}/api/security/protect-pdf`, {
+          method: 'POST',
+          body: formData
         });
 
-        for (let i = 1; i <= numPages; i++) {
-          const page = await pdfDoc.getPage(i);
-          const scale = 2.0; // High quality render
-          const viewport = page.getViewport({ scale });
-
-          const canvas = document.createElement('canvas');
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-          const ctx = canvas.getContext('2d');
-          await page.render({ canvasContext: ctx, viewport }).promise;
-
-          const imgData = canvas.toDataURL('image/jpeg', 0.92);
-          const pageW = viewport.width / scale;
-          const pageH = viewport.height / scale;
-
-          if (i > 1) {
-            doc.addPage([pageW, pageH], pageW > pageH ? 'landscape' : 'portrait');
-          }
-
-          doc.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
+        if (!response.ok) {
+          const err = await response.text();
+          throw new Error(err);
         }
 
-        const pdfBlob = doc.output('blob');
+        const protectedBlob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(protectedBlob);
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(pdfBlob);
-        a.download = 'protected.pdf';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        a.href = downloadUrl;
+        a.download = `protected_${originalName}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+
         ldr.classList.remove('active'); ok.classList.remove('hidden');
-      } catch (e) { ldr.classList.remove('active'); alert('Error: ' + e.message); }
+      } catch (e) {
+        ldr.classList.remove('active');
+        alert('Protection Error: ' + e.message);
+      }
     }
   </script>
 </body>
