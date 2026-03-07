@@ -159,40 +159,52 @@
                 }
                 const base64Data = window.btoa(binary);
 
-                const payload = {
-                    fileName: fileName + ".docx",
-                    base64: base64Data
-                };
+                const apiKey = "yoginogia@gmail.com_YH030fTZv0nNx8QY29t3WqKdgvmWgxkVXDC3TkXEKxMaH8xSVmXZjGPtnXTWtAgj";
 
-                // Google Apps Script Web App URL provided by the admin
-                const scriptUrl = "https://script.google.com/macros/s/AKfycbytTW-r3CF-_3LEp_L_Oz1A7ivfzZXryB8pnH7zRx6iYm5dKP2eyP0vxOl5z8b5CwrN/exec";
-
-                // Send to backend
-                const response = await fetch(scriptUrl, {
+                // Step 1: Upload to PDF.co
+                const uploadResponse = await fetch("https://api.pdf.co/v1/file/upload/base64", {
                     method: 'POST',
-                    body: JSON.stringify(payload)
+                    headers: {
+                        'x-api-key': apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file: "data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64," + base64Data,
+                        name: fileName + ".docx"
+                    })
                 });
 
-                if (!response.ok) {
-                    throw new Error("Server communication failed.");
-                }
+                if (!uploadResponse.ok) throw new Error("Upload communication failed.");
+                const uploadData = await uploadResponse.json();
+                if (uploadData.error) throw new Error("Upload Error: " + uploadData.message);
 
-                const result = await response.json();
+                const uploadedFileUrl = uploadData.url;
 
-                if (result.status !== "success") {
-                    throw new Error(result.message || "Conversion failed on server.");
-                }
+                // Step 2: Convert to PDF
+                const convertResponse = await fetch("https://api.pdf.co/v1/pdf/convert/from/doc", {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: uploadedFileUrl,
+                        name: fileName + ".pdf"
+                    })
+                });
 
-                // Decode the returned base64 PDF and create a download link
-                const pdfBase64 = result.base64;
-                const pdfBinary = window.atob(pdfBase64);
-                const pdfBytes = new Uint8Array(pdfBinary.length);
-                for (let i = 0; i < pdfBinary.length; i++) {
-                    pdfBytes[i] = pdfBinary.charCodeAt(i);
-                }
+                if (!convertResponse.ok) throw new Error("Conversion communication failed.");
+                const convertData = await convertResponse.json();
+                if (convertData.error) throw new Error("Conversion Error: " + convertData.message);
 
-                const blob = new Blob([pdfBytes], { type: "application/pdf" });
-                const downloadUrl = URL.createObjectURL(blob);
+                const finalPdfUrl = convertData.url;
+
+                // Step 3: Fetch and Download the PDF
+                const pdfResponse = await fetch(finalPdfUrl);
+                if (!pdfResponse.ok) throw new Error("Failed to download converted PDF.");
+                const pdfBlob = await pdfResponse.blob();
+
+                const downloadUrl = URL.createObjectURL(pdfBlob);
 
                 const a = document.createElement("a");
                 a.href = downloadUrl;
