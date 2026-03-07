@@ -173,7 +173,7 @@ async def protect_pdf(background_tasks: BackgroundTasks, file: UploadFile = File
         
         pdf = pikepdf.Pdf.open(pdf_path)
         # Apply 256-bit AES encryption
-        pdf.save(out_path, encryption=pikepdf.Encryption(user=password, owner=password, allow=pikepdf.Permissions(extract=False, print=False)))
+        pdf.save(out_path, encryption=pikepdf.Encryption(user=password, owner=password))
         pdf.close()
             
         background_tasks.add_task(cleanup_files, pdf_path, out_path)
