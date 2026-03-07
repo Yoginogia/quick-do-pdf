@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="canonical" href="https://quickdopdf.com/pdf-to-excel.html">
-  <link rel="icon" type="image/png" href="favicon.png">
-  <title>PDF to Excel – Quick Do PDF</title>
-    <!-- Load PDF.js for text extraction -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <!-- Load SheetJS for creating the Excel spreadsheet -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link rel="canonical" href="https://quickdopdf.com/pdf-to-excel.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>PDF to Excel – Quick Do PDF</title>
     <link rel="stylesheet" href="tools.css">
     <style>
         /* Green theme overrides for PDF to Excel */
@@ -27,10 +26,11 @@
             background: rgba(34, 197, 94, 0.12);
         }
     </style>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-KXQBGLEXZ6');</script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021" crossorigin="anonymous"></script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6"></script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-KXQBGLEXZ6');</script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021"
+        crossorigin="anonymous"></script>
     <script src="theme.js"></script>
 </head>
 
@@ -49,9 +49,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg> Back</a>
         <span class="logo">Quick Do PDF</span>
-            <div class="header-right">
+        <div class="header-right">
             <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
-                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                    </path>
+                </svg>
             </button>
         </div>
     </header>
@@ -104,7 +108,6 @@
     </main>
 
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         const inp = document.getElementById('pdfInput');
         const drop = document.getElementById('dropArea');
@@ -149,65 +152,35 @@
             ldr.classList.add('active');
 
             try {
-                // 1. Extract Text using pdf.js
-                const pdf = await pdfjsLib.getDocument({ data: origBuf }).promise;
-                const maxPages = pdf.numPages;
-                let excelDataMatrix = [];
+                // Upload to local Python Backend or Render Production
+                const API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:")
+                    ? "http://localhost:8000"
+                    : "https://quick-do-pdf.onrender.com";
 
-                // Simple heuristic-based table extractor
-                for (let i = 1; i <= maxPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
+                const formData = new FormData();
+                const fileBlob = new Blob([origBuf], { type: 'application/pdf' });
+                formData.append("file", fileBlob, `${fileName}.pdf`);
 
-                    let lineGroups = {};
+                const convertResponse = await fetch(`${API_URL}/api/convert/pdf-to-excel`, {
+                    method: 'POST',
+                    body: formData
+                });
 
-                    // Group text items by their Y position (with a tolerance of 5 points)
-                    for (const item of textContent.items) {
-                        // x is transform[4], y is transform[5]
-                        const y = Math.round(item.transform[5] / 5) * 5;
-
-                        if (!lineGroups[y]) {
-                            lineGroups[y] = [];
-                        }
-                        // Store the X coordinate to sort it horizontally later
-                        lineGroups[y].push({ text: item.str.trim(), x: item.transform[4] });
-                    }
-
-                    // Process Y groups from top to bottom (highest Y to lowest Y in PDF coordinates generally)
-                    const sortedYKeys = Object.keys(lineGroups).sort((a, b) => parseFloat(b) - parseFloat(a));
-
-                    for (const yKey of sortedYKeys) {
-                        let rowItems = lineGroups[yKey];
-                        // Sort items on the same line horizontally (Left to Right)
-                        rowItems.sort((a, b) => a.x - b.x);
-
-                        // Filter out empty spaces
-                        let rowData = rowItems.filter(item => item.text.length > 0).map(item => item.text);
-
-                        if (rowData.length > 0) {
-                            excelDataMatrix.push(rowData);
-                        }
-                    }
-
-                    excelDataMatrix.push([]); // Empty row for page break
+                if (!convertResponse.ok) {
+                    const errorText = await convertResponse.text();
+                    throw new Error(`Server Error: ${errorText}`);
                 }
 
-                // 2. Build the Excel workbook using SheetJS
-                const workbook = XLSX.utils.book_new();
-                const worksheet = XLSX.utils.aoa_to_sheet(excelDataMatrix.length > 0 ? excelDataMatrix : [["No compatible data extracted from PDF."]]);
-
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-                // 3. Export as .xlsx
-                const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-                const blob = new Blob([wbout], { type: "application/octet-stream" });
-
+                // Download the generated Excel file from server
+                const xlsxBlob = await convertResponse.blob();
+                const downloadUrl = window.URL.createObjectURL(xlsxBlob);
                 const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
+                a.href = downloadUrl;
                 a.download = `${fileName}.xlsx`;
                 document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
+                a.remove();
+                window.URL.revokeObjectURL(downloadUrl);
 
                 sMsg.classList.remove('hidden');
             } catch (e) {

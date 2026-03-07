@@ -2,6 +2,8 @@ from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pdf2docx import Converter
+import pdfplumber
+import pandas as pd
 import os
 import uuid
 import tempfile
@@ -70,6 +72,67 @@ async def convert_pdf_to_word(background_tasks: BackgroundTasks, file: UploadFil
         print(f"Error during conversion: {e}")
         # If error occurs, cleanup immediately to avoid junk accumulation
         cleanup_files(pdf_path, docx_path)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/convert/pdf-to-excel")
+async def convert_pdf_to_excel(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="File must be a PDF")
+        
+    session_id = str(uuid.uuid4())
+    temp_dir = tempfile.gettempdir()
+    pdf_path = os.path.join(temp_dir, f"temp_excel_{session_id}.pdf")
+    xlsx_path = os.path.join(temp_dir, f"temp_excel_{session_id}.xlsx")
+    
+    try:
+        contents = await file.read()
+        with open(pdf_path, "wb") as f:
+            f.write(contents)
+            
+        print(f"Started converting {file.filename} -> EXCEL...")
+        
+        all_tables = []
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                tables = page.extract_tables()
+                for table in tables:
+                    # Filter out None values that pdfplumber sometimes inserts for empty cells
+                    cleaned_table = [
+                        ['' if cell is None else str(cell) for cell in row]
+                        for row in table
+                    ]
+                    if len(cleaned_table) > 1:
+                        df = pd.DataFrame(cleaned_table[1:], columns=cleaned_table[0])
+                    else:
+                        df = pd.DataFrame(cleaned_table)
+                    all_tables.append(df)
+                    
+        if not all_tables:
+            df = pd.DataFrame([["No structured tables could be detected in this PDF."]])
+            all_tables.append(df)
+            
+        with pd.ExcelWriter(xlsx_path, engine='openpyxl') as writer:
+            for i, df in enumerate(all_tables):
+                sheet_name = f"Table_{i+1}"
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+                
+        if not os.path.exists(xlsx_path):
+            raise Exception("Conversion failed to produce an XLSX file.")
+            
+        print("Excel extraction successful! Returning XLSX...")
+            
+        background_tasks.add_task(cleanup_files, pdf_path, xlsx_path)
+        final_filename = file.filename.rsplit('.', 1)[0] + ".xlsx"
+        
+        return FileResponse(
+            path=xlsx_path, 
+            filename=final_filename,
+            media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        
+    except Exception as e:
+        print(f"Error during Excel conversion: {e}")
+        cleanup_files(pdf_path, xlsx_path)
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
