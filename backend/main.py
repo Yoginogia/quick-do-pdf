@@ -94,7 +94,28 @@ async def convert_pdf_to_excel(background_tasks: BackgroundTasks, file: UploadFi
         all_tables = []
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
-                tables = page.extract_tables()
+                # Use text-based layout parsing to capture the entire document into a grid, not just bordered tables
+                tables = page.extract_tables({
+                    "vertical_strategy": "text",
+                    "horizontal_strategy": "text",
+                    "snap_tolerance": 3,
+                    "join_tolerance": 3
+                })
+                
+                # Fallback: if 'text' strategy fails to find any structured tables, we use a custom line-by-line extractor
+                if not tables:
+                    text_layout = page.extract_text(layout=True)
+                    if text_layout:
+                        import re
+                        raw_rows = []
+                        for line in text_layout.split('\n'):
+                            if line.strip():
+                                # Try to maintain some semblance of columns by splitting by 2+ spaces
+                                cols = re.split(r'\s{2,}', line.strip())
+                                raw_rows.append(cols)
+                        if raw_rows:
+                            tables = [raw_rows]
+
                 for table in tables:
                     # Filter out None values that pdfplumber sometimes inserts for empty cells
                     cleaned_table = [
