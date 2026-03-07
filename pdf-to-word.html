@@ -7,9 +7,7 @@
     <link rel="canonical" href="https://quickdopdf.com/pdf-to-word.html">
     <link rel="icon" type="image/png" href="favicon.png">
     <title>PDF to Word – Quick Do PDF</title>
-    <!-- Load PDF.js for text extraction -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <!-- docx.js will be dynamically loaded as an ES module via esm.sh -->
+    <!-- Formatting will be flawlessly retained via direct PDF.co Client-Side API -->
     <link rel="stylesheet" href="tools.css">
     <style>
         /* Sky Blue theme overrides for PDF to Word */
@@ -108,8 +106,6 @@
     </main>
 
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
         const inp = document.getElementById('pdfInput');
         const drop = document.getElementById('dropArea');
         const info = document.getElementById('fileInfo');
@@ -153,76 +149,76 @@
             ldr.classList.add('active');
 
             try {
-                // Read a fresh array buffer every time to prevent Detached ArrayBuffer Error
+                // Read a fresh array buffer
                 const arrayBuffer = await selectedFile.arrayBuffer();
 
-                // 1. Extract Text using pdf.js passing fresh Uint8Array
-                const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-                const maxPages = pdf.numPages;
-                let paragraphsData = [];
-
-                for (let i = 1; i <= maxPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-
-                    let lastY = -1;
-                    let currentLineData = [];
-
-                    // Group text items roughly by their Y position (lines)
-                    for (const item of textContent.items) {
-                        const y = item.transform[5];
-                        if (lastY === -1 || Math.abs(y - lastY) > 5) {
-                            if (currentLineData.length > 0) {
-                                paragraphsData.push(currentLineData.join(" "));
-                                currentLineData = [];
-                            }
-                        }
-                        currentLineData.push(item.str);
-                        lastY = y;
-                    }
-                    if (currentLineData.length > 0) {
-                        paragraphsData.push(currentLineData.join(" "));
-                    }
-                    paragraphsData.push(""); // Page break spacer basically
+                // Convert to Base64 for PDF.co Upload
+                let binary = '';
+                const bytes = new Uint8Array(arrayBuffer);
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i]);
                 }
+                const base64Data = window.btoa(binary);
 
-                // 2. Build the word document using docx.js via dynamic ES module import
-                const docxModule = await import('https://esm.sh/docx@7.8.2');
-                const { Document, Packer, Paragraph, TextRun } = docxModule;
+                const apiKey = "yoginogia@gmail.com_YH030fTZv0nNx8QY29t3WqKdgvmWgxkVXDC3TkXEKxMaH8xSVmXZjGPtnXTWtAgj";
 
-                // Convert arrays of strings into docx Paragraphs
-                const docParagraphs = paragraphsData.map(textLine => {
-                    return new Paragraph({
-                        children: [
-                            new TextRun({
-                                text: textLine,
-                                size: 24, // 12pt font
-                                font: "Calibri",
-                            })
-                        ],
-                        spacing: { after: 120 }
-                    });
+                // Step 1: Upload to PDF.co
+                const uploadResponse = await fetch("https://api.pdf.co/v1/file/upload/base64", {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file: "data:application/pdf;base64," + base64Data,
+                        name: fileName + ".pdf"
+                    })
                 });
 
-                const doc = new Document({
-                    sections: [{
-                        properties: {},
-                        children: docParagraphs.length > 0 ? docParagraphs : [new Paragraph("No text could be extracted from this PDF.")]
-                    }]
+                if (!uploadResponse.ok) throw new Error("Upload communication failed.");
+                const uploadData = await uploadResponse.json();
+                if (uploadData.error) throw new Error("Upload Error: " + uploadData.message);
+
+                const uploadedFileUrl = uploadData.url;
+
+                // Step 2: Convert to Word (.docx)
+                const convertResponse = await fetch("https://api.pdf.co/v1/pdf/convert/to/doc", {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: uploadedFileUrl,
+                        name: fileName + ".docx"
+                    })
                 });
 
-                // 3. Export as .docx
-                const blob = await Packer.toBlob(doc);
+                if (!convertResponse.ok) throw new Error("Conversion communication failed.");
+                const convertData = await convertResponse.json();
+                if (convertData.error) throw new Error("Conversion Error: " + convertData.message);
 
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
+                const finalDocxUrl = convertData.url;
+
+                // Step 3: Fetch and Download the DOCX
+                const docxResponse = await fetch(finalDocxUrl);
+                if (!docxResponse.ok) throw new Error("Failed to download converted Word file.");
+                const docxBlob = await docxResponse.blob();
+
+                const downloadUrl = URL.createObjectURL(docxBlob);
+
+                const a = document.createElement("a");
+                a.href = downloadUrl;
                 a.download = `${fileName}.docx`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
 
+                URL.revokeObjectURL(downloadUrl);
+
                 sMsg.classList.remove('hidden');
             } catch (e) {
+                console.error(e);
                 alert('Conversion Error: ' + e.message);
             }
 
