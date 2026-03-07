@@ -156,7 +156,7 @@
                 // Upload to local Python Backend or Render Production
                 const API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:")
                     ? "http://localhost:8000"
-                    : "https://quickdopdf-backend.onrender.com"; // User will update this URL later
+                    : "https://quick-do-pdf.onrender.com"; // Updated to match exact Render URL
 
                 const formData = new FormData();
                 formData.append("file", selectedFile);
