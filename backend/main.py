@@ -91,7 +91,7 @@ async def convert_pdf_to_excel(background_tasks: BackgroundTasks, file: UploadFi
             
         print(f"Started converting {file.filename} -> EXCEL...")
         
-        all_tables = []
+        all_rows = []
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
                 # Use text-based layout parsing to capture the entire document into a grid, not just bordered tables
@@ -117,25 +117,22 @@ async def convert_pdf_to_excel(background_tasks: BackgroundTasks, file: UploadFi
                             tables = [raw_rows]
 
                 for table in tables:
-                    # Filter out None values that pdfplumber sometimes inserts for empty cells
-                    cleaned_table = [
-                        ['' if cell is None else str(cell) for cell in row]
-                        for row in table
-                    ]
-                    if len(cleaned_table) > 1:
-                        df = pd.DataFrame(cleaned_table[1:], columns=cleaned_table[0])
-                    else:
-                        df = pd.DataFrame(cleaned_table)
-                    all_tables.append(df)
+                    for row in table:
+                        # Convert all cells to strings and handle None values
+                        cleaned_row = ['' if cell is None else str(cell) for cell in row]
+                        all_rows.append(cleaned_row)
+                    # Add an empty row between separate tables or pages for readability
+                    all_rows.append([])
                     
-        if not all_tables:
-            df = pd.DataFrame([["No structured tables could be detected in this PDF."]])
-            all_tables.append(df)
+        if not all_rows:
+            all_rows = [["No structured data could be detected in this PDF."]]
             
+        # Create a single DataFrame without headers so columns aren't mismatched
+        df = pd.DataFrame(all_rows)
+        
         with pd.ExcelWriter(xlsx_path, engine='openpyxl') as writer:
-            for i, df in enumerate(all_tables):
-                sheet_name = f"Table_{i+1}"
-                df.to_excel(writer, sheet_name=sheet_name, index=False)
+            # Disable pandas index and header row, write everything to one continuous sheet
+            df.to_excel(writer, sheet_name="Sheet1", index=False, header=False)
                 
         if not os.path.exists(xlsx_path):
             raise Exception("Conversion failed to produce an XLSX file.")
