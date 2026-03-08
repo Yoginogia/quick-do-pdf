@@ -40,3 +40,30 @@
         });
     });
 })();
+
+
+// Lazy Load Heavy Scripts (Analytics & AdSense)
+let adsLoaded = false;
+function loadAds() {
+    if (adsLoaded) return;
+    adsLoaded = true;
+    
+    const ga = document.createElement('script');
+    ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-KXQBGLEXZ6';
+    ga.async = true;
+    document.head.appendChild(ga);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-KXQBGLEXZ6');
+
+    const ads = document.createElement('script');
+    ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021';
+    ads.crossOrigin = 'anonymous';
+    ads.async = true;
+    document.head.appendChild(ads);
+}
+['scroll', 'mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
+    window.addEventListener(evt, loadAds, {once: true, passive: true});
+});
+setTimeout(loadAds, 4500);
