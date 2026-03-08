@@ -160,7 +160,9 @@
     const progBar = document.getElementById('progBar');
     const progText = document.getElementById('progText');
     let origSize = 0;
-    let origBuf = null;
+    let origFile = null; // Permanent fix: store File object, not ArrayBuffer
+    // (ArrayBuffer gets 'detached' when transferred to pdf.js web worker;
+    //  re-reading from File each time guarantees a fresh buffer every attempt)
 
     inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
     drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
@@ -180,16 +182,15 @@
     async function loadFile(file) {
       cmpCard.classList.add('hidden'); info.innerHTML = '';
       origSize = file.size;
-      origBuf = await file.arrayBuffer();
+      origFile = file; // Store File object — re-read fresh buffer on each compress
       info.innerHTML = `<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fs">${fmt(file.size)}</span></div>`;
       lvlCard.classList.remove('hidden');
       btn.classList.remove('hidden');
-      // Scroll to file info gently
       setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
     }
 
     async function compressPDF() {
-      if (!origBuf) { alert('Select a PDF file'); return; }
+      if (!origFile) { alert('Select a PDF file'); return; }
       ldr.classList.add('active'); cmpCard.classList.add('hidden');
 
       try {
@@ -226,10 +227,12 @@
         if (progBar) progBar.style.width = '10%';
 
         // 1. Load the original PDF into pdf.js
-        // NOTE: Use .slice(0) to clone the buffer — pdf.js transfers the original
-        // ArrayBuffer to its web worker (detaching it). Without slice(), a second
-        // compress attempt crashes with "Cannot perform Construct on a detached ArrayBuffer"
-        const pdf = await pdfjsLib.getDocument({ data: origBuf.slice(0) }).promise;
+        // PERMANENT FIX: Call origFile.arrayBuffer() each time for a FRESH buffer.
+        // The File object on disk is never detached — only the ArrayBuffer produced
+        // from it gets transferred to the pdf.js web worker. Re-reading gives us
+        // a clean buffer every single compress attempt, no matter how many times.
+        const freshBuf = await origFile.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: freshBuf }).promise;
         const totalPages = pdf.numPages;
 
         // 2. Initialize jsPDF (output file)
