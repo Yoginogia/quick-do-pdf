@@ -763,6 +763,18 @@
       </div>
     </div>
 
+    <!-- SEARCH BAR -->
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="toolSearch" placeholder="Search for tools (e.g. Merge, Excel, Protect)...">
+      </div>
+    </div>
+
     <!-- BASIC -->
     <div class="divider">
       <div class="divider-content">
@@ -982,6 +994,22 @@
         style="color:var(--accent1,#2a8bff);">Terms</a> · <a href="contact.html"
         style="color:var(--accent1,#2a8bff);">Contact</a> · <a href="blog/"
         style="color:var(--accent1,#2a8bff);">Blog</a></footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const searchInput = document.getElementById("toolSearch");
+        const toolCards = document.querySelectorAll(".tool-card");
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            toolCards.forEach(card => {
+              const text = card.textContent.toLowerCase();
+              card.style.display = text.includes(term) ? "flex" : "none";
+            });
+          });
+        }
+      });
+    </script>
 </body>
 
 </html>
