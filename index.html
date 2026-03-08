@@ -709,15 +709,83 @@
         font-size: 32px;
       }
     }
-  /* SEARCH BAR CSS ADDED */
-.search-wrap{display:flex;justify-content:center;align-items:center;margin:3rem auto 1rem;max-width:600px;width:90%}
-.search-box{width:100%;position:relative;display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:0.5rem 1.5rem;transition:all 0.3s ease;backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur)}
-.search-box:focus-within{border-color:var(--a1);box-shadow:0 0 20px color-mix(in srgb,var(--a1) 20%,transparent);transform:translateY(-2px)}
-.search-box svg{color:var(--muted);margin-right:12px;flex-shrink:0;transition:color 0.3s ease}
-.search-box:focus-within svg{color:var(--a1)}
-.search-box input{width:100%;background:transparent;border:none;color:var(--text);font-size:1.05rem;padding:0.75rem 0;outline:none;font-family:inherit}
-.search-box input::placeholder{color:var(--muted)}
-</style>
+
+    /* ===== SEARCH BAR ===== */
+    .search-wrap {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2rem auto 0;
+      max-width: 600px;
+      width: 90%;
+      border-radius: 50px;
+      padding: 2px;
+      /* Thickness of animated border */
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(255, 42, 95, 0.15);
+    }
+
+    .search-wrap::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, transparent 60%, #00dfa2 80%, #2a8bff 90%, #ff2a5f 100%);
+      animation: spinBorder 3s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes spinBorder {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .search-box {
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      /* Blocks gradient from bleeding inside */
+      border-radius: 48px;
+      padding: 0.8rem 1.5rem;
+      z-index: 1;
+    }
+
+    .search-box svg {
+      color: var(--muted);
+      margin-right: 12px;
+      flex-shrink: 0;
+      transition: color 0.3s ease;
+    }
+
+    .search-box:focus-within svg {
+      color: var(--a1);
+    }
+
+    .search-box input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.1rem;
+      padding: 0.5rem 0;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .search-box input::placeholder {
+      color: var(--muted);
+    }
+  </style>
 
   <script src="theme.js"></script>
 </head>
@@ -754,6 +822,18 @@
         <div class="pill">🔒 File Never Leaves Device</div>
         <div class="pill">🆓 100% Free Forever</div>
       </div>
+
+      <!-- SEARCH BAR (Now prominently in Hero Section) -->
+      <div class="search-wrap">
+        <div class="search-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="toolSearch" placeholder="Search for tools (e.g. Merge, Excel, Protect)...">
+        </div>
+      </div>
     </section>
 
     <div class="stats-bar">
@@ -768,18 +848,6 @@
       <div class="stat">
         <div class="stat-val v3">Unlimited</div>
         <div class="stat-label">Usage Free</div>
-      </div>
-    </div>
-
-    <!-- SEARCH BAR -->
-    <div class="search-wrap">
-      <div class="search-box">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" id="toolSearch" placeholder="Search for tools (e.g. Merge, Excel, Protect)...">
       </div>
     </div>
 
@@ -1012,7 +1080,7 @@
             const term = e.target.value.toLowerCase().trim();
             toolCards.forEach(card => {
               const text = card.textContent.toLowerCase();
-              card.style.display = text.includes(term) ? "flex" : "none";
+              card.style.display = text.includes(term) ? "" : "none";
             });
           });
         }
