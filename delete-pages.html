@@ -40,8 +40,8 @@
       cursor: pointer;
       transition: all 0.2s;
       position: relative;
-      animation: slideUp 0.3s ease forwards;
-      opacity: 0;
+      animation: none;
+      /* opacity is set to 0 in JS and faded to 1 via setTimeout for reliability */
     }
 
     .page-thumb canvas {
@@ -274,7 +274,11 @@
 
         const card = document.createElement('div');
         card.className = 'page-thumb'; card.dataset.page = i;
-        card.style.animationDelay = (i - 1) * 50 + 'ms';
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(12px)';
+        card.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+        // Fade in with staggered delay — pure JS, no CSS animation needed
+        setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, (i - 1) * 45 + 30);
         const badge = document.createElement('div'); badge.className = 'delete-badge'; badge.textContent = '✕';
         const num = document.createElement('div'); num.className = 'p-num'; num.textContent = `Page ${i}`;
         card.appendChild(canvas); card.appendChild(badge); card.appendChild(num);
