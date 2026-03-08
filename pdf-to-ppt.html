@@ -207,18 +207,11 @@
 
                             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
 
-                            // Convert canvas to base64 data URL
-                            const imgData = canvas.toDataURL('image/png'); // PNG = lossless, no JPEG artifacts
-
+                            // slide.background fills 100% of slide by definition
+                            // — most reliable: no x/y math, no letterboxing possible
+                            const imgData = canvas.toDataURL('image/jpeg', 0.92);
                             let slide = pres.addSlide();
-                            // Fill the entire slide — no sizing constraint, no letterboxing
-                            slide.addImage({
-                                data: imgData,
-                                x: 0,
-                                y: 0,
-                                w: slideW,
-                                h: slideH
-                            });
+                            slide.background = { data: imgData };
                         }
 
                         updateProgress(95, 'Saving PPTX file...');
