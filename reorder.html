@@ -1,195 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="canonical" href="https://quickdopdf.com/reorder.html">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://quickdopdf.com/reorder.html">
   <link rel="icon" type="image/png" href="favicon.png">
   <title>Reorder Pages – Quick Do PDF</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"></noscript>
+  <link rel="preload"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style"
+    onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap">
+  </noscript>
   <link rel="stylesheet" href="tools.css?v=2">
   <style>
     .drag-grid {
-      display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
-      gap:12px; margin-top:20px; width:100%; max-width:580px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 580px;
     }
+
     .drag-card {
-      border-radius:12px; border:2px solid var(--border); background:var(--surface);
-      padding:10px; text-align:center; cursor:grab; transition:all 0.2s;
-      position:relative; user-select:none;
-      animation:slideUp 0.3s ease forwards; opacity:0;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      padding: 10px;
+      text-align: center;
+      cursor: grab;
+      transition: all 0.2s;
+      position: relative;
+      user-select: none;
     }
-    .drag-card:active { cursor:grabbing; }
-    .drag-card.dragging { opacity:0.4; border-style:dashed; border-color:var(--a1); transform:scale(0.97); }
-    .drag-card.drag-over { border-color:var(--a1); background:color-mix(in srgb,var(--a1) 10%,transparent); transform:scale(1.03); }
-    .drag-card canvas { width:100%; border-radius:6px; display:block; pointer-events:none; }
-    .drag-handle { font-size:18px; margin-bottom:6px; color:var(--muted); }
-    .p-num { font-size:12px; font-weight:700; margin-top:6px; color:var(--muted); }
+
+    .drag-card:active {
+      cursor: grabbing;
+    }
+
+    .drag-card.dragging {
+      opacity: 0.4;
+      border-style: dashed;
+      border-color: var(--a1);
+      transform: scale(0.97);
+    }
+
+    .drag-card.drag-over {
+      border-color: var(--a1);
+      background: color-mix(in srgb, var(--a1) 10%, transparent);
+      transform: scale(1.03);
+    }
+
+    .drag-card canvas {
+      width: 100%;
+      border-radius: 6px;
+      display: block;
+      pointer-events: none;
+    }
+
+    .drag-handle {
+      font-size: 18px;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .p-num {
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
     .order-badge {
-      position:absolute; top:-8px; left:-8px; width:22px; height:22px;
-      border-radius:50%; background:var(--a1); color:white;
-      font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center;
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--a1);
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
     .hint-box {
-      width:100%; max-width:580px; margin-top:16px; padding:12px 16px;
-      background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2);
-      border-radius:12px; font-size:13px; color:#818cf8; display:none;
-      align-items:center; gap:10px;
+      width: 100%;
+      max-width: 580px;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 12px;
+      font-size: 13px;
+      color: #818cf8;
+      display: none;
+      align-items: center;
+      gap: 10px;
     }
-    .hint-box.show { display:flex; }
+
+    .hint-box.show {
+      display: flex;
+    }
   </style>
 
-    <script src="theme.js"></script>
+  <script src="theme.js"></script>
 </head>
+
 <body class="theme-blue">
-<div id="loader"><div class="loader-ring"></div><p class="loader-text">Reordering pages...</p><p class="loader-sub">Saving new order</p></div>
-<header>
-  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
-  <span class="logo">Quick Do PDF</span>
-        <div class="header-right">
-            <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
-                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            </button>
-        </div>
-    </header>
-<main>
-  <h1 class="page-title">Reorder <span>PDF Pages</span></h1>
-  <p class="page-subtitle">Drag and drop pages to rearrange them</p>
-
-  <div class="upload-zone" id="dropArea">
-    <div class="upload-icon">🔀</div>
-    <h3>Drop your PDF file here</h3>
-    <p>Then drag pages to rearrange their order</p>
-    <label class="select-btn">
-      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-      Select PDF File
-      <input type="file" id="pdfInput" accept="application/pdf">
-    </label>
+  <div id="loader">
+    <div class="loader-ring"></div>
+    <p class="loader-text">Reordering pages...</p>
+    <p class="loader-sub">Saving new order</p>
   </div>
+  <header>
+    <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg> Back</a>
+    <span class="logo">Quick Do PDF</span>
+    <div class="header-right">
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+        <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+          </path>
+        </svg>
+      </button>
+    </div>
+  </header>
+  <main>
+    <h1 class="page-title">Reorder <span>PDF Pages</span></h1>
+    <p class="page-subtitle">Drag and drop pages to rearrange them</p>
 
-  <div class="hint-box" id="hintBox">
-    <span>💡</span><span>Drag pages to rearrange. Numbers show new order. Click <b>Save</b> when done.</span>
-  </div>
+    <div class="upload-zone" id="dropArea">
+      <div class="upload-icon">🔀</div>
+      <h3>Drop your PDF file here</h3>
+      <p>Then drag pages to rearrange their order</p>
+      <label class="select-btn">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Select PDF File
+        <input type="file" id="pdfInput" accept="application/pdf">
+      </label>
+    </div>
 
-  <div class="drag-grid" id="dragGrid"></div>
+    <div class="hint-box" id="hintBox">
+      <span>💡</span><span>Drag pages to rearrange. Numbers show new order. Click <b>Save</b> when done.</span>
+    </div>
 
-  <button class="action-btn hidden" id="actionBtn" onclick="saveReordered()">
-    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-    Save Reordered PDF
-  </button>
+    <div class="drag-grid" id="dragGrid"></div>
 
-  <div id="successMsg" class="success-msg hidden">
-    <div class="s-icon">✅</div><h3>Done!</h3><p>Reordered PDF downloaded.</p>
-  </div>
-</main>
-<script>
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const inp=document.getElementById('pdfInput');
-const fileDropArea=document.getElementById('dropArea');
-const dragGrid=document.getElementById('dragGrid');
-const btn=document.getElementById('actionBtn');
-const ok=document.getElementById('successMsg');
-const ldr=document.getElementById('loader');
-const hintBox=document.getElementById('hintBox');
-let pdfBuf=null, dragSrc=null;
+    <button class="action-btn hidden" id="actionBtn" onclick="saveReordered()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+      Save Reordered PDF
+    </button>
 
-inp.addEventListener('change',()=>{if(inp.files[0])loadPDF(inp.files[0]);});
-fileDropArea.addEventListener('dragover',e=>{e.preventDefault();fileDropArea.classList.add('over');});
-fileDropArea.addEventListener('dragleave',()=>fileDropArea.classList.remove('over'));
-fileDropArea.addEventListener('drop',e=>{
-  e.preventDefault();fileDropArea.classList.remove('over');
-  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf');
-  if(f){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;loadPDF(f);}
-});
+    <div id="successMsg" class="success-msg hidden">
+      <div class="s-icon">✅</div>
+      <h3>Done!</h3>
+      <p>Reordered PDF downloaded.</p>
+    </div>
+  </main>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const inp = document.getElementById('pdfInput');
+    const fileDropArea = document.getElementById('dropArea');
+    const dragGrid = document.getElementById('dragGrid');
+    const btn = document.getElementById('actionBtn');
+    const ok = document.getElementById('successMsg');
+    const ldr = document.getElementById('loader');
+    const hintBox = document.getElementById('hintBox');
+    let pdfBuf = null, dragSrc = null;
 
-async function loadPDF(file){
-  dragGrid.innerHTML=''; ok.classList.add('hidden'); btn.classList.add('hidden');
-  pdfBuf=await file.arrayBuffer();
-  const pdf=await pdfjsLib.getDocument({data:pdfBuf.slice(0)}).promise;
-  const total=pdf.numPages;
-
-  for(let i=1;i<=total;i++){
-    const page=await pdf.getPage(i);
-    const vp=page.getViewport({scale:0.55});
-    const canvas=document.createElement('canvas');
-    canvas.width=vp.width; canvas.height=vp.height;
-    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
-
-    const card=document.createElement('div');
-    card.className='drag-card'; card.draggable=true; card.dataset.origPage=i;
-    card.style.animationDelay=(i-1)*50+'ms';
-
-    const badge=document.createElement('div'); badge.className='order-badge'; badge.textContent=i;
-    const handle=document.createElement('div'); handle.className='drag-handle'; handle.textContent='⠿';
-    const num=document.createElement('div'); num.className='p-num'; num.id=`pnum-${i}`;
-    num.textContent=`Page ${i}`;
-
-    card.appendChild(badge);
-    card.appendChild(handle);
-    card.appendChild(canvas);
-    card.appendChild(num);
-
-    // Drag events
-    card.addEventListener('dragstart',e=>{
-      dragSrc=card; card.classList.add('dragging');
-      e.dataTransfer.effectAllowed='move';
+    inp.addEventListener('change', () => { if (inp.files[0]) loadPDF(inp.files[0]); });
+    fileDropArea.addEventListener('dragover', e => { e.preventDefault(); fileDropArea.classList.add('over'); });
+    fileDropArea.addEventListener('dragleave', () => fileDropArea.classList.remove('over'));
+    fileDropArea.addEventListener('drop', e => {
+      e.preventDefault(); fileDropArea.classList.remove('over');
+      const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
+      if (f) { const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; loadPDF(f); }
     });
-    card.addEventListener('dragend',()=>{
-      card.classList.remove('dragging');
-      document.querySelectorAll('.drag-card').forEach(c=>c.classList.remove('drag-over'));
-      updateBadges();
-    });
-    card.addEventListener('dragover',e=>{
-      e.preventDefault(); e.dataTransfer.dropEffect='move';
-      if(card!==dragSrc) card.classList.add('drag-over');
-    });
-    card.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
-    card.addEventListener('drop',e=>{
-      e.preventDefault(); card.classList.remove('drag-over');
-      if(dragSrc&&dragSrc!==card){
-        const cards=[...dragGrid.children];
-        const srcIdx=cards.indexOf(dragSrc);
-        const tgtIdx=cards.indexOf(card);
-        if(srcIdx<tgtIdx) dragGrid.insertBefore(dragSrc,card.nextSibling);
-        else dragGrid.insertBefore(dragSrc,card);
+
+    async function loadPDF(file) {
+      dragGrid.innerHTML = ''; ok.classList.add('hidden'); btn.classList.add('hidden');
+      pdfBuf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: pdfBuf.slice(0) }).promise;
+      const total = pdf.numPages;
+
+      for (let i = 1; i <= total; i++) {
+        const page = await pdf.getPage(i);
+        const vp = page.getViewport({ scale: 0.55 });
+        const canvas = document.createElement('canvas');
+        canvas.width = vp.width; canvas.height = vp.height;
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+
+        const card = document.createElement('div');
+        card.className = 'drag-card'; card.draggable = true; card.dataset.origPage = i;
+        // JS fade-in — no CSS animation needed, and clears itself so .dragging class works
+        card.style.cssText = 'opacity:0;transform:translateY(12px);transition:opacity 0.35s ease,transform 0.35s ease';
+        const _delay = (i - 1) * 45 + 30;
+        setTimeout(() => {
+          card.style.opacity = '1'; card.style.transform = 'translateY(0)';
+          setTimeout(() => { card.style.cssText = ''; }, 400); // clear so .dragging opacity works
+        }, _delay);
+
+        const badge = document.createElement('div'); badge.className = 'order-badge'; badge.textContent = i;
+        const handle = document.createElement('div'); handle.className = 'drag-handle'; handle.textContent = '⠿';
+        const num = document.createElement('div'); num.className = 'p-num'; num.id = `pnum-${i}`;
+        num.textContent = `Page ${i}`;
+
+        card.appendChild(badge);
+        card.appendChild(handle);
+        card.appendChild(canvas);
+        card.appendChild(num);
+
+        // Drag events
+        card.addEventListener('dragstart', e => {
+          dragSrc = card; card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          document.querySelectorAll('.drag-card').forEach(c => c.classList.remove('drag-over'));
+          updateBadges();
+        });
+        card.addEventListener('dragover', e => {
+          e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+          if (card !== dragSrc) card.classList.add('drag-over');
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+        card.addEventListener('drop', e => {
+          e.preventDefault(); card.classList.remove('drag-over');
+          if (dragSrc && dragSrc !== card) {
+            const cards = [...dragGrid.children];
+            const srcIdx = cards.indexOf(dragSrc);
+            const tgtIdx = cards.indexOf(card);
+            if (srcIdx < tgtIdx) dragGrid.insertBefore(dragSrc, card.nextSibling);
+            else dragGrid.insertBefore(dragSrc, card);
+          }
+        });
+
+        dragGrid.appendChild(card);
       }
-    });
+      hintBox.classList.add('show');
+      btn.classList.remove('hidden');
+    }
 
-    dragGrid.appendChild(card);
-  }
-  hintBox.classList.add('show');
-  btn.classList.remove('hidden');
-}
+    function updateBadges() {
+      [...dragGrid.children].forEach((card, i) => {
+        const badge = card.querySelector('.order-badge');
+        if (badge) badge.textContent = i + 1;
+      });
+    }
 
-function updateBadges(){
-  [...dragGrid.children].forEach((card,i)=>{
-    const badge=card.querySelector('.order-badge');
-    if(badge) badge.textContent=i+1;
-  });
-}
-
-async function saveReordered(){
-  if(!pdfBuf){alert('Select a PDF');return;}
-  ldr.classList.add('active'); ok.classList.add('hidden');
-  try{
-    const {PDFDocument}=PDFLib;
-    const src=await PDFDocument.load(pdfBuf.slice(0));
-    const out=await PDFDocument.create();
-    const newOrder=[...dragGrid.children].map(c=>parseInt(c.dataset.origPage)-1);
-    const pages=await out.copyPages(src,newOrder);
-    pages.forEach(p=>out.addPage(p));
-    const bytes=await out.save();
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
-    a.download='reordered.pdf'; document.body.appendChild(a);a.click();document.body.removeChild(a);
-    ldr.classList.remove('active'); ok.classList.remove('hidden');
-  }catch(e){ldr.classList.remove('active');alert('Error: '+e.message);}
-}
-</script>
+    async function saveReordered() {
+      if (!pdfBuf) { alert('Select a PDF'); return; }
+      ldr.classList.add('active'); ok.classList.add('hidden');
+      try {
+        const { PDFDocument } = PDFLib;
+        const src = await PDFDocument.load(pdfBuf.slice(0));
+        const out = await PDFDocument.create();
+        const newOrder = [...dragGrid.children].map(c => parseInt(c.dataset.origPage) - 1);
+        const pages = await out.copyPages(src, newOrder);
+        pages.forEach(p => out.addPage(p));
+        const bytes = await out.save();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+        a.download = 'reordered.pdf'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        ldr.classList.remove('active'); ok.classList.remove('hidden');
+      } catch (e) { ldr.classList.remove('active'); alert('Error: ' + e.message); }
+    }
+  </script>
 </body>
+
 </html>
