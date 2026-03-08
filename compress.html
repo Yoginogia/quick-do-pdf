@@ -14,8 +14,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"></noscript>
+  <link rel="preload"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style"
+    onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap">
+  </noscript>
   <link rel="stylesheet" href="tools.css?v=2">
   <style>
     /* Add green theme specific orbs */
@@ -221,7 +226,10 @@
         if (progBar) progBar.style.width = '10%';
 
         // 1. Load the original PDF into pdf.js
-        const pdf = await pdfjsLib.getDocument(origBuf).promise;
+        // NOTE: Use .slice(0) to clone the buffer — pdf.js transfers the original
+        // ArrayBuffer to its web worker (detaching it). Without slice(), a second
+        // compress attempt crashes with "Cannot perform Construct on a detached ArrayBuffer"
+        const pdf = await pdfjsLib.getDocument({ data: origBuf.slice(0) }).promise;
         const totalPages = pdf.numPages;
 
         // 2. Initialize jsPDF (output file)
