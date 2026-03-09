@@ -490,13 +490,13 @@
             textLayerDiv.style.height = viewport.height + 'px';
 
             const textContent = await page.getTextContent();
-            const textLayer = new pdfjsViewer.TextLayerBuilder({
-                textLayerDiv: textLayerDiv,
-                pageIndex: pageNum - 1,
-                viewport: viewport
-            });
-            textLayer.setTextContent(textContent);
-            textLayer.render();
+
+            await pdfjsLib.renderTextLayer({
+                textContentSource: textContent,
+                container: textLayerDiv,
+                viewport: viewport,
+                textDivs: []
+            }).promise;
 
             // Initialize native edits memory for this page
             nativeTextEdits[pageNum] = [];
