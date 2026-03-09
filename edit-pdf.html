@@ -15,7 +15,9 @@
         rel="stylesheet">
 
     <!-- PDF.js for rendering -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.js"></script>
     <!-- PDF-lib for exporting added text/images/svgs -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 
@@ -162,6 +164,36 @@
             pointer-events: auto;
         }
 
+        /* PDF.js Text Layer */
+        .textLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            opacity: 1;
+            line-height: 1.0;
+            pointer-events: none;
+        }
+
+        .tool-mode-edit-text .textLayer {
+            pointer-events: auto;
+        }
+
+        .tool-mode-edit-text .textLayer span {
+            cursor: text;
+            color: transparent !important;
+            border: 1px dashed rgba(139, 92, 246, 0.4);
+            border-radius: 2px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .tool-mode-edit-text .textLayer span:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.8);
+        }
+
         /* Invisible overlay containing DOM elements for Text/Images */
         .interaction-layer {
             position: absolute;
@@ -267,8 +299,24 @@
             width: 100%;
             height: 100%;
             object-fit: fill;
-            /* We want exact dimensions as dragged */
             pointer-events: none;
+        }
+
+        /* Native original text overridden editor */
+        .native-text-editor {
+            position: absolute;
+            background: white;
+            border: 2px solid var(--a1);
+            outline: none;
+            z-index: 10;
+            font-family: Helvetica, Arial, sans-serif;
+            color: black;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            margin: 0;
+            white-space: pre;
+            overflow: hidden;
+            resize: none;
         }
     </style>
 
@@ -320,7 +368,8 @@
             <!-- Toolbar -->
             <div class="editor-toolbar">
                 <button class="tool-btn active" id="btnCursor" onclick="setTool('cursor')">👆 Select / Move</button>
-                <button class="tool-btn" id="btnText" onclick="setTool('text')">🔤 Add Text</button>
+                <button class="tool-btn" id="btnEditText" onclick="setTool('edit-text')">📝 Edit Existing Text</button>
+                <button class="tool-btn" id="btnText" onclick="setTool('text')">🔤 Add New Text</button>
                 <input type="file" id="imgInput" accept="image/png, image/jpeg, image/jpg" style="display:none"
                     onchange="handleAddImageFile(event)">
                 <button class="tool-btn" id="btnImage" onclick="document.getElementById('imgInput').click()">🖼️ Add
@@ -361,13 +410,15 @@
 
         let origPdfBuf = null;
         let fileName = '';
-        let currentTool = 'cursor'; // cursor, text, image, draw
+        let currentTool = 'cursor'; // cursor, edit-text, text, image, draw
         let activeItem = null; // currently selected edit-item
         let scaleMultiplier = 1.5; // Render scale for crispness
 
         // State object strictly tracking freehand draw paths
-        // Structure: pageStrokes[pageNum] = [ { color, w, points: [{x,y}, ...] }, ... ]
         let pageStrokes = {};
+
+        // State object tracking modifications to original text
+        let nativeTextEdits = {};
 
         const workspace = document.getElementById('workspace');
         workspace.classList.add('tool-mode-cursor'); // default class
@@ -395,6 +446,7 @@
             workspace.innerHTML = '';
             fileName = file.name;
             pageStrokes = {}; // reset
+            nativeTextEdits = {}; // reset
             origPdfBuf = await file.arrayBuffer();
 
             try {
@@ -431,19 +483,39 @@
             bgCanvas.height = viewport.height;
             await page.render({ canvasContext: bgCanvas.getContext('2d'), viewport: viewport }).promise;
 
-            // 2. Draw Layer
+            // 2. Text Layer (For native text editing/selection)
+            const textLayerDiv = document.createElement('div');
+            textLayerDiv.className = 'textLayer';
+            textLayerDiv.style.width = viewport.width + 'px';
+            textLayerDiv.style.height = viewport.height + 'px';
+
+            const textContent = await page.getTextContent();
+            const textLayer = new pdfjsViewer.TextLayerBuilder({
+                textLayerDiv: textLayerDiv,
+                pageIndex: pageNum - 1,
+                viewport: viewport
+            });
+            textLayer.setTextContent(textContent);
+            textLayer.render();
+
+            // Initialize native edits memory for this page
+            nativeTextEdits[pageNum] = [];
+            setupNativeTextEditing(textLayerDiv, pageNum, viewport);
+
+            // 3. Draw Layer
             const drawCanvas = document.createElement('canvas');
             drawCanvas.className = 'draw-canvas';
             drawCanvas.width = viewport.width;
             drawCanvas.height = viewport.height;
             setupDrawCanvas(drawCanvas, wrapper, pageNum);
 
-            // 3. Interaction Layer (DOM Overlays)
+            // 4. Interaction Layer (DOM Overlays)
             const interLayer = document.createElement('div');
             interLayer.className = 'interaction-layer';
             setupInteractionLayer(interLayer, wrapper, pageNum);
 
             wrapper.appendChild(bgCanvas);
+            wrapper.appendChild(textLayerDiv);
             wrapper.appendChild(drawCanvas);
             wrapper.appendChild(interLayer);
             workspace.appendChild(wrapper);
@@ -455,7 +527,13 @@
         function setTool(mode) {
             currentTool = mode;
             document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            const activeBtn = document.getElementById(mode === 'cursor' ? 'btnCursor' : mode === 'text' ? 'btnText' : mode === 'draw' ? 'btnDraw' : 'btnCursor');
+            const btnMap = {
+                'cursor': 'btnCursor',
+                'edit-text': 'btnEditText',
+                'text': 'btnText',
+                'draw': 'btnDraw'
+            };
+            const activeBtn = document.getElementById(btnMap[mode] || 'btnCursor');
             if (activeBtn) activeBtn.classList.add('active');
 
             // Toggle workspace classes to change pointer-events and cursors
@@ -464,7 +542,113 @@
         }
 
         /* =========================================
-           4. INTERACTION LAYER - TEXT & DOM DRAGGING
+           4. NATIVE TEXT EDITING (WHITE-OUT & REPLACE)
+           ========================================= */
+        function setupNativeTextEditing(textLayerDiv, pageNum, viewport) {
+            textLayerDiv.addEventListener('mousedown', (e) => {
+                if (currentTool !== 'edit-text') return;
+                if (e.target.tagName !== 'SPAN') return;
+
+                const span = e.target;
+                const originalText = span.textContent;
+                if (!originalText || originalText.trim() === '') return;
+
+                // Prevent multiple editors on the same span
+                if (span.dataset.editing === "true") return;
+                span.dataset.editing = "true";
+
+                // Get precise CSS bounds of the word
+                const rect = span.getBoundingClientRect();
+                const layerRect = textLayerDiv.getBoundingClientRect();
+
+                const cssLeft = rect.left - layerRect.left;
+                const cssTop = rect.top - layerRect.top;
+                const cssWidth = rect.width;
+                const cssHeight = rect.height;
+
+                // Generate a unique ID for this edit
+                const editId = 'nx_' + Math.random().toString(36).substr(2, 9);
+                span.dataset.editId = editId;
+
+                // Visual feedback - hide the original span text completely in case opacity was an issue
+                span.style.color = "transparent";
+
+                // Create the editor textarea
+                const editor = document.createElement('textarea');
+                editor.className = 'native-text-editor';
+                editor.value = originalText;
+
+                // Style editor to perfectly cover the original span
+                editor.style.left = cssLeft + 'px';
+                editor.style.top = cssTop + 'px';
+                editor.style.minWidth = Math.max(cssWidth + 20, 50) + 'px'; // +20 for comfortable typing padding
+                editor.style.height = Math.max(cssHeight, parseInt(span.style.fontSize || "16") * 1.2) + 'px';
+
+                // Match font specifics
+                const computedStyle = window.getComputedStyle(span);
+                editor.style.fontSize = computedStyle.fontSize;
+                editor.style.lineHeight = computedStyle.lineHeight || '1';
+                const fontFamily = computedStyle.fontFamily;
+                editor.style.fontFamily = fontFamily;
+
+                // Try to guess color (usually text layer is transparent, so we default to black)
+                editor.style.color = "#000000";
+
+                textLayerDiv.appendChild(editor);
+                setTimeout(() => {
+                    editor.focus();
+                    editor.select();
+                }, 50);
+
+                // Handle when user finishes typing
+                const commitEdit = () => {
+                    const newText = editor.value;
+                    const finalColor = editor.style.color;
+
+                    // Save edit strongly in our engine memory
+                    nativeTextEdits[pageNum].push({
+                        id: editId,
+                        originalText: originalText,
+                        newText: newText,
+                        cssLeft: cssLeft,
+                        cssTop: cssTop,
+                        cssWidth: cssWidth, // width to wipe
+                        cssHeight: cssHeight, // height to wipe
+                        fontSizePx: parseFloat(computedStyle.fontSize),
+                        fontFamily: fontFamily,
+                        color: finalColor
+                    });
+
+                    // Keep the editor DOM node but make it look like part of the page now
+                    editor.style.border = "none";
+                    editor.style.background = "transparent";
+                    editor.readOnly = true;
+                    editor.style.boxShadow = "none";
+                    editor.style.cursor = "pointer";
+
+                    // Allow clicking it again to re-edit
+                    editor.addEventListener('mousedown', (e) => {
+                        if (currentTool !== 'edit-text') return;
+                        e.stopPropagation();
+
+                        // Remove from edit history so we can re-add it clean
+                        nativeTextEdits[pageNum] = nativeTextEdits[pageNum].filter(edit => edit.id !== editId);
+
+                        editor.style.border = "2px solid var(--a1)";
+                        editor.style.background = "white";
+                        editor.readOnly = false;
+                        editor.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+                        editor.style.cursor = "text";
+                        editor.focus();
+                    }, { once: true });
+                };
+
+                editor.addEventListener('blur', commitEdit);
+            });
+        }
+
+        /* =========================================
+           5. INTERACTION LAYER - TEXT & DOM DRAGGING
            ========================================= */
         function setupInteractionLayer(layer, wrapper, pageNum) {
             // Click on empty space in interaction layer -> creates text if in TEXT mode
@@ -749,13 +933,51 @@
                     const pdfPage = pages[pageNum - 1]; // 0-indexed
 
                     // --- MAPPING SCALES --- //
-                    // We rendered at viewport 'scaleMultiplier' (e.g., 1.5). 
-                    // We need to map CSS px (which are basically (pdfPoints * 1.5)) back to PDF Points
                     const cssToPdfRatio = 1 / scaleMultiplier;
-                    // Note on Y-axis: DOM y is from TOP. PDF-lib y is from BOTTOM!
                     const pdfHeight = pdfPage.getHeight();
 
-                    // 1. Burn DOM Elements (Text and Images)
+                    // 1. BURN NATIVE TEXT EDITS (Whiteout + Replace)
+                    const pageEdits = nativeTextEdits[pageNum] || [];
+                    for (let edit of pageEdits) {
+                        const pdfX = edit.cssLeft * cssToPdfRatio;
+                        // Wipe box height: roughly the height of the word
+                        const pdfWipeH = edit.cssHeight * cssToPdfRatio;
+                        const pdfWipeW = edit.cssWidth * cssToPdfRatio;
+
+                        // DOM y is from top. PDF-lib y is from bottom.
+                        const pdfRectY = pdfHeight - ((edit.cssTop + edit.cssHeight) * cssToPdfRatio);
+
+                        // A) Draw Whiteout Box
+                        pdfPage.drawRectangle({
+                            x: pdfX - 1,
+                            y: pdfRectY - 1,
+                            width: pdfWipeW + 2,
+                            height: pdfWipeH + 2,
+                            color: rgb(1, 1, 1) // Pure white
+                        });
+
+                        // B) Draw New Text (y is the baseline for text, not bottom-left corner)
+                        if (edit.newText.trim() !== '') {
+                            const pdfFontSize = edit.fontSizePx * cssToPdfRatio;
+                            // Baseline is approx 20% up from the bottom of the bounding box
+                            const baselinePdfY = pdfRectY + (pdfFontSize * 0.2);
+
+                            let rgbTuple = [0, 0, 0];
+                            if (edit.color && edit.color.startsWith('rgb')) {
+                                rgbTuple = hexToRgbTuple(rgbToHex(edit.color));
+                            }
+
+                            pdfPage.drawText(edit.newText, {
+                                x: pdfX,
+                                y: baselinePdfY,
+                                size: pdfFontSize,
+                                font: helveticaFont,
+                                color: rgb(...rgbTuple)
+                            });
+                        }
+                    }
+
+                    // 2. Burn DOM Elements (Text and Images)
                     const layer = w.querySelector('.interaction-layer');
                     const items = layer.querySelectorAll('.edit-item');
 
