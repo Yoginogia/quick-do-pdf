@@ -197,19 +197,24 @@
 
         <div class="workspace" id="workspace">
             <!-- Drop Area -->
-            <div class="drop-area" id="dropArea">
+            <div class="upload-zone" id="dropArea">
                 <div class="upload-icon">🖼️</div>
                 <h3>Drop your image here</h3>
                 <p>or</p>
-                <input type="file" id="fileInput" accept="image/*" hidden>
-                <button class="select-btn" onclick="document.getElementById('fileInput').click()">Select Image
-                    File</button>
+                <label class="select-btn">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Select Image File
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                </label>
             </div>
 
             <!-- Loader -->
-            <div class="loader" id="loader">
-                <div class="spinner"></div>
-                <p>Converting format...</p>
+            <div id="loader"
+                style="display: none; align-items: center; justify-content: center; flex-direction: column; padding: 40px;">
+                <div class="loader-ring"></div>
+                <p class="loader-text" style="margin-top:20px; font-weight: 600;">Converting format...</p>
             </div>
 
             <!-- Options Panel -->
@@ -239,14 +244,21 @@
             </div>
 
             <!-- Result Panel -->
-            <div class="result-panel" id="resultPanel">
-                <div class="success-icon">✨</div>
+            <div id="successMsg" class="success-msg hidden" style="display: none; text-align: center;">
+                <div class="s-icon">✅</div>
                 <h3>Conversion Complete!</h3>
-                <p>Your new image is ready. Files are not stored on our servers.</p>
-                <div class="action-buttons">
-                    <button class="download-btn" id="downloadBtn">Download Image</button>
-                    <button class="secondary-btn" onclick="resetTool()">Convert Another</button>
-                </div>
+                <p id="successDetail" style="margin-bottom: 20px;">Your new image is ready. Files are not stored on our
+                    servers.</p>
+                <button class="action-btn" id="downloadBtn" style="margin-bottom: 10px;">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg> Download Image
+                </button>
+                <br>
+                <button class="select-btn" onclick="resetTool()"
+                    style="background: transparent; border: 1px solid var(--border); color: var(--text);">Convert
+                    Another</button>
             </div>
         </div>
     </main>
@@ -256,7 +268,7 @@
         const fileInput = document.getElementById('fileInput');
         const optionsPanel = document.getElementById('optionsPanel');
         const loader = document.getElementById('loader');
-        const resultPanel = document.getElementById('resultPanel');
+        const resultPanel = document.getElementById('successMsg');
         const formatBtns = document.querySelectorAll('.format-btn');
         const qualityBox = document.getElementById('qualityBox');
         const qualitySlider = document.getElementById('qualitySlider');
@@ -342,7 +354,7 @@
 
         // Conversion Engine (Canvas API)
         convertBtn.addEventListener('click', async () => {
-            loader.classList.add('active');
+            loader.style.display = 'flex';
             optionsPanel.classList.remove('active');
 
             setTimeout(() => {
@@ -374,8 +386,8 @@
                         document.body.removeChild(link);
                     };
 
-                    loader.classList.remove('active');
-                    resultPanel.classList.add('active');
+                    loader.style.display = 'none';
+                    resultPanel.style.display = 'block';
                 } catch (err) {
                     alert("Conversion failed: " + err.message);
                     resetTool();
@@ -389,8 +401,8 @@
             fileInput.value = '';
             dropArea.style.display = 'block';
             optionsPanel.classList.remove('active');
-            resultPanel.classList.remove('active');
-            loader.classList.remove('active');
+            resultPanel.style.display = 'none';
+            loader.style.display = 'none';
         }
     </script>
 </body>
