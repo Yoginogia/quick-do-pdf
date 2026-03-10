@@ -374,20 +374,33 @@
 
                     const quality = parseInt(qualitySlider.value) / 100;
 
-                    // Transcode
-                    const dataUrl = canvas.toDataURL(targetFormat, quality);
+                    // Transcode using Blobs (Handles massively large high-res images without max URL length crashes)
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            alert("Conversion failed. The image might be too complex or large.");
+                            resetTool();
+                            return;
+                        }
 
-                    downloadBtn.onclick = () => {
-                        const link = document.createElement('a');
-                        link.href = dataUrl;
-                        link.download = `${originalFileName}_converted.${targetExt}`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    };
+                        // Release any previous object URL to save memory
+                        if (window.converterObjectUrl) {
+                            URL.revokeObjectURL(window.converterObjectUrl);
+                        }
+                        window.converterObjectUrl = URL.createObjectURL(blob);
 
-                    loader.style.display = 'none';
-                    resultPanel.style.display = 'block';
+                        downloadBtn.onclick = () => {
+                            const link = document.createElement('a');
+                            link.href = window.converterObjectUrl;
+                            link.download = `${originalFileName}_converted.${targetExt}`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        };
+
+                        loader.style.display = 'none';
+                        resultPanel.style.display = 'block';
+                    }, targetFormat, quality);
+
                 } catch (err) {
                     alert("Conversion failed: " + err.message);
                     resetTool();
