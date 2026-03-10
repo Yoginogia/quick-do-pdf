@@ -12,10 +12,15 @@
     <title>Contact Us – Quick Do PDF</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"></noscript>
-  <link rel="stylesheet" href="tools.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap">
+    </noscript>
+    <link rel="stylesheet" href="tools.css">
     <style>
         .contact-content {
             max-width: 700px;
@@ -205,7 +210,7 @@
             color: var(--a1);
         }
     </style>
-    
+
     <script src="theme.js"></script>
 </head>
 
@@ -220,9 +225,13 @@
             </svg> Back
         </a>
         <span class="logo">Quick Do PDF</span>
-            <div class="header-right">
+        <div class="header-right">
             <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
-                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                    </path>
+                </svg>
             </button>
         </div>
     </header>
@@ -242,11 +251,27 @@
                 <h3>GitHub</h3>
                 <p>Report issues & contribute</p>
             </a>
+            <div class="contact-card">
+                <div class="icon">📍</div>
+                <h3>Headquarters</h3>
+                <p>New Delhi, India</p>
+            </div>
             <a href="about.html" class="contact-card">
                 <div class="icon">ℹ️</div>
                 <h3>About Us</h3>
                 <p>Learn more about our mission</p>
             </a>
+        </div>
+
+        <div
+            style="margin-bottom: 40px; padding: 24px; background: rgba(0,0,0,0.02); border-left: 4px solid var(--a1); border-radius: 8px;">
+            <h3 style="margin-bottom: 12px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;"><span
+                    style="font-size: 1.5rem">⏱️</span> Support Guidelines & Response Times</h3>
+            <p style="color: var(--muted); margin-bottom: 8px; line-height: 1.6;">We value your time. Our dedicated
+                support team aims to respond to all inquiries within <strong>24 to 48 business hours</strong>.</p>
+            <p style="color: var(--muted); margin-bottom: 0; line-height: 1.6;">For bug reports, please include your
+                <strong>Browser version</strong> (e.g., Chrome 114) and <strong>Operating System</strong> (e.g., Windows
+                11) to help our engineers diagnose the issue faster.</p>
         </div>
 
         <div class="contact-form" id="contactForm">
