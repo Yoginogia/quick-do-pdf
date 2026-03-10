@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Convert images instantly for free. Convert JPG to PNG, WEBP to JPG, BMP to PNG and more right in your browser. 100% private.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://quickdopdf.com/image-converter.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Image Converter: JPG to PNG, WEBP & More – Quick Do PDF</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap">
+    </noscript>
+    <link rel="stylesheet" href="tools.css">
+
+    <style>
+        .options-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+            display: none;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            text-align: left;
+        }
+
+        .options-panel.active {
+            display: block;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .option-group {
+            margin-bottom: 20px;
+        }
+
+        .option-group label {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .format-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .format-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 12px;
+            color: var(--text);
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .format-btn:hover {
+            border-color: var(--a1);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .format-btn.active {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--a1) 20%, transparent), color-mix(in srgb, var(--a2) 20%, transparent));
+            border-color: var(--a1);
+            box-shadow: 0 4px 15px color-mix(in srgb, var(--a1) 30%, transparent);
+        }
+
+        .quality-slider-container {
+            margin-top: 16px;
+            display: none;
+        }
+
+        .quality-slider-container.show {
+            display: block;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            height: 6px;
+            border-radius: 3px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: var(--a1);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--a1);
+            margin-top: -7px;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #fff;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px color-mix(in srgb, var(--a1) 40%, transparent);
+            width: 100%;
+            margin-top: 24px;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px color-mix(in srgb, var(--a1) 50%, transparent);
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto 16px;
+            object-fit: contain;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+
+        .file-info {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script src="theme.js"></script>
+</head>
+
+<body class="theme-purple">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+
+    <header>
+        <a href="index.html" class="back-btn">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg> Back
+        </a>
+        <span class="logo">Quick Do PDF</span>
+        <div class="header-right">
+            <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                    </path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="tool-layout">
+        <div class="hero">
+            <h1>Universal Image Converter</h1>
+            <p class="subtitle">Convert JPG, PNG, WEBP, and BMP formats instantly. 100% offline and private.</p>
+        </div>
+
+        <div class="workspace" id="workspace">
+            <!-- Drop Area -->
+            <div class="drop-area" id="dropArea">
+                <div class="upload-icon">🖼️</div>
+                <h3>Drop your image here</h3>
+                <p>or</p>
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <button class="select-btn" onclick="document.getElementById('fileInput').click()">Select Image
+                    File</button>
+            </div>
+
+            <!-- Loader -->
+            <div class="loader" id="loader">
+                <div class="spinner"></div>
+                <p>Converting format...</p>
+            </div>
+
+            <!-- Options Panel -->
+            <div class="options-panel" id="optionsPanel">
+                <img id="previewImage" class="preview-img" alt="Preview">
+                <div class="file-info" id="fileInfo"></div>
+
+                <div class="option-group">
+                    <label>Convert To:</label>
+                    <div class="format-selector">
+                        <button class="format-btn active" data-format="image/jpeg" data-ext="jpg">JPG</button>
+                        <button class="format-btn" data-format="image/png" data-ext="png">PNG</button>
+                        <button class="format-btn" data-format="image/webp" data-ext="webp">WEBP</button>
+                        <button class="format-btn" data-format="image/bmp" data-ext="bmp">BMP</button>
+                    </div>
+                </div>
+
+                <div class="quality-slider-container show" id="qualityBox">
+                    <div class="slider-header">
+                        <span>Quality (Smaller Size vs Better Looks)</span>
+                        <span id="qualityVal">90%</span>
+                    </div>
+                    <input type="range" id="qualitySlider" min="10" max="100" value="90">
+                </div>
+
+                <button class="convert-btn" id="convertBtn">Convert & Download</button>
+            </div>
+
+            <!-- Result Panel -->
+            <div class="result-panel" id="resultPanel">
+                <div class="success-icon">✨</div>
+                <h3>Conversion Complete!</h3>
+                <p>Your new image is ready. Files are not stored on our servers.</p>
+                <div class="action-buttons">
+                    <button class="download-btn" id="downloadBtn">Download Image</button>
+                    <button class="secondary-btn" onclick="resetTool()">Convert Another</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const optionsPanel = document.getElementById('optionsPanel');
+        const loader = document.getElementById('loader');
+        const resultPanel = document.getElementById('resultPanel');
+        const formatBtns = document.querySelectorAll('.format-btn');
+        const qualityBox = document.getElementById('qualityBox');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityVal = document.getElementById('qualityVal');
+        const previewImage = document.getElementById('previewImage');
+        const fileInfo = document.getElementById('fileInfo');
+        const convertBtn = document.getElementById('convertBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let currentFile = null;
+        let originalFileName = '';
+        let targetFormat = 'image/jpeg';
+        let targetExt = 'jpg';
+        let imageElement = null;
+
+        // File Selection Logic
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) processFile(e.target.files[0]);
+        });
+
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = 'var(--a1)';
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.style.borderColor = 'var(--border)';
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = 'var(--border)';
+            if (e.dataTransfer.files.length > 0) {
+                const f = e.dataTransfer.files[0];
+                if (f.type.startsWith('image/')) {
+                    processFile(f);
+                } else {
+                    alert("Please drop a valid image file.");
+                }
+            }
+        });
+
+        function processFile(file) {
+            currentFile = file;
+            originalFileName = file.name.split('.').slice(0, -1).join('.');
+            if (!originalFileName) originalFileName = "image";
+
+            fileInfo.textContent = `Original: ${file.name} (${(file.size / 1024).toFixed(1)} KB) - ${file.type}`;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                imageElement = new Image();
+                imageElement.onload = function () {
+                    previewImage.src = event.target.result;
+                    dropArea.style.display = 'none';
+                    optionsPanel.classList.add('active');
+                };
+                imageElement.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Options Logic
+        formatBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                formatBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                targetFormat = btn.dataset.format;
+                targetExt = btn.dataset.ext;
+
+                // Only show quality slider for JPG and WEBP
+                if (targetFormat === 'image/jpeg' || targetFormat === 'image/webp') {
+                    qualityBox.classList.add('show');
+                } else {
+                    qualityBox.classList.remove('show');
+                }
+            });
+        });
+
+        qualitySlider.addEventListener('input', (e) => {
+            qualityVal.textContent = e.target.value + '%';
+        });
+
+        // Conversion Engine (Canvas API)
+        convertBtn.addEventListener('click', async () => {
+            loader.classList.add('active');
+            optionsPanel.classList.remove('active');
+
+            setTimeout(() => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = imageElement.naturalWidth;
+                    canvas.height = imageElement.naturalHeight;
+                    const ctx = canvas.getContext('2d');
+
+                    // Fill background white if converting PNG with transparency to JPG
+                    if (targetFormat === 'image/jpeg' || targetFormat === 'image/bmp') {
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+
+                    ctx.drawImage(imageElement, 0, 0);
+
+                    const quality = parseInt(qualitySlider.value) / 100;
+
+                    // Transcode
+                    const dataUrl = canvas.toDataURL(targetFormat, quality);
+
+                    downloadBtn.onclick = () => {
+                        const link = document.createElement('a');
+                        link.href = dataUrl;
+                        link.download = `${originalFileName}_converted.${targetExt}`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    };
+
+                    loader.classList.remove('active');
+                    resultPanel.classList.add('active');
+                } catch (err) {
+                    alert("Conversion failed: " + err.message);
+                    resetTool();
+                }
+            }, 600); // UI breathing room
+        });
+
+        function resetTool() {
+            currentFile = null;
+            imageElement = null;
+            fileInput.value = '';
+            dropArea.style.display = 'block';
+            optionsPanel.classList.remove('active');
+            resultPanel.classList.remove('active');
+            loader.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>
