@@ -244,7 +244,7 @@
             </div>
 
             <!-- Result Panel -->
-            <div id="successMsg" class="success-msg hidden" style="display: none; text-align: center;">
+            <div id="successMsg" class="success-msg hidden" style="text-align: center;">
                 <div class="s-icon">✅</div>
                 <h3>Conversion Complete!</h3>
                 <p id="successDetail" style="margin-bottom: 20px;">Your new image is ready. Files are not stored on our
@@ -387,7 +387,7 @@
                     };
 
                     loader.style.display = 'none';
-                    resultPanel.style.display = 'block';
+                    resultPanel.classList.remove('hidden');
                 } catch (err) {
                     alert("Conversion failed: " + err.message);
                     resetTool();
@@ -401,7 +401,7 @@
             fileInput.value = '';
             dropArea.style.display = 'block';
             optionsPanel.classList.remove('active');
-            resultPanel.style.display = 'none';
+            resultPanel.classList.add('hidden');
             loader.style.display = 'none';
         }
     </script>
