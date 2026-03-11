@@ -279,7 +279,7 @@
     const successMsg = document.getElementById('successMsg');
 
     let filesArray = [];
-    let rotations = []; // Add state array to track rotations
+    let rotations = []; // Added for tracking per-image rotation angle
     let mergeDirection = 'vertical';
     let exportFormat = 'jpg';
 
@@ -289,6 +289,7 @@
       Array.from(files).forEach(f => {
         if (f.type.startsWith('image/')) {
           filesArray.push(f);
+          rotations.push(0); // Initialize default rotation
         }
       });
       renderList();
@@ -312,19 +313,34 @@
       filesArray.forEach((file, index) => {
         const row = document.createElement('div');
         row.className = 'img-row';
-
+        
         const img = document.createElement('img');
         img.src = URL.createObjectURL(file);
-
+        // Apply visual rotation to the preview thumbnail instantly
+        img.style.transform = `rotate(${rotations[index]}deg)`;
+        img.style.transition = 'transform 0.3s ease';
+        
         const info = document.createElement('div');
         info.className = 'info';
         info.textContent = `${index + 1}. ${file.name}`;
+
+        // Rotate Button
+        const rotBtn = document.createElement('button');
+        rotBtn.className = 'remove-btn';
+        rotBtn.style.color = 'var(--c1)';
+        rotBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+        rotBtn.innerHTML = '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>';
+        rotBtn.onclick = () => {
+          rotations[index] = (rotations[index] + 90) % 360;
+          img.style.transform = `rotate(${rotations[index]}deg)`;
+        };
 
         const rmBtn = document.createElement('button');
         rmBtn.className = 'remove-btn';
         rmBtn.innerHTML = '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>';
         rmBtn.onclick = () => {
           filesArray.splice(index, 1);
+          rotations.splice(index, 1);
           renderList();
           if (filesArray.length === 0) {
             configPanel.style.display = 'none';
@@ -334,6 +350,7 @@
 
         row.appendChild(img);
         row.appendChild(info);
+        row.appendChild(rotBtn);
         row.appendChild(rmBtn);
         imageList.appendChild(row);
       });
@@ -380,22 +397,40 @@
       const images = await Promise.all(filesArray.map(f => loadImage(f)));
       if (images.length === 0) throw new Error("No images to merge.");
 
+      // Calculate actual bounding boxes for each image considering its rotation
+      const boxes = images.map((img, i) => {
+        const angle = rotations[i];
+        const isSwapped = angle === 90 || angle === 270;
+        return {
+           w: isSwapped ? img.height : img.width,
+           h: isSwapped ? img.width : img.height,
+           img: img,
+           angle: angle
+        };
+      });
+
       let totalWidth = 0, totalHeight = 0;
 
       if (mergeDirection === 'vertical') {
-        totalWidth = Math.max(...images.map(img => img.width));
-        totalHeight = images.reduce((acc, img) => acc + img.height, 0);
+        totalWidth = Math.max(...boxes.map(b => b.w));
+        totalHeight = boxes.reduce((acc, b) => acc + b.h, 0);
       } else {
-        totalHeight = Math.max(...images.map(img => img.height));
-        totalWidth = images.reduce((acc, img) => acc + img.width, 0);
+        totalHeight = Math.max(...boxes.map(b => b.h));
+        totalWidth = boxes.reduce((acc, b) => acc + b.w, 0);
       }
 
       // Safeguard against insanely huge canvases that crash RAM
       const limit = 16000;
       if (totalWidth > limit || totalHeight > limit) {
-        const ratio = Math.min(limit / totalWidth, limit / totalHeight);
-        totalWidth = Math.floor(totalWidth * ratio);
-        totalHeight = Math.floor(totalHeight * ratio);
+          const ratio = Math.min(limit / totalWidth, limit / totalHeight);
+          totalWidth = Math.floor(totalWidth * ratio);
+          totalHeight = Math.floor(totalHeight * ratio);
+          
+          // Re-scale boxes proportionally
+          boxes.forEach(b => {
+             b.w *= ratio;
+             b.h *= ratio;
+          });
       }
 
       const canvas = document.createElement('canvas');
@@ -406,28 +441,46 @@
       ctx.fillRect(0, 0, totalWidth, totalHeight);
 
       let currentX = 0, currentY = 0;
-      for (const img of images) {
+      for (const box of boxes) {
+        let drawW = box.w;
+        let drawH = box.h;
+        let xOffset = currentX;
+        let yOffset = currentY;
+
         if (mergeDirection === 'vertical') {
-          // Scale to fit width if necessary
-          let drawW = img.width;
-          let drawH = img.height;
-          if (img.width > totalWidth) {
-            drawW = totalWidth;
-            drawH = img.height * (totalWidth / img.width);
-          }
-          let xOffset = (totalWidth - drawW) / 2;
-          ctx.drawImage(img, xOffset, currentY, drawW, drawH);
-          currentY += drawH;
+           if (box.w > totalWidth) {
+               drawW = totalWidth;
+               drawH = box.h * (totalWidth / box.w);
+           }
+           xOffset = (totalWidth - drawW) / 2;
         } else {
-          let drawW = img.width;
-          let drawH = img.height;
-          if (img.height > totalHeight) {
-            drawH = totalHeight;
-            drawW = img.width * (totalHeight / img.height);
-          }
-          let yOffset = (totalHeight - drawH) / 2;
-          ctx.drawImage(img, currentX, yOffset, drawW, drawH);
-          currentX += drawW;
+           if (box.h > totalHeight) {
+               drawH = totalHeight;
+               drawW = box.w * (totalHeight / box.h);
+           }
+           yOffset = (totalHeight - drawH) / 2;
+        }
+
+        // Draw the image rotated onto its calculated bounding box area
+        ctx.save();
+        // Translate to the center of the bounding box
+        ctx.translate(xOffset + drawW / 2, yOffset + drawH / 2);
+        // Rotate the context
+        ctx.rotate((box.angle * Math.PI) / 180);
+        
+        // Ensure image fits perfectly inside rotated bounds
+        const isSwapped = box.angle === 90 || box.angle === 270;
+        const actualDrawW = isSwapped ? drawH : drawW;
+        const actualDrawH = isSwapped ? drawW : drawH;
+        
+        // Draw image shifted by half its width and height (since we translated to center)
+        ctx.drawImage(box.img, -actualDrawW / 2, -actualDrawH / 2, actualDrawW, actualDrawH);
+        ctx.restore();
+
+        if (mergeDirection === 'vertical') {
+           currentY += drawH;
+        } else {
+           currentX += drawW;
         }
       }
 
