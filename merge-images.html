@@ -1,18 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Merge multiple JPGs or PNGs into a single image. Export to JPG, PNG, PDF, DOCX, XLSX, or PPTX format completely offline for free.">
+  <meta name="description"
+    content="Merge multiple JPGs or PNGs into a single image. Export to JPG, PNG, PDF, DOCX, XLSX, or PPTX format completely offline for free.">
   <link rel="canonical" href="https://quickdopdf.com/merge-images.html">
   <link rel="icon" type="image/png" href="favicon.png">
   <title>Merge Images: JPG to Document – Quick Do PDF</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"></noscript>
-  
+  <link rel="preload"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style"
+    onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap">
+  </noscript>
+
   <link rel="stylesheet" href="tools.css?v=2">
   <script src="theme.js"></script>
 
@@ -32,11 +39,12 @@
       display: none;
       text-align: left;
     }
+
     .config-panel.active {
       display: block;
       animation: fadeIn 0.4s ease;
     }
-    
+
     .img-list {
       display: flex;
       flex-direction: column;
@@ -83,6 +91,7 @@
       cursor: pointer;
       transition: 0.2s;
     }
+
     .img-row .remove-btn:hover {
       background: #ff4444;
       color: #fff;
@@ -166,13 +175,16 @@
     }
   </style>
 </head>
+
 <body class="theme-blue">
   <div class="orb orb1"></div>
   <div class="orb orb2"></div>
 
   <header>
     <a href="index.html" class="back-btn">
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg> Back
     </a>
     <span class="logo">Quick Do PDF</span>
     <div class="header-right">
@@ -195,14 +207,17 @@
         <h3>Drop Multiple Images</h3>
         <p>Select the images you want to merge</p>
         <label class="select-btn">
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
           Select Images
           <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/bmp" multiple hidden>
         </label>
       </div>
 
       <!-- Loader -->
-      <div id="loader" style="display: none; align-items: center; justify-content: center; flex-direction: column; padding: 40px;">
+      <div id="loader"
+        style="display: none; align-items: center; justify-content: center; flex-direction: column; padding: 40px;">
         <div class="loader-ring"></div>
         <p class="loader-text" id="loaderText" style="margin-top:20px; font-weight: 600;">Processing images...</p>
       </div>
@@ -210,9 +225,10 @@
       <!-- Config Panel -->
       <div class="config-panel" id="configPanel">
         <div class="img-list" id="imageList"></div>
-        
+
         <!-- Add more button -->
-        <label class="select-btn" style="width: 100%; justify-content: center; margin-bottom: 24px; padding: 12px; background: rgba(255,255,255,0.05); color: var(--text); border: 1px dashed var(--border);">
+        <label class="select-btn"
+          style="width: 100%; justify-content: center; margin-bottom: 24px; padding: 12px; background: rgba(255,255,255,0.05); color: var(--text); border: 1px dashed var(--border);">
           + Add More Images
           <input type="file" id="moreFileInput" accept="image/*" multiple hidden>
         </label>
@@ -245,7 +261,8 @@
         <div class="s-icon">✅</div>
         <h3>Merger Complete!</h3>
         <p style="margin-bottom: 20px;">Your merged file has been downloaded automatically.</p>
-        <button class="select-btn" onclick="location.reload()" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Start Over</button>
+        <button class="select-btn" onclick="location.reload()"
+          style="background: transparent; border: 1px solid var(--border); color: var(--text);">Start Over</button>
       </div>
     </div>
   </main>
@@ -260,8 +277,9 @@
     const loader = document.getElementById('loader');
     const loaderText = document.getElementById('loaderText');
     const successMsg = document.getElementById('successMsg');
-    
+
     let filesArray = [];
+    let rotations = []; // Add state array to track rotations
     let mergeDirection = 'vertical';
     let exportFormat = 'jpg';
 
@@ -294,10 +312,10 @@
       filesArray.forEach((file, index) => {
         const row = document.createElement('div');
         row.className = 'img-row';
-        
+
         const img = document.createElement('img');
         img.src = URL.createObjectURL(file);
-        
+
         const info = document.createElement('div');
         info.className = 'info';
         info.textContent = `${index + 1}. ${file.name}`;
@@ -375,9 +393,9 @@
       // Safeguard against insanely huge canvases that crash RAM
       const limit = 16000;
       if (totalWidth > limit || totalHeight > limit) {
-          const ratio = Math.min(limit / totalWidth, limit / totalHeight);
-          totalWidth = Math.floor(totalWidth * ratio);
-          totalHeight = Math.floor(totalHeight * ratio);
+        const ratio = Math.min(limit / totalWidth, limit / totalHeight);
+        totalWidth = Math.floor(totalWidth * ratio);
+        totalHeight = Math.floor(totalHeight * ratio);
       }
 
       const canvas = document.createElement('canvas');
@@ -390,26 +408,26 @@
       let currentX = 0, currentY = 0;
       for (const img of images) {
         if (mergeDirection === 'vertical') {
-           // Scale to fit width if necessary
-           let drawW = img.width;
-           let drawH = img.height;
-           if (img.width > totalWidth) {
-               drawW = totalWidth;
-               drawH = img.height * (totalWidth / img.width);
-           }
-           let xOffset = (totalWidth - drawW) / 2;
-           ctx.drawImage(img, xOffset, currentY, drawW, drawH);
-           currentY += drawH;
+          // Scale to fit width if necessary
+          let drawW = img.width;
+          let drawH = img.height;
+          if (img.width > totalWidth) {
+            drawW = totalWidth;
+            drawH = img.height * (totalWidth / img.width);
+          }
+          let xOffset = (totalWidth - drawW) / 2;
+          ctx.drawImage(img, xOffset, currentY, drawW, drawH);
+          currentY += drawH;
         } else {
-           let drawW = img.width;
-           let drawH = img.height;
-           if (img.height > totalHeight) {
-               drawH = totalHeight;
-               drawW = img.width * (totalHeight / img.height);
-           }
-           let yOffset = (totalHeight - drawH) / 2;
-           ctx.drawImage(img, currentX, yOffset, drawW, drawH);
-           currentX += drawW;
+          let drawW = img.width;
+          let drawH = img.height;
+          if (img.height > totalHeight) {
+            drawH = totalHeight;
+            drawW = img.width * (totalHeight / img.height);
+          }
+          let yOffset = (totalHeight - drawH) / 2;
+          ctx.drawImage(img, currentX, yOffset, drawW, drawH);
+          currentX += drawW;
         }
       }
 
@@ -432,57 +450,57 @@
           canvas.toBlob((blob) => {
             triggerDownload(blob, `${baseFileName}.${exportFormat}`);
           }, mime, 0.95);
-        } 
+        }
         else if (exportFormat === 'pdf') {
           const { PDFDocument } = PDFLib;
           const pdfDoc = await PDFDocument.create();
-          
+
           let jpgBuffer;
           await new Promise(r => canvas.toBlob(blob => {
-             const reader = new FileReader();
-             reader.onload = e => { jpgBuffer = e.target.result; r(); };
-             reader.readAsArrayBuffer(blob);
+            const reader = new FileReader();
+            reader.onload = e => { jpgBuffer = e.target.result; r(); };
+            reader.readAsArrayBuffer(blob);
           }, 'image/jpeg', 0.95));
 
           const pdfImage = await pdfDoc.embedJpg(jpgBuffer);
           const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
           page.drawImage(pdfImage, { x: 0, y: 0, width: pdfImage.width, height: pdfImage.height });
-          
+
           const pdfBytes = await pdfDoc.save();
           triggerDownload(new Blob([pdfBytes], { type: 'application/pdf' }), `${baseFileName}.pdf`);
         }
         else if (exportFormat === 'docx') {
           canvas.toBlob(blob => {
-             const reader = new FileReader();
-             reader.onload = async (e) => {
-                 const arrayBuffer = e.target.result;
-                 
-                 const doc = new docx.Document({
-                     sections: [{
-                         properties: {
-                             page: {
-                               margin: { top: 0, right: 0, bottom: 0, left: 0 }
-                             }
-                         },
-                         children: [
-                             new docx.Paragraph({
-                                 children: [
-                                     new docx.ImageRun({
-                                         data: arrayBuffer,
-                                         transformation: {
-                                             width: Math.min(canvas.width, 700), // Docx standard scaling max
-                                             height: Math.min(canvas.height, 700 * (canvas.height/canvas.width))
-                                         }
-                                     })
-                                 ]
-                             })
-                         ]
-                     }]
-                 });
-                 const docxBlob = await docx.Packer.toBlob(doc);
-                 triggerDownload(docxBlob, `${baseFileName}.docx`);
-             };
-             reader.readAsArrayBuffer(blob);
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+              const arrayBuffer = e.target.result;
+
+              const doc = new docx.Document({
+                sections: [{
+                  properties: {
+                    page: {
+                      margin: { top: 0, right: 0, bottom: 0, left: 0 }
+                    }
+                  },
+                  children: [
+                    new docx.Paragraph({
+                      children: [
+                        new docx.ImageRun({
+                          data: arrayBuffer,
+                          transformation: {
+                            width: Math.min(canvas.width, 700), // Docx standard scaling max
+                            height: Math.min(canvas.height, 700 * (canvas.height / canvas.width))
+                          }
+                        })
+                      ]
+                    })
+                  ]
+                }]
+              });
+              const docxBlob = await docx.Packer.toBlob(doc);
+              triggerDownload(docxBlob, `${baseFileName}.docx`);
+            };
+            reader.readAsArrayBuffer(blob);
           }, 'image/jpeg');
         }
         else if (exportFormat === 'xlsx') {
@@ -496,7 +514,7 @@
           // Add image covering A1 roughly
           ws.addImage(imageId, {
             tl: { col: 0, row: 0 },
-            ext: { width: Math.min(canvas.width, 1000), height: Math.min(canvas.height, 1000 * (canvas.height/canvas.width)) }
+            ext: { width: Math.min(canvas.width, 1000), height: Math.min(canvas.height, 1000 * (canvas.height / canvas.width)) }
           });
           const buffer = await wb.xlsx.writeBuffer();
           triggerDownload(new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${baseFileName}.xlsx`);
@@ -523,7 +541,7 @@
 
       if (window.converterObjectUrl) URL.revokeObjectURL(window.converterObjectUrl);
       window.converterObjectUrl = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = window.converterObjectUrl;
       link.download = filename;
@@ -533,4 +551,5 @@
     }
   </script>
 </body>
+
 </html>
