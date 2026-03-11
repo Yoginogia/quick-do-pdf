@@ -247,15 +247,7 @@
             <div id="successMsg" class="success-msg" style="display: none; text-align: center;">
                 <div class="s-icon">✅</div>
                 <h3>Conversion Complete!</h3>
-                <p id="successDetail" style="margin-bottom: 20px;">Your new image is ready. Files are not stored on our
-                    servers.</p>
-                <button class="action-btn" id="downloadBtn" style="margin-bottom: 10px;">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg> Download Image
-                </button>
-                <br>
+                <p id="successDetail" style="margin-bottom: 20px;">Your new image has been downloaded automatically. Files are not stored on our servers.</p>
                 <button class="select-btn" onclick="resetTool()"
                     style="background: transparent; border: 1px solid var(--border); color: var(--text);">Convert
                     Another</button>
@@ -276,7 +268,6 @@
         const previewImage = document.getElementById('previewImage');
         const fileInfo = document.getElementById('fileInfo');
         const convertBtn = document.getElementById('convertBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
 
         let currentFile = null;
         let originalFileName = '';
@@ -388,14 +379,13 @@
                         }
                         window.converterObjectUrl = URL.createObjectURL(blob);
 
-                        downloadBtn.onclick = () => {
-                            const link = document.createElement('a');
-                            link.href = window.converterObjectUrl;
-                            link.download = `${originalFileName}_converted.${targetExt}`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        };
+                        // Auto-trigger Download
+                        const link = document.createElement('a');
+                        link.href = window.converterObjectUrl;
+                        link.download = `${originalFileName}_converted.${targetExt}`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
 
                         loader.style.display = 'none';
                         resultPanel.style.display = 'block';
