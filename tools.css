@@ -1019,3 +1019,39 @@ main {
     font-size: 32px;
   }
 }
+
+/* Tool SEO Content Expansion Styles */
+.tool-seo-content {
+  max-width: 800px;
+  margin: 60px auto 20px;
+  padding: 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.tool-seo-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.tool-seo-content h3 {
+  font-size: 1.2rem;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.tool-seo-content p, .tool-seo-content li {
+  color: var(--muted);
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.tool-seo-content ul {
+  padding-left: 20px;
+  margin-bottom: 20px;
+}
