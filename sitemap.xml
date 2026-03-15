@@ -1,66 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://quickdopdf.com/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://quickdopdf.com/merge.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/split.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/about.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/add-background.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/compare-pdfs.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/compress-pdf-100kb.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/compress-pdf-200kb.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/compress-pdf-for-email.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/compress-pdf-under-1mb.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/compress-pdf-without-losing-quality.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/compress.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/protect.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/unlock.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/rotate.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/watermark.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/sign.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/contact.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/crop.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/pdf-to-word.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/delete-pages.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/edit-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/excel-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/extract-images.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/extract-pages.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/extract-text.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/flatten.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/grayscale.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/image-converter.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/jpg-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/merge-images.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/merge-multiple-pdf-into-one.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/merge-pdf-without-watermark.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/merge.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/page-numbers.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/pdf-ocr.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-to-excel.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-to-jpg.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/jpg-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/word-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-to-ppt.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/excel-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/extract-pages.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/extract-text.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/extract-images.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/pdf-ocr.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/compare-pdfs.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/scan-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/delete-pages.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/reorder.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/page-numbers.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/grayscale.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/flatten.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/sanitize.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/add-background.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/about.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/privacy-policy.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/terms.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/contact.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/how-to-merge-pdf-files-free.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/best-ways-to-compress-pdf.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/pdf-to-word-conversion-guide.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/how-to-unlock-pdf-bank-statements.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/pdf-vs-word-which-is-better.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/how-to-sign-pdf-document-online.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/why-is-my-pdf-so-large.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/how-to-convert-images-to-pdf.html</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/compress-pdf-100kb.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/compress-pdf-200kb.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/compress-pdf-under-1mb.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/compress-pdf-for-email.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/compress-pdf-without-losing-quality.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/merge-pdf-without-watermark.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/merge-multiple-pdf-into-one.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/split-pdf-by-page-number.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/unlock-pdf-without-password.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-to-word-editable.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/how-to-compress-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/how-to-merge-pdf-files.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/how-to-reduce-pdf-size-for-gmail.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/pdf-to-word.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/privacy-policy.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/protect.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/reorder.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/rotate.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/sanitize.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/scan-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/sign.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/split-pdf-by-page-number.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/split.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/terms.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/unlock-pdf-without-password.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/unlock.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/watermark.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/word-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/blog/best-free-pdf-tools-2026.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/ilovepdf-vs-smallpdf-comparison.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/how-to-edit-pdf-without-software.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/best-ways-to-compress-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/blog/compress-pdf-on-mobile.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/blog/convert-pdf-without-losing-formatting.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://quickdopdf.com/blog/how-to-unlock-secured-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/blog/free-pdf-tools-without-signup.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-compress-pdf-exactly-100kb.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-compress-pdf-mac-preview.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-compress-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-convert-images-to-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-edit-pdf-without-software.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-extract-photos-from-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-fix-detached-arraybuffer-error-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-fix-pdf-text-mojibake-garbled.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-merge-multiple-jpg-to-one-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-merge-pdf-files-free.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-merge-pdf-files.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-print-protected-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-reduce-pdf-size-for-gmail.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-replace-text-in-pdf-free.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-sign-pdf-document-online.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-unlock-pdf-bank-statements.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/how-to-unlock-secured-pdf.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/ilovepdf-vs-smallpdf-comparison.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/index.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/is-it-safe-to-unlock-pdf-online.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/pdf-to-word-conversion-guide.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/pdf-vs-word-which-is-better.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/what-is-pdf-a-compliance.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/blog/why-is-my-pdf-so-large.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
 </urlset>

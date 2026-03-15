@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Discover why extracting text from PDFs sometimes results in weird, garbled symbols and how modern OCR and native conversion tools fix PDF encoding errors.">
+  <title>How to Fix Garbled Text (Mojibake) in PDF to Word Conversions – Quick Do PDF Blog</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"></noscript>
+  <link rel="stylesheet" href="../tools.css">
+  <link rel="stylesheet" href="blog-layout.css">
+  <script src="../theme.js"></script>
+</head>
+<body class="theme-blue">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <header>
+    <a href="index.html" class="back-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Blog
+    </a>
+    <a href="../index.html" class="logo" style="text-decoration:none; color:inherit;">Quick Do PDF</a>
+    <div class="header-right">
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+        <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="blog-container">
+    <article class="blog-post">
+      <div class="blog-header">
+        <h1>Why is My PDF Text Showing Weird Symbols? Fixing Mojibake</h1>
+        <div class="blog-meta">Published on March 15, 2026 • 5 min read</div>
+      </div>
+      
+      <div class="blog-content">
+        
+            <p>We've all experienced this extremely frustrating scenario: You have a perfectly readable PDF document. You try to highlight a paragraph of text, right-click "Copy", and paste it into Microsoft Word. Instead of English sentences, your screen is suddenly flooded with bizarre symbols, strange wingdings, and unreadable alien characters (like æ, ø, å, or Ã©). This phenomenon is officially known in computer science as <strong>Mojibake</strong>.</p>
+            
+            <h2>Understanding the Root Cause of Garbled PDF Text</h2>
+            <p>To fix the issue, you must first understand that a PDF (Portable Document Format) is fundamentally not a text document like Word or Notepad. A PDF is actually a highly precise graphical coordinate system. When a software generates a PDF, it places visual "glyphs" (shapes representing letters) onto an X/Y grid so it looks perfect on any screen or printer.</p>
+            
+            <p>In a properly created PDF, there is a hidden background table called an <strong>Encoding Dictionary (ToUnicode map)</strong>. This table tells the computer: "The graphical shape located at X:100, Y:50 visually looks like the letter 'A', and logically maps to the Unicode character point U+0041."</p>
+
+            <p>Mojibake happens when the software that originally created the PDF was either broken, outdated, or used custom proprietary font subgrouping. The document visually looks fine because the graphics are correct, but the hidden `ToUnicode` map is entirely missing or corrupted. When you try to copy the text, your clipboard pulls the raw, corrupted logical data instead of the visual glyphs.</p>
+
+            <h2>How to Extract Text from a Corrupted PDF</h2>
+            <h3>Method 1: Advanced OCR (Optical Character Recognition)</h3>
+            <p>If the internal text map is destroyed, the easiest way to recover the data is to treat the PDF like a physical photograph. By using an OCR engine, the software visually scans the document, recognizes the shapes as letters using Artificial Intelligence, and types out a brand new, clean text file.</p>
+            <p>You can use <strong>QuickDoPDF's PDF to Excel or PDF to Word tools</strong> which utilize advanced heuristic extraction parameters to often bypass minor encoding errors and rebuild the document structure accurately.</p>
+
+            <h3>Method 2: Print to PDF Flattening</h3>
+            <p>Sometimes, simply forcing the browser to rebuild the document can fix broken font subsets. Open the corrupted PDF in Chrome, press "Print", and select "Save as PDF". This creates a brand new document architecture which occasionally resolves encoding conflicts.</p>
+
+            <h3>Method 3: Image Conversion</h3>
+            <p>If you absolutely must extract data and copy-pasting is entirely broken, you can convert the entire PDF into a series of images using the <strong>"PDF to JPG" tool.</strong> Once you have high-quality JPGs, you can upload them to Google Drive and open them with Google Docs, which automatically applies its massive cloud-based OCR engine to extract the text flawlessly.</p>
+
+            <div class='seo-content-expansion' style='margin-top: 50px; padding-top: 30px; border-top: 1px solid var(--border);'>
+                <h2>Frequently Asked Questions</h2>
+                <h3>Why does this only happen with certain fonts?</h3>
+                <p>Mojibake is extremely common with custom, non-standard web fonts downloaded from third-party sites. Standard system fonts like Arial or Times New Roman have universal Unicode mappings built into every OS. When a designer uses a custom font and fails to properly embed it during the PDF export process, the logical mapping framework shatters.</p>
+
+                <h3>Can I fix the original PDF file permanently?</h3>
+                <p>Unfortunately, you cannot easily "inject" a missing ToUnicode map into a broken PDF without professional prepress software like Adobe Acrobat Pro (using the Preflight tool). The most practical solution for end-users is to convert the file to Word, fix the text, and re-export it as a fresh, clean PDF.</p>
+
+                <div class="pro-tip-box" style="background: rgba(var(--primary-rgb), 0.05); border-left: 4px solid var(--primary); padding: 20px; border-radius: 8px; margin-top: 30px;">
+                    <h3>💡 Pro Tip: Prevent Mojibake in the Future</h3>
+                    <p>If you are the one creating PDFs (e.g., exporting from Canva, InDesign, or a niche accounting software), always check the export settings. Look for checkboxes labeled "Embed Fonts" or "PDF/A Compliance". Selecting these options forces the software to include all necessary Unicode mapping data, guaranteeing your recipients will be able to copy and paste smoothly.</p>
+                </div>
+            </div>
+        
+      </div>
+    </article>
+    
+    <div class="blog-cta">
+        <h3>Ready to manage documents seamlessly?</h3>
+        <p>Explore our suite of 100% free, offline PDF tools.</p>
+        <a href="../index.html" class="cta-btn">Explore PDF Tools</a>
+    </div>
+  </main>
+  
+  <footer>
+    <div class="footer-links">
+      <a href="../privacy-policy.html">Privacy Policy</a>
+      <a href="../terms.html">Terms of Service</a>
+      <a href="../about.html">About Us</a>
+      <a href="../contact.html">Contact Us</a>
+    </div>
+  </footer>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021" crossorigin="anonymous"></script>
+</body>
+</html>
