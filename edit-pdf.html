@@ -318,6 +318,30 @@
             overflow: hidden;
             resize: none;
         }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); display: flex;
+            align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-overlay.hidden { display: none; }
+        .modal {
+            background: var(--surface); padding: 24px; border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .modal-actions { margin-top: 16px; display: flex; gap: 10px; justify-content: center; }
+        .modal-actions button {
+            padding: 8px 16px; border: 1px solid var(--border);
+            font-family: inherit; font-size: 14px;
+            background: var(--bg); border-radius: 6px; cursor: pointer; color: var(--text);
+            transition: all 0.2s;
+        }
+        .modal-actions button:hover { background: var(--border); }
+        .modal-actions button.primary {
+            background: var(--a1); color: white; border-color: var(--a1);
+        }
+        .modal-actions button.primary:hover { opacity: 0.9; background: var(--a1); }
     </style>
 
     <script src="theme.js"></script>
@@ -325,6 +349,19 @@
 </head>
 
 <body class="theme-purple" style="--a1: #8b5cf6;" id="themeBody">
+    <!-- Signature Modal -->
+    <div id="sigModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 style="margin-top:0; margin-bottom:16px;">Draw Your Signature</h3>
+            <canvas id="sigCanvas" width="400" height="200" style="border:1px dashed var(--border); background:#fff; touch-action:none; border-radius:8px; cursor:crosshair;"></canvas>
+            <div class="modal-actions">
+                <button onclick="clearSignature()">Clear</button>
+                <button onclick="saveSignature()" class="primary">Add to PDF</button>
+                <button onclick="closeSignature()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div id="loader">
         <div class="loader-ring"></div>
         <p class="loader-text" id="loaderText">Processing...</p>
@@ -376,6 +413,17 @@
                 <button class="tool-btn" id="btnImage" onclick="document.getElementById('imgInput').click()">🖼️ Add
                     Image</button>
                 <button class="tool-btn" id="btnDraw" onclick="setTool('draw')">✏️ Draw</button>
+                <button class="tool-btn" id="btnHighlight" onclick="setTool('highlight')">🖍️ Highlight</button>
+
+                <div class="tool-sep"></div>
+                <button class="tool-btn" id="btnShapeRect" onclick="setTool('shape-rect')">🔲 Box</button>
+                <button class="tool-btn" id="btnShapeCircle" onclick="setTool('shape-circle')">⭕ Circle</button>
+                <button class="tool-btn" id="btnRedact" onclick="setTool('redact')">⬛ Redact</button>
+
+                <div class="tool-sep"></div>
+                <button class="tool-btn" id="btnSignature" onclick="openSignature()">✍️ Signature</button>
+                <button class="tool-btn" id="btnLink" onclick="setTool('link')">🔗 Link</button>
+                <button class="tool-btn" id="btnSticky" onclick="setTool('sticky')">💬 Note</button>
 
                 <div class="tool-sep"></div>
 
@@ -426,7 +474,7 @@
 
         let origPdfBuf = null;
         let fileName = '';
-        let currentTool = 'cursor'; // cursor, edit-text, text, image, draw
+        let currentTool = 'cursor'; // cursor, edit-text, text, image, draw, highlight
         let activeItem = null; // currently selected edit-item
         let scaleMultiplier = 1.5; // Render scale for crispness
 
@@ -547,7 +595,13 @@
                 'cursor': 'btnCursor',
                 'edit-text': 'btnEditText',
                 'text': 'btnText',
-                'draw': 'btnDraw'
+                'draw': 'btnDraw',
+                'highlight': 'btnHighlight',
+                'shape-rect': 'btnShapeRect',
+                'shape-circle': 'btnShapeCircle',
+                'redact': 'btnRedact',
+                'link': 'btnLink',
+                'sticky': 'btnSticky'
             };
             const activeBtn = document.getElementById(btnMap[mode] || 'btnCursor');
             if (activeBtn) activeBtn.classList.add('active');
@@ -671,12 +725,23 @@
             layer.addEventListener('mousedown', (e) => {
                 if (e.target !== layer) return; // ignore clicks on children
 
+                const rect = layer.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
                 if (currentTool === 'text') {
-                    const rect = layer.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
                     addTextElement(layer, x, y);
-                    // Auto switch to cursor to allow moving the new text
+                    setTool('cursor');
+                } else if (currentTool === 'shape-rect' || currentTool === 'shape-circle' || currentTool === 'redact') {
+                    addShapeElement(layer, x, y, currentTool);
+                    setTool('cursor');
+                } else if (currentTool === 'link') {
+                    const url = prompt("Enter URL for this link:", "https://");
+                    if (url) addLinkElement(layer, x, y, url);
+                    setTool('cursor');
+                } else if (currentTool === 'sticky') {
+                    const text = prompt("Enter note text:");
+                    if (text) addStickyNoteElement(layer, x, y, text);
                     setTool('cursor');
                 } else {
                     deselectAll(); // Clicked empty space in cursor mode
@@ -707,6 +772,77 @@
             // Select it immediately
             selectItem(item);
             setTimeout(() => ta.focus(), 50); // focus for instant binding
+        }
+
+        function addShapeElement(layer, x, y, type) {
+            const color = document.getElementById('colorPicker').value;
+            const size = Math.max(parseInt(document.getElementById('sizePicker').value) || 2, 1);
+            
+            const w = 100;
+            const h = type === 'shape-circle' ? 100 : 80;
+            const item = createEditItemWrapper(layer, x, y, w, h);
+            item.dataset.shapeType = type;
+            item.dataset.shapeColor = color;
+            item.dataset.shapeBorder = size;
+
+            const shapeDiv = document.createElement('div');
+            shapeDiv.className = 'edit-shape';
+            shapeDiv.style.width = '100%';
+            shapeDiv.style.height = '100%';
+            shapeDiv.style.pointerEvents = 'none';
+
+            if (type === 'shape-rect') {
+                shapeDiv.style.border = `${size}px solid ${color}`;
+            } else if (type === 'shape-circle') {
+                shapeDiv.style.border = `${size}px solid ${color}`;
+                shapeDiv.style.borderRadius = '50%';
+            } else if (type === 'redact') {
+                shapeDiv.style.backgroundColor = '#000000';
+            }
+
+            item.appendChild(shapeDiv);
+            selectItem(item);
+        }
+
+        function addLinkElement(layer, x, y, url) {
+            const w = 150;
+            const h = 40;
+            const item = createEditItemWrapper(layer, x, y, w, h);
+            item.dataset.linkUrl = url;
+
+            const linkDiv = document.createElement('div');
+            linkDiv.className = 'edit-link';
+            linkDiv.style.width = '100%';
+            linkDiv.style.height = '100%';
+            linkDiv.style.pointerEvents = 'none';
+            linkDiv.style.background = 'rgba(139, 92, 246, 0.2)';
+            linkDiv.style.border = '1px dashed var(--a1)';
+            linkDiv.title = url;
+
+            item.appendChild(linkDiv);
+            selectItem(item);
+        }
+
+        function addStickyNoteElement(layer, x, y, text) {
+            const w = 40;
+            const h = 40;
+            const item = createEditItemWrapper(layer, x, y, w, h);
+            item.dataset.stickyText = text;
+
+            const noteDiv = document.createElement('div');
+            noteDiv.className = 'edit-sticky';
+            noteDiv.style.width = '100%';
+            noteDiv.style.height = '100%';
+            noteDiv.style.pointerEvents = 'none';
+            noteDiv.style.fontSize = '30px';
+            noteDiv.style.display = 'flex';
+            noteDiv.style.alignItems = 'center';
+            noteDiv.style.justifyContent = 'center';
+            noteDiv.innerHTML = '💬';
+            noteDiv.title = text;
+
+            item.appendChild(noteDiv);
+            selectItem(item);
         }
 
         function handleAddImageFile(e) {
@@ -829,6 +965,11 @@
                 document.getElementById('colorPicker').value = rgbToHex(ta.style.color);
                 document.getElementById('sizePicker').value = parseInt(ta.style.fontSize);
             }
+            const shape = item.querySelector('.edit-shape');
+            if (shape && item.dataset.shapeColor) {
+                document.getElementById('colorPicker').value = item.dataset.shapeColor;
+                document.getElementById('sizePicker').value = item.dataset.shapeBorder || 2;
+            }
         }
 
         function deselectAll() {
@@ -849,6 +990,14 @@
                 ta.style.height = 'auto';
                 ta.style.height = ta.scrollHeight + 'px';
                 activeItem.style.height = ta.style.height;
+            }
+            const shape = activeItem.querySelector('.edit-shape');
+            if (shape) {
+                activeItem.dataset.shapeColor = color;
+                activeItem.dataset.shapeBorder = size;
+                if (activeItem.dataset.shapeType === 'shape-rect' || activeItem.dataset.shapeType === 'shape-circle') {
+                    shape.style.border = `${size}px solid ${color}`;
+                }
             }
         }
 
@@ -875,7 +1024,7 @@
             pageStrokes[pageNum] = []; // initialize memory
 
             canvas.addEventListener('mousedown', (e) => {
-                if (currentTool !== 'draw') return;
+                if (currentTool !== 'draw' && currentTool !== 'highlight') return;
                 isDrawing = true;
 
                 const rect = canvas.getBoundingClientRect();
@@ -883,10 +1032,15 @@
                 const y = e.clientY - rect.top;
 
                 const color = document.getElementById('colorPicker').value;
-                const size = parseInt(document.getElementById('sizePicker').value) || 2;
+                let size = parseInt(document.getElementById('sizePicker').value) || 2;
+                if (currentTool === 'highlight') size = Math.max(size, 16); // Thicker default for highlight
 
-                currentStroke = { color: color, width: size, points: [{ x, y }] };
+                currentStroke = { tool: currentTool, color: color, width: size, points: [{ x, y }] };
                 pageStrokes[pageNum].push(currentStroke);
+
+                // Set drawing styles based on tool
+                ctx.globalCompositeOperation = currentTool === 'highlight' ? 'multiply' : 'source-over';
+                ctx.globalAlpha = currentTool === 'highlight' ? 0.4 : 1.0;
 
                 ctx.beginPath();
                 ctx.moveTo(x, y);
@@ -1050,6 +1204,71 @@
                                 width: cssW * cssToPdfRatio,
                                 height: cssH * cssToPdfRatio
                             });
+                        } else if (item.dataset.shapeType) {
+                            const type = item.dataset.shapeType;
+                            const color = item.dataset.shapeColor || '#000000';
+                            const borderW = parseInt(item.dataset.shapeBorder || 2) * cssToPdfRatio;
+                            const rgbT = hexToRgbTuple(color);
+                            
+                            if (type === 'shape-rect') {
+                                pdfPage.drawRectangle({
+                                    x: pdfX,
+                                    y: pdfY,
+                                    width: cssW * cssToPdfRatio,
+                                    height: cssH * cssToPdfRatio,
+                                    borderColor: rgb(...rgbT),
+                                    borderWidth: borderW
+                                });
+                            } else if (type === 'shape-circle') {
+                                pdfPage.drawEllipse({
+                                    x: pdfX + (cssW * cssToPdfRatio)/2,
+                                    y: pdfY + (cssH * cssToPdfRatio)/2,
+                                    xScale: (cssW * cssToPdfRatio)/2,
+                                    yScale: (cssH * cssToPdfRatio)/2,
+                                    borderColor: rgb(...rgbT),
+                                    borderWidth: borderW
+                                });
+                            } else if (type === 'redact') {
+                                pdfPage.drawRectangle({
+                                    x: pdfX,
+                                    y: pdfY,
+                                    width: cssW * cssToPdfRatio,
+                                    height: cssH * cssToPdfRatio,
+                                    color: rgb(0,0,0) // Pure black solid
+                                });
+                            }
+                        } else if (item.dataset.linkUrl) {
+                            const url = item.dataset.linkUrl;
+                            const linkAnnotation = pdfDoc.context.obj({
+                                Type: 'Annot',
+                                Subtype: 'Link',
+                                Rect: [pdfX, pdfY, pdfX + (cssW * cssToPdfRatio), pdfY + (cssH * cssToPdfRatio)],
+                                Border: [0, 0, 0],
+                                A: { Type: 'Action', S: 'URI', URI: PDFLib.PDFString.of(url) }
+                            });
+                            
+                            if (!pdfPage.node.has(PDFLib.PDFName.of('Annots'))) {
+                                pdfPage.node.set(PDFLib.PDFName.of('Annots'), pdfDoc.context.obj([]));
+                            }
+                            const annots = pdfPage.node.lookup(PDFLib.PDFName.of('Annots'), PDFLib.PDFArray);
+                            annots.push(linkAnnotation);
+
+                        } else if (item.dataset.stickyText) {
+                            const text = item.dataset.stickyText;
+                            const noteAnnotation = pdfDoc.context.obj({
+                                Type: 'Annot',
+                                Subtype: 'Text',
+                                Rect: [pdfX, pdfY, pdfX + (cssW * cssToPdfRatio), pdfY + (cssH * cssToPdfRatio)],
+                                Contents: PDFLib.PDFString.of(text),
+                                Open: false,
+                                Name: PDFLib.PDFName.of('Comment')
+                            });
+                            
+                            if (!pdfPage.node.has(PDFLib.PDFName.of('Annots'))) {
+                                pdfPage.node.set(PDFLib.PDFName.of('Annots'), pdfDoc.context.obj([]));
+                            }
+                            const annots = pdfPage.node.lookup(PDFLib.PDFName.of('Annots'), PDFLib.PDFArray);
+                            annots.push(noteAnnotation);
                         }
                     }
 
@@ -1072,7 +1291,10 @@
                             const strokeTuple = hexToRgbTuple(stroke.color);
                             pdfPage.drawSvgPath(svgPath, {
                                 borderColor: rgb(...strokeTuple),
-                                borderWidth: stroke.width * cssToPdfRatio
+                                borderWidth: stroke.width * cssToPdfRatio,
+                                borderOpacity: stroke.tool === 'highlight' ? 0.4 : 1.0,
+                                borderLineCap: PDFLib.LineCapStyle.Round,
+                                borderLineJoin: PDFLib.LineJoinStyle.Round
                             });
                         }
                     }
@@ -1096,6 +1318,70 @@
 
             document.getElementById('loader').classList.remove('active');
             document.getElementById('saveBtn').classList.remove('hidden');
+        }
+
+        /* =========================================
+           7. SIGNATURE MODAL LOGIC
+           ========================================= */
+        const sigModal = document.getElementById('sigModal');
+        const sigCanvas = document.getElementById('sigCanvas');
+        const sigCtx = sigCanvas ? sigCanvas.getContext('2d') : null;
+        let isSigDrawing = false;
+
+        if (sigCanvas) {
+            function getSigPos(e) {
+                const rect = sigCanvas.getBoundingClientRect();
+                return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            }
+            sigCanvas.addEventListener('mousedown', (e) => {
+                isSigDrawing = true;
+                const pos = getSigPos(e);
+                sigCtx.beginPath();
+                sigCtx.moveTo(pos.x, pos.y);
+                sigCtx.strokeStyle = document.getElementById('themeBody').classList.contains('theme-dark') ? '#000' : '#000'; // always black or user specified
+                sigCtx.lineWidth = 3;
+                sigCtx.lineCap = 'round';
+            });
+            sigCanvas.addEventListener('mousemove', (e) => {
+                if (isSigDrawing) {
+                    const pos = getSigPos(e);
+                    sigCtx.lineTo(pos.x, pos.y);
+                    sigCtx.stroke();
+                }
+            });
+            sigCanvas.addEventListener('mouseup', () => isSigDrawing = false);
+            sigCanvas.addEventListener('mouseleave', () => isSigDrawing = false);
+        }
+
+        function openSignature() {
+            sigModal.classList.remove('hidden');
+            clearSignature();
+        }
+
+        function closeSignature() {
+            sigModal.classList.add('hidden');
+        }
+
+        function clearSignature() {
+            sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+        }
+
+        function saveSignature() {
+            const dataUrl = sigCanvas.toDataURL('image/png');
+            closeSignature();
+            
+            const wrapper = document.querySelector('.page-wrapper') || workspace.firstChild;
+            if (wrapper) {
+                const layer = wrapper.querySelector('.interaction-layer');
+                const item = createEditItemWrapper(layer, 50, 50, 200, 100);
+                const itemImg = document.createElement('img');
+                itemImg.className = 'edit-image';
+                itemImg.src = dataUrl;
+                item.dataset.imgSrc = dataUrl;
+                item.appendChild(itemImg);
+                setTool('cursor');
+                selectItem(item);
+            }
         }
 
     </script>
