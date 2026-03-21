@@ -1255,6 +1255,8 @@
                                 Subtype: 'Link',
                                 Rect: [pdfX, pdfY, pdfX + (cssW * cssToPdfRatio), pdfY + (cssH * cssToPdfRatio)],
                                 Border: [0, 0, 0],
+                                F: 4, // Print flag
+                                P: pdfPage.ref,
                                 A: { Type: 'Action', S: 'URI', URI: PDFLib.PDFString.of(url) }
                             });
                             
@@ -1271,8 +1273,10 @@
                                 Subtype: 'Text',
                                 Rect: [pdfX, pdfY, pdfX + (cssW * cssToPdfRatio), pdfY + (cssH * cssToPdfRatio)],
                                 Contents: PDFLib.PDFString.of(text),
-                                Open: false,
-                                Name: PDFLib.PDFName.of('Comment')
+                                Name: PDFLib.PDFName.of('Comment'),
+                                F: 4, // Print flag
+                                P: pdfPage.ref,
+                                C: [1, 0.8, 0] // Yellow color
                             });
                             
                             if (!pdfPage.node.has(PDFLib.PDFName.of('Annots'))) {
