@@ -829,6 +829,18 @@
             linkDiv.style.background = 'rgba(139, 92, 246, 0.2)';
             linkDiv.style.border = '1px dashed var(--a1)';
             linkDiv.title = url;
+            
+            // Show the URL text inside the box
+            linkDiv.innerText = url;
+            linkDiv.style.color = '#0000EE';
+            linkDiv.style.textDecoration = 'underline';
+            linkDiv.style.display = 'flex';
+            linkDiv.style.alignItems = 'center';
+            linkDiv.style.justifyContent = 'center';
+            linkDiv.style.fontSize = '12px';
+            linkDiv.style.overflow = 'hidden';
+            linkDiv.style.padding = '4px';
+            linkDiv.style.wordBreak = 'break-all';
 
             item.appendChild(linkDiv);
             selectItem(item);
@@ -1259,6 +1271,22 @@
                                 height: cssH * cssToPdfRatio,
                                 color: rgb(0.2, 0.5, 1.0),
                                 opacity: 0.15
+                            });
+                            
+                            // Draw the URL text inside the box
+                            let displayUrl = url;
+                            // Calculate approximate characters that fit based on width (very rough approximation)
+                            const maxChars = Math.max(10, Math.floor((cssW * cssToPdfRatio) / (6 * cssToPdfRatio))); 
+                            if (displayUrl.length > maxChars) {
+                                displayUrl = displayUrl.substring(0, maxChars - 3) + "...";
+                            }
+                            
+                            pdfPage.drawText(displayUrl, {
+                                x: pdfX + (4 * cssToPdfRatio),
+                                y: pdfY + (cssH * cssToPdfRatio) / 2 - (4 * cssToPdfRatio),
+                                size: 10 * cssToPdfRatio,
+                                font: helveticaFont,
+                                color: rgb(0, 0, 0.8)
                             });
 
                             // 2. Add the actual clickable annotation box over it
