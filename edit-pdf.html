@@ -160,8 +160,10 @@
             /* cursor: crosshair; */
         }
 
-        .tool-mode-draw .draw-canvas {
+        .tool-mode-draw .draw-canvas,
+        .tool-mode-highlight .draw-canvas {
             pointer-events: auto;
+            cursor: crosshair;
         }
 
         /* PDF.js Text Layer */
@@ -207,8 +209,17 @@
             overflow: hidden;
         }
 
-        .tool-mode-text .interaction-layer {
+        .tool-mode-text .interaction-layer,
+        .tool-mode-shape-rect .interaction-layer,
+        .tool-mode-shape-circle .interaction-layer,
+        .tool-mode-redact .interaction-layer,
+        .tool-mode-link .interaction-layer,
+        .tool-mode-sticky .interaction-layer {
             pointer-events: auto;
+            cursor: crosshair;
+        }
+
+        .tool-mode-text .interaction-layer {
             cursor: text;
         }
 
