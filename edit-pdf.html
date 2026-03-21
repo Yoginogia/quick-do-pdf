@@ -1250,12 +1250,24 @@
                             }
                         } else if (item.dataset.linkUrl) {
                             const url = item.dataset.linkUrl;
+                            
+                            // 1. Burn a subtle visual blue highlight so the link is permanently visible
+                            pdfPage.drawRectangle({
+                                x: pdfX,
+                                y: pdfY,
+                                width: cssW * cssToPdfRatio,
+                                height: cssH * cssToPdfRatio,
+                                color: rgb(0.2, 0.5, 1.0),
+                                opacity: 0.15
+                            });
+
+                            // 2. Add the actual clickable annotation box over it
                             const linkAnnotation = pdfDoc.context.obj({
                                 Type: 'Annot',
                                 Subtype: 'Link',
                                 Rect: [pdfX, pdfY, pdfX + (cssW * cssToPdfRatio), pdfY + (cssH * cssToPdfRatio)],
                                 Border: [0, 0, 0],
-                                F: 4, // Print flag
+                                F: 4, 
                                 P: pdfPage.ref,
                                 A: { Type: 'Action', S: 'URI', URI: PDFLib.PDFString.of(url) }
                             });
@@ -1265,15 +1277,26 @@
 
                         } else if (item.dataset.stickyText) {
                             const text = item.dataset.stickyText;
+                            
+                            // 1. Burn the visual Note Emoji and Text to guarantee display
+                            pdfPage.drawText("💬 " + text, {
+                                x: pdfX,
+                                y: pdfY + 10,
+                                size: 14 * cssToPdfRatio,
+                                font: helveticaFont,
+                                color: rgb(0, 0, 0)
+                            });
+
+                            // 2. Add the formal PDF comment structure
                             const noteAnnotation = pdfDoc.context.obj({
                                 Type: 'Annot',
                                 Subtype: 'Text',
                                 Rect: [pdfX, pdfY, pdfX + (cssW * cssToPdfRatio), pdfY + (cssH * cssToPdfRatio)],
                                 Contents: PDFLib.PDFString.of(text),
                                 Name: PDFLib.PDFName.of('Comment'),
-                                F: 4, // Print flag
+                                F: 4, 
                                 P: pdfPage.ref,
-                                C: [1, 0.8, 0] // Yellow color
+                                C: [1, 0.8, 0] 
                             });
                             
                             const noteRef = pdfDoc.context.register(noteAnnotation);
