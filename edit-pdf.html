@@ -1278,8 +1278,8 @@
                         } else if (item.dataset.stickyText) {
                             const text = item.dataset.stickyText;
                             
-                            // 1. Burn the visual Note Emoji and Text to guarantee display
-                            pdfPage.drawText("💬 " + text, {
+                            // 1. Burn the visual Note Emoji and Text to guarantee display (Removed unicode emoji due to WinAnsi encoding crash)
+                            pdfPage.drawText("Note: " + text, {
                                 x: pdfX,
                                 y: pdfY + 10,
                                 size: 14 * cssToPdfRatio,
