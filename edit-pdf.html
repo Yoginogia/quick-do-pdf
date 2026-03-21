@@ -1262,7 +1262,7 @@
                                 pdfPage.node.set(PDFLib.PDFName.of('Annots'), pdfDoc.context.obj([]));
                             }
                             const annots = pdfPage.node.lookup(PDFLib.PDFName.of('Annots'), PDFLib.PDFArray);
-                            annots.push(linkAnnotation);
+                            annots.push(pdfDoc.context.register(linkAnnotation));
 
                         } else if (item.dataset.stickyText) {
                             const text = item.dataset.stickyText;
@@ -1279,7 +1279,7 @@
                                 pdfPage.node.set(PDFLib.PDFName.of('Annots'), pdfDoc.context.obj([]));
                             }
                             const annots = pdfPage.node.lookup(PDFLib.PDFName.of('Annots'), PDFLib.PDFArray);
-                            annots.push(noteAnnotation);
+                            annots.push(pdfDoc.context.register(noteAnnotation));
                         }
                     }
 
