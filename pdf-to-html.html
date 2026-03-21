@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://quickdopdf.com/pdf-to-html.html">
+  <meta name="description" content="Convert PDF documents to HTML format offline for free. Extract text and layouts securely in your browser.">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Convert PDF to HTML Online Free – PDF to Webpage – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"></noscript>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .preview-box {
+      width: 100%; max-width: 580px; margin-top: 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px; display: none;
+      flex-direction: column; align-items: center; gap: 16px;
+    }
+    .preview-box.show { display: flex; }
+    .render-status {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      color: var(--text);
+    }
+  </style>
+
+    <script src="theme.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021" crossorigin="anonymous"></script>
+</head>
+<body class="theme-red">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text" id="ldrTxt">Converting PDF to HTML...</p><p class="loader-sub">Parsing layout</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+        <div class="header-right">
+            <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </button>
+        </div>
+    </header>
+<main>
+  <h1 class="page-title">Convert <span>PDF to HTML</span></h1>
+  <p class="page-subtitle">Transform your PDF files into responsive HTML webpages instantly</p>
+
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">🌐</div>
+    <h3>Drop your PDF file here</h3>
+    <p>Convert directly to HTML markup right in your browser</p>
+    <label class="select-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Select PDF File
+    <input type="file" id="pdfInput" accept="application/pdf">
+    </label>
+  </div>
+
+  <div id="fileInfo"></div>
+  
+  <div class="preview-box" id="previewBox">
+      <span class="render-status">File Loaded! Ready to convert.</span>
+      <button class="action-btn" id="actionBtn" onclick="processConversion()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Convert to HTML
+      </button>
+  </div>
+
+  <div id="successMsg" class="success-msg hidden">
+    <div class="s-icon">✅</div><h3>Converted!</h3><p>Your HTML file has been downloaded successfully.</p>
+  </div>
+
+
+    <section class="tool-seo-content">
+        <h2>Offline PDF to HTML Converter</h2>
+        <p>Turning a PDF back into a semantic webpage allows developers to easily embed, style, and interact with the content natively in a web browser. Rather than copying and pasting from Acrobat formatting, this tool exports the exact structural layout mapped as precise CSS positioning.</p>
+        
+        <h3>Secure Layout Extraction</h3>
+        <ul>
+            <li><strong>Complete Content Privacy:</strong> Sensitive PDFs such as bank statements or proprietary presentations never reach a server infrastructure. All processing executes locally using JS engines.</li>
+            <li><strong>True-to-Layout Positioning:</strong> Our JS implementation maps the exact typography coordinates of your PDF and translates them into absolute positioned HTML tags, preserving your layout integrity.</li>
+            <li><strong>Free Unlimited Access:</strong> Convert as many PDF documents to HTML pages as you'd like without payment walls or restrictions.</li>
+        </ul>
+    </section>
+
+  </main>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const inp=document.getElementById('pdfInput');
+const drop=document.getElementById('dropArea');
+const info=document.getElementById('fileInfo');
+const ok=document.getElementById('successMsg');
+const ldr=document.getElementById('loader');
+const previewBox=document.getElementById('previewBox');
+
+let currentFileName = '';
+let currentFileObj = null;
+
+inp.addEventListener('change',()=>{if(inp.files[0])loadFile(inp.files[0]);});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.classList.remove('over');
+  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf');
+  if(f){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;loadFile(f);}
+});
+
+function fmtSize(b){return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';}
+
+async function loadFile(file){
+  ok.classList.add('hidden');info.innerHTML='';
+  currentFileName = file.name;
+  currentFileObj = file;
+  
+  info.innerHTML=`<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fs">${fmtSize(file.size)}</span></div>`;
+  previewBox.classList.add('show');
+}
+
+async function processConversion(){
+  if(!currentFileObj) return;
+  ldr.classList.add('active');
+  
+  try {
+      const origPdfBytes = await currentFileObj.arrayBuffer();
+      const pdfJsDoc = await pdfjsLib.getDocument({data: origPdfBytes}).promise;
+      
+      let htmlOutput = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${currentFileObj.name} - Converted HTML</title>
+<style>
+  body { background-color: #f1f3f5; margin: 0; padding: 20px; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
+  .pdf-page { background: white; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  .pdf-text { position: absolute; white-space: pre; transform-origin: 0% 100%; color: transparent; cursor: text; }
+  .pdf-text::selection { background: rgba(0, 153, 255, 0.4); color: transparent; }
+</style>
+</head>
+<body>
+`;
+      
+      for(let i=1; i<=pdfJsDoc.numPages; i++) {
+          document.getElementById('ldrTxt').innerText = `Mapping page ${i} of ${pdfJsDoc.numPages}...`;
+          
+          const page = await pdfJsDoc.getPage(i);
+          const viewport = page.getViewport({scale: 1.5}); // 1.5x scale for better reading
+          
+          // Render page to canvas for background image
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          
+          await page.render({canvasContext: ctx, viewport: viewport}).promise;
+          const bgImgData = canvas.toDataURL('image/jpeg', 0.85); // Compress lightly
+          
+          htmlOutput += `<div class="pdf-page" style="width: ${viewport.width}px; height: ${viewport.height}px; background-image: url('${bgImgData}'); background-size: 100% 100%;">\n`;
+          
+          const textContent = await page.getTextContent();
+          
+          textContent.items.forEach(item => {
+              // PDF.js transform: [scaleX, skewY, skewX, scaleY, tx, ty]
+              // Scale the translation matrix based on viewport scale
+              const tx = item.transform[4] * 1.5;
+              const ty = item.transform[5] * 1.5;
+              const scaleY = item.transform[3] * 1.5;
+              const scaleX = item.transform[0] * 1.5;
+              
+              const fontSize = Math.abs(scaleY);
+              const dir = scaleY < 0 ? -1 : 1;
+              const bottom = ty; 
+              
+              // Handle letter spacing or stretching using CSS transform scaleX
+              const scaleXRatio = Math.abs(scaleY) > 0 ? Math.abs(scaleX) / Math.abs(scaleY) : 1;
+              const transformStr = (scaleXRatio !== 1) ? ` transform: scaleX(${scaleXRatio});` : '';
+              
+              // Only render if there's actual text
+              if(item.str.trim() !== "") {
+                  // Escape HTML to prevent injection issues in generated dom
+                  const safeStr = item.str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                  
+                  htmlOutput += `<span class="pdf-text" style="left: ${tx}px; bottom: ${bottom}px; font-size: ${fontSize}px; font-family: '${item.fontName}', sans-serif;${transformStr}">${safeStr}</span>\n`;
+              }
+          });
+          
+          htmlOutput += `</div>\n`; // End page
+      }
+      
+      htmlOutput += `</body></html>`;
+      
+      // Download process
+      const blob = new Blob([htmlOutput], {type: 'text/html'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = currentFileName.replace('.pdf', '_converted.html');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      ldr.classList.remove('active');
+      ok.classList.remove('hidden');
+
+  } catch (e) {
+      ldr.classList.remove('active');
+      alert("Error generating HTML: " + e.message);
+  }
+}
+</script>
+</body>
+</html>

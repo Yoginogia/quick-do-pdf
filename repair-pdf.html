@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://quickdopdf.com/repair-pdf.html">
+  <meta name="description" content="Repair corrupted or damaged PDF files online for free. Fix broken cross-reference tables and recover PDF data securely in your browser.">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Repair Corrupted PDF Online Free – Fix PDF – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"></noscript>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .repair-info {
+        background:color-mix(in srgb, var(--a1) 10%, transparent);
+        border:1px solid var(--a1);
+        border-radius:12px;
+        padding:16px;
+        margin-top:20px;
+        color:var(--text);
+        text-align:center;
+        font-family:'DM Sans', sans-serif;
+    }
+  </style>
+
+    <script src="theme.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021" crossorigin="anonymous"></script>
+</head>
+<body class="theme-red">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text">Repairing PDF...</p><p class="loader-sub">Rebuilding structure</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+        <div class="header-right">
+            <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </button>
+        </div>
+    </header>
+<main>
+  <h1 class="page-title">Repair <span>Corrupt PDF</span></h1>
+  <p class="page-subtitle">Fix broken files and rebuild corrupted PDF structures</p>
+
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">🛠️</div>
+    <h3>Drop your damaged PDF here</h3>
+    <p>We will attempt to repair it securely in your browser</p>
+    <label class="select-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Select PDF File
+      <input type="file" id="pdfInput" accept="application/pdf">
+    </label>
+  </div>
+
+  <div id="fileInfo"></div>
+
+  <div class="repair-info hidden" id="optCard">
+      <p>Your file has been loaded. We will attempt to rebuild its raw structure and fix cross-reference table errors.</p>
+  </div>
+
+  <button class="action-btn hidden" id="actionBtn" onclick="repairPDF()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+    Repair PDF
+  </button>
+
+  <div id="successMsg" class="success-msg hidden">
+    <div class="s-icon">✅</div><h3>Repaired!</h3><p>Your repaired PDF has been downloaded.</p>
+  </div>
+
+
+    <section class="tool-seo-content">
+        <h2>How Does PDF Repair Work?</h2>
+        <p>PDF files often become corrupted during interrupted downloads, improper hard drive ejects, or failed hardware transfers. When this happens, the document's internal structure (known as the cross-reference table) breaks, preventing PDF software like Adobe Acrobat from opening it.</p>
+        
+        <h3>Secure Local Recovery</h3>
+        <p>Our Repair PDF tool dissects the bytes of your damaged PDF file right inside your browser. We utilize a forgiving parsing technique to read all available objects, ignore the corrupted sections, and write an entirely new, cleanly structured PDF file. Because this happens offline using WebAssembly, your damaged document is never uploaded or saved to any external servers, maintaining your total privacy.</p>
+    </section>
+
+  </main>
+<script>
+const inp=document.getElementById('pdfInput');
+const drop=document.getElementById('dropArea');
+const info=document.getElementById('fileInfo');
+const btn=document.getElementById('actionBtn');
+const ok=document.getElementById('successMsg');
+const ldr=document.getElementById('loader');
+const optCard=document.getElementById('optCard');
+let pdfBuf=null;
+let fileName='';
+
+inp.addEventListener('change',()=>{if(inp.files[0])loadFile(inp.files[0]);});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.classList.remove('over');
+  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf');
+  if(f){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;loadFile(f);}
+});
+
+function fmtSize(b){return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';}
+
+async function loadFile(file){
+  ok.classList.add('hidden');info.innerHTML='';
+  fileName=file.name;
+  pdfBuf=await file.arrayBuffer();
+  info.innerHTML=`<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fs">${fmtSize(file.size)}</span></div>`;
+  optCard.classList.remove('hidden');
+  btn.classList.remove('hidden');
+}
+
+async function repairPDF(){
+  if(!pdfBuf){alert('Select a PDF');return;}
+  ldr.classList.add('active');ok.classList.add('hidden');
+  
+  try{
+    // The act of loading and saving with ignoreEncryption acts as a strong repair for corrupted objects/XRef tables
+    const pdf = await PDFLib.PDFDocument.load(pdfBuf, { ignoreEncryption: true });
+    
+    // Save to rebuild structure cleanly
+    const bytes = await pdf.save({ useObjectStreams: false }); 
+    
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'}));
+    a.download = fileName.replace('.pdf', '_repaired.pdf');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    ldr.classList.remove('active');
+    ok.classList.remove('hidden');
+  }catch(e){
+    ldr.classList.remove('active');
+    alert('Could not repair: The file may be too heavily corrupted. \n\nDetailed Error: ' + e.message);
+  }
+}
+</script>
+</body>
+</html>

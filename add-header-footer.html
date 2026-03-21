@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://quickdopdf.com/add-header-footer.html">
+  <meta name="description" content="Add headers, footers, and Bates numbering to your PDF documents for free. Secure, offline tool that runs directly in your browser.">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Add Header and Footer to PDF Online Free – Quick Do PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"></noscript>
+  <link rel="stylesheet" href="tools.css?v=2">
+  <style>
+    .input-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:16px; }
+    .input-row label { color:var(--muted); font-size:13px; font-weight:600; min-width:80px; }
+    .text-input {
+      flex: 1; padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+      background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif;
+      font-size:14px; outline:none; min-width:200px;
+    }
+    .text-input:focus { border-color:var(--a1); }
+    .num-input {
+      padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+      background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif;
+      font-size:14px; width:80px; outline:none;
+    }
+    .num-input:focus { border-color:var(--a1); }
+    .pos-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+    .pos-btn {
+      padding:10px 6px; border-radius:10px; border:1px solid var(--border);
+      background:transparent; color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif;
+      font-size:12px; font-weight:600; text-align:center; transition:all 0.2s;
+    }
+    .pos-btn:hover,.pos-btn.active{border-color:var(--a1);background:color-mix(in srgb,var(--a1) 10%,transparent);color:var(--a1);}
+  </style>
+
+    <script src="theme.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021" crossorigin="anonymous"></script>
+</head>
+<body class="theme-blue">
+<div id="loader"><div class="loader-ring"></div><p class="loader-text">Adding headers & footers...</p><p class="loader-sub">Please wait</p></div>
+<header>
+  <a href="index.html" class="back-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</a>
+  <span class="logo">Quick Do PDF</span>
+        <div class="header-right">
+            <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+                <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </button>
+        </div>
+    </header>
+<main>
+  <h1 class="page-title">Add <span>Header & Footer</span></h1>
+  <p class="page-subtitle">Add custom text or Bates numbers to the top and bottom of your PDF pages</p>
+
+  <div class="upload-zone" id="dropArea">
+    <div class="upload-icon">🏷️</div>
+    <h3>Drop your PDF file here</h3>
+    <p>Your document stays completely secure on your computer</p>
+    <label class="select-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Select PDF File
+      <input type="file" id="pdfInput" accept="application/pdf">
+    </label>
+  </div>
+
+  <div id="fileInfo"></div>
+
+  <div class="option-card hidden" id="optCard">
+    <h4>Header Settings</h4>
+    <div class="input-row">
+      <label>Header Text:</label>
+      <input class="text-input" type="text" id="headerText" placeholder="e.g. Confidential Document">
+    </div>
+    <div class="pos-grid" id="headerAlign">
+      <button class="pos-btn" data-align="left" onclick="pickAlign('header', this)">↖ Left align</button>
+      <button class="pos-btn active" data-align="center" onclick="pickAlign('header', this)">⬆ Center align</button>
+      <button class="pos-btn" data-align="right" onclick="pickAlign('header', this)">↗ Right align</button>
+    </div>
+
+    <h4 style="margin-top:24px;">Footer Settings</h4>
+    <div class="input-row">
+      <label>Footer Text:</label>
+      <input class="text-input" type="text" id="footerText" placeholder="e.g. Prepared for John Doe - Date: 2026">
+    </div>
+    <div class="pos-grid" id="footerAlign">
+      <button class="pos-btn" data-align="left" onclick="pickAlign('footer', this)">↙ Left align</button>
+      <button class="pos-btn active" data-align="center" onclick="pickAlign('footer', this)">⬇ Center align</button>
+      <button class="pos-btn" data-align="right" onclick="pickAlign('footer', this)">↘ Right align</button>
+    </div>
+
+    <h4 style="margin-top:24px;">Typography</h4>
+    <div class="input-row">
+      <label>Font Size:</label>
+      <input class="num-input" type="number" id="fontSize" value="12" min="6" max="72">
+      <label style="margin-left:12px;">Margin (px):</label>
+      <input class="num-input" type="number" id="marginOffset" value="30" min="0" max="200">
+    </div>
+  </div>
+
+  <button class="action-btn hidden" id="actionBtn" onclick="processPDF()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+    Add Text & Download
+  </button>
+
+  <div id="successMsg" class="success-msg hidden">
+    <div class="s-icon">✅</div><h3>Done!</h3><p>PDF with headers and footers downloaded.</p>
+  </div>
+
+
+    <section class="tool-seo-content">
+        <h2>Professional Header & Footer Tool</h2>
+        <p>Quickly add standardized headers, footers, page titles, or Bates numbering to your legal, academic, and professional PDF documents. We make it easy to apply consistent branding across hundreds of pages instantly.</p>
+        
+        <h3>100% Secure & Private Processing</h3>
+        <p>Unlike other PDF tools that force you to upload your sensitive contracts or court documents to a cloud server, our Add Header & Footer tool operates <strong>entirely within your web browser</strong>.</p>
+        <ul>
+            <li><strong>No Data Uploads:</strong> Files are processed utilizing your device's memory. We do not transmit or store your documents.</li>
+            <li><strong>No Quality Loss:</strong> We append the text directly to the native PDF structure without rasterizing your vector content.</li>
+            <li><strong>Unlimited Usage:</strong> Since we don't pay server processing costs, there are no artificial file size limits or paywalls.</li>
+        </ul>
+    </section>
+
+  </main>
+<script>
+const inp=document.getElementById('pdfInput');
+const drop=document.getElementById('dropArea');
+const info=document.getElementById('fileInfo');
+const btn=document.getElementById('actionBtn');
+const ok=document.getElementById('successMsg');
+const ldr=document.getElementById('loader');
+const optCard=document.getElementById('optCard');
+let pdfBuf=null;
+let alignments = { header: 'center', footer: 'center' };
+
+inp.addEventListener('change',()=>{if(inp.files[0])loadFile(inp.files[0]);});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.classList.remove('over');
+  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf');
+  if(f){const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;loadFile(f);}
+});
+
+function pickAlign(type, el) {
+  const container = document.getElementById(type + 'Align');
+  container.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  alignments[type] = el.dataset.align;
+}
+
+function fmtSize(b){return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';}
+
+async function loadFile(file){
+  ok.classList.add('hidden');info.innerHTML='';
+  pdfBuf=await file.arrayBuffer();
+  const pdf=await PDFLib.PDFDocument.load(pdfBuf);
+  info.innerHTML=`<div class="file-item"><span class="fi">📄</span><span class="fn">${file.name}</span><span class="fc">${pdf.getPageCount()} pages</span><span class="fs">${fmtSize(file.size)}</span></div>`;
+  optCard.classList.remove('hidden');
+  btn.classList.remove('hidden');
+}
+
+async function processPDF(){
+  if(!pdfBuf){alert('Select a PDF');return;}
+  ldr.classList.add('active');ok.classList.add('hidden');
+  
+  const hText = document.getElementById('headerText').value.trim();
+  const fText = document.getElementById('footerText').value.trim();
+  
+  if (!hText && !fText) {
+      alert("Please enter header or footer text.");
+      ldr.classList.remove('active');
+      return;
+  }
+
+  try{
+    const {PDFDocument,rgb,StandardFonts}=PDFLib;
+    const pdf=await PDFDocument.load(pdfBuf);
+    const font=await pdf.embedFont(StandardFonts.Helvetica);
+    const pages=pdf.getPages();
+    
+    const fontSize=parseInt(document.getElementById('fontSize').value)||12;
+    const margin=parseInt(document.getElementById('marginOffset').value)||30;
+
+    pages.forEach((page)=>{
+      const {width,height}=page.getSize();
+      
+      // Header
+      if (hText) {
+          const tw = font.widthOfTextAtSize(hText, fontSize);
+          let x = margin;
+          if (alignments.header === 'right') x = width - tw - margin;
+          else if (alignments.header === 'center') x = (width - tw) / 2;
+          
+          let y = height - margin - fontSize; // Top
+          page.drawText(hText,{x, y, size:fontSize, font, color:rgb(0,0,0)});
+      }
+
+      // Footer
+      if (fText) {
+          const tw = font.widthOfTextAtSize(fText, fontSize);
+          let x = margin;
+          if (alignments.footer === 'right') x = width - tw - margin;
+          else if (alignments.footer === 'center') x = (width - tw) / 2;
+          
+          let y = margin; // Bottom
+          page.drawText(fText,{x, y, size:fontSize, font, color:rgb(0,0,0)});
+      }
+    });
+
+    const bytes=await pdf.save();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    a.download='with_header_footer.pdf';document.body.appendChild(a);a.click();document.body.removeChild(a);
+    ldr.classList.remove('active');ok.classList.remove('hidden');
+  }catch(e){ldr.classList.remove('active');alert('Error: '+e.message);}
+}
+</script>
+</body>
+</html>
