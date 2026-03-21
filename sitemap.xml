@@ -3,6 +3,7 @@
   <url><loc>https://quickdopdf.com/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://quickdopdf.com/about.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/add-background.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/add-header-footer.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/compare-pdfs.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/compress-pdf-100kb.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/compress-pdf-200kb.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
@@ -19,8 +20,10 @@
   <url><loc>https://quickdopdf.com/extract-images.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/extract-pages.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/extract-text.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/fill-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/flatten.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/grayscale.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/html-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/image-converter.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/jpg-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/merge-images.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
@@ -30,13 +33,16 @@
   <url><loc>https://quickdopdf.com/page-numbers.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-ocr.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-to-excel.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/pdf-to-html.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-to-jpg.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-to-ppt.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/pdf-to-txt.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-to-word-editable.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/pdf-to-word.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/privacy-policy.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/protect.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/reorder.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://quickdopdf.com/repair-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/rotate.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/sanitize.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://quickdopdf.com/scan-to-pdf.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
