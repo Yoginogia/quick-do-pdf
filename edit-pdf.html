@@ -1260,11 +1260,8 @@
                                 A: { Type: 'Action', S: 'URI', URI: PDFLib.PDFString.of(url) }
                             });
                             
-                            if (!pdfPage.node.has(PDFLib.PDFName.of('Annots'))) {
-                                pdfPage.node.set(PDFLib.PDFName.of('Annots'), pdfDoc.context.obj([]));
-                            }
-                            const annots = pdfPage.node.lookup(PDFLib.PDFName.of('Annots'), PDFLib.PDFArray);
-                            annots.push(pdfDoc.context.register(linkAnnotation));
+                            const linkRef = pdfDoc.context.register(linkAnnotation);
+                            pdfPage.node.addAnnot(linkRef);
 
                         } else if (item.dataset.stickyText) {
                             const text = item.dataset.stickyText;
@@ -1279,11 +1276,8 @@
                                 C: [1, 0.8, 0] // Yellow color
                             });
                             
-                            if (!pdfPage.node.has(PDFLib.PDFName.of('Annots'))) {
-                                pdfPage.node.set(PDFLib.PDFName.of('Annots'), pdfDoc.context.obj([]));
-                            }
-                            const annots = pdfPage.node.lookup(PDFLib.PDFName.of('Annots'), PDFLib.PDFArray);
-                            annots.push(pdfDoc.context.register(noteAnnotation));
+                            const noteRef = pdfDoc.context.register(noteAnnotation);
+                            pdfPage.node.addAnnot(noteRef);
                         }
                     }
 
