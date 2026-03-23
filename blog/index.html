@@ -42,17 +42,45 @@
             gap: 24px;
         }
 
+        
+
         .blog-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 32px 28px;
             text-decoration: none;
             color: var(--text);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             backdrop-filter: var(--glass-blur);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .card-img-wrap {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .blog-card:hover .card-img {
+            transform: scale(1.08);
+        }
+
+        .card-body {
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
 
         .blog-card:hover {
@@ -165,7 +193,7 @@
             border: 1px solid rgba(251, 191, 36, 0.3);
         }
 
-        .tag-compare {
+        .tag-software {
             background: rgba(56, 189, 248, 0.15);
             color: #38bdf8;
             border: 1px solid rgba(56, 189, 248, 0.3);
@@ -256,268 +284,299 @@
             <button class="filter-btn" data-filter="guide">Guides</button>
             <button class="filter-btn" data-filter="tips">Tips</button>
             <button class="filter-btn" data-filter="security">Security</button>
-            <button class="filter-btn" data-filter="compare">Comparisons</button>
+            <button class="filter-btn" data-filter="software">Software</button>
         </div>
 
-        <div class="blog-grid" id="blogGrid">
-            <a href="how-to-repair-corrupted-pdf-files.html" class="blog-card" data-category="howto">
+        <div class="blog-grid" id="blogGrid">\n
+            <a href="adobe-acrobat-vs-quickdopdf.html" class="blog-card" data-category="software">
+                <div class="card-img-wrap"><img src="images/thumb_software.png" class="card-img" alt="Software Thumbnail"></div>
+                <div class="card-body">
+                    <span class="tag tag-software">Software</span>
+                    <p class="date">March 23, 2026</p>
+                    <h2>Adobe Acrobat vs Quick Do PDF: Best Offline Alternative</h2>
+                    <p>An in-depth comparison between the industry heavyweight Adobe Acrobat and the free, decentralized alternative Quick Do PDF.</p>
+                    <span class="read-more">Read Article →</span>
+                </div>
+            </a>
+            <a href="top-5-offline-pdf-editors.html" class="blog-card" data-category="software">
+                <div class="card-img-wrap"><img src="images/thumb_software.png" class="card-img" alt="Software Thumbnail"></div>
+                <div class="card-body">
+                    <span class="tag tag-software">Software</span>
+                    <p class="date">March 23, 2026</p>
+                    <h2>Top 5 Offline PDF Editors for Ultimate Privacy</h2>
+                    <p>Discover the top 5 software applications that let you edit and manipulate PDF files offline without risking your data to cloud servers.</p>
+                    <span class="read-more">Read Article →</span>
+                </div>
+            </a>
+            <a href="is-pdf-software-dying.html" class="blog-card" data-category="software">
+                <div class="card-img-wrap"><img src="images/thumb_software.png" class="card-img" alt="Software Thumbnail"></div>
+                <div class="card-body">
+                    <span class="tag tag-software">Software</span>
+                    <p class="date">March 23, 2026</p>
+                    <h2>Is Traditional Desktop PDF Software Dying?</h2>
+                    <p>Desktop software requires installation, updates, and massive hard drive space. Is the era of desktop PDF software coming to an end in 2026?</p>
+                    <span class="read-more">Read Article →</span>
+                </div>
+            </a>
+
+            <a href="how-to-repair-corrupted-pdf-files.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 21, 2026</p>
                 <h2>How to Repair Corrupted PDF Files For Free</h2>
                 <p>Learn how to quickly repair corrupted or damaged PDF files for free online. Recover unreadable documents and rebuild broken PDFs.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-extract-text-from-pdf-to-txt-html.html" class="blog-card" data-category="howto">
+                </div>\n            </a>
+            <a href="how-to-extract-text-from-pdf-to-txt-html.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 21, 2026</p>
                 <h2>How to Extract Text from PDF to TXT or HTML Free</h2>
                 <p>Learn the fastest and most accurate ways to extract text from a PDF document to raw TXT files or semantic HTML webpages.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-add-header-footer-page-numbers-pdf.html" class="blog-card" data-category="guide">
+                </div>\n            </a>
+            <a href="how-to-add-header-footer-page-numbers-pdf.html" class="blog-card" data-category="guide">\n                <div class="card-img-wrap"><img src="images/thumb_guide.png" class="card-img" alt="guide Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-guide">Guide</span>
                 <p class="date">March 21, 2026</p>
                 <h2>How to Add Header, Footer & Page Numbers to PDFs</h2>
                 <p>Learn how to professionally add running headers, footers, bates numbering, and automatic page numbers to any PDF document sequentially.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-fill-pdf-forms-online.html" class="blog-card" data-category="security">
+                </div>\n            </a>
+            <a href="how-to-fill-pdf-forms-online.html" class="blog-card" data-category="security">\n                <div class="card-img-wrap"><img src="images/thumb_security.png" class="card-img" alt="security Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-security">Security</span>
                 <p class="date">March 21, 2026</p>
                 <h2>How to Safely Fill PDF Forms & AcroForms Online</h2>
                 <p>Learn the safest way to fill out interactive PDF forms, checkboxes, and digitally sign documents online using a private browser tool.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-compress-pdf.html" class="blog-card" data-category="howto">
+                </div>\n            </a>
+            <a href="how-to-compress-pdf.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 2026</p>
                 <h2>How to Compress PDF Files For Free Without Losing Quality</h2>
                 <p>Learn step-by-step how to compress PDF files securely. Keep your document quality intact while
                     shrinking the file size easily.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-merge-pdf-files.html" class="blog-card" data-category="howto">
+                </div>\n            </a>
+            <a href="how-to-merge-pdf-files.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 2026</p>
                 <h2>How To Easily Merge PDF Files Into One Document</h2>
                 <p>Discover the easiest, fastest, and most secure method to merge multiple PDF files into one complete
                     document online for free without watermarks.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-reduce-pdf-size-for-gmail.html" class="blog-card" data-category="guide">
+                </div>\n            </a>
+            <a href="how-to-reduce-pdf-size-for-gmail.html" class="blog-card" data-category="guide">\n                <div class="card-img-wrap"><img src="images/thumb_guide.png" class="card-img" alt="guide Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-guide">Guide</span>
                 <p class="date">March 2026</p>
                 <h2>How To Shrink a PDF File to Bypass Gmail's Limit</h2>
                 <p>Struggle with Gmail's 25MB attachment limit? Learn how to compress your large PDF files securely so
                     they easily fit into your email outbox.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="best-free-pdf-tools-2026.html" class="blog-card" data-category="tips">
+                </div>\n            </a>
+            <a href="best-free-pdf-tools-2026.html" class="blog-card" data-category="tips">\n                <div class="card-img-wrap"><img src="images/thumb_tips.png" class="card-img" alt="tips Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-tips">Tips</span>
                 <p class="date">March 2026</p>
                 <h2>10 Best Free PDF Tools in 2026 (No Sign-Up)</h2>
                 <p>Looking for the best free PDF tools in 2026? Quick Do PDF offers a 100% private, client-side suite
                     for compressing, merging, and converting.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="ilovepdf-vs-smallpdf-comparison.html" class="blog-card" data-category="compare">
-                <span class="tag tag-compare">Compare</span>
+                </div>\n            </a>
+            <a href="ilovepdf-vs-smallpdf-comparison.html" class="blog-card" data-category="software">\n                <div class="card-img-wrap"><img src="images/thumb_software.png" class="card-img" alt="software Thumbnail"></div>\n                <div class="card-body">
+                <span class="tag tag-software">Software</span>
                 <p class="date">March 2026</p>
                 <h2>iLovePDF vs Smallpdf vs Quick Do PDF: Comparison</h2>
                 <p>A fast, honest comparison between iLovePDF, Smallpdf, and the privacy-first alternative Quick Do PDF.
                     Find the best online PDF editor.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-edit-pdf-without-software.html" class="blog-card" data-category="howto">
+                </div>\n            </a>
+            <a href="how-to-edit-pdf-without-software.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 2026</p>
                 <h2>How to Edit a PDF Without Expensive Software</h2>
                 <p>Learn how to effortlessly edit, manipulate, and combine PDF files entirely online without having to
                     download or install expensive software.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="compress-pdf-on-mobile.html" class="blog-card" data-category="guide">
+                </div>\n            </a>
+            <a href="compress-pdf-on-mobile.html" class="blog-card" data-category="guide">\n                <div class="card-img-wrap"><img src="images/thumb_guide.png" class="card-img" alt="guide Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-guide">Guide</span>
                 <p class="date">March 2026</p>
                 <h2>How To Quickly Compress Large PDFs on Mobile</h2>
                 <p>A complete guide on how to shrink large PDF files directly from your iPhone or Android device without
                     downloading sketchy apps. Fast and secure.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="convert-pdf-without-losing-formatting.html" class="blog-card" data-category="tips">
+                </div>\n            </a>
+            <a href="convert-pdf-without-losing-formatting.html" class="blog-card" data-category="tips">\n                <div class="card-img-wrap"><img src="images/thumb_tips.png" class="card-img" alt="tips Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-tips">Tips</span>
                 <p class="date">March 2026</p>
                 <h2>Convert PDF Without Losing Formatting</h2>
                 <p>Discover how to perfectly convert a PDF to Word or Excel without destroying the original text
                     formatting, tables, or layout structure.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-unlock-secured-pdf.html" class="blog-card" data-category="security">
+                </div>\n            </a>
+            <a href="how-to-unlock-secured-pdf.html" class="blog-card" data-category="security">\n                <div class="card-img-wrap"><img src="images/thumb_security.png" class="card-img" alt="security Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-security">Security</span>
                 <p class="date">March 2026</p>
                 <h2>How to Unlock a Secured PDF Document</h2>
                 <p>A comprehensive tutorial teaching you how to remove password layers, unsecure restricted files, and
                     unlock PDF print permissions safely.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="free-pdf-tools-without-signup.html" class="blog-card" data-category="guide">
+                </div>\n            </a>
+            <a href="free-pdf-tools-without-signup.html" class="blog-card" data-category="guide">\n                <div class="card-img-wrap"><img src="images/thumb_guide.png" class="card-img" alt="guide Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-guide">Guide</span>
                 <p class="date">March 2026</p>
                 <h2>Free PDF Editing Tools Without Registration Hurdles</h2>
                 <p>Discover the best free online PDF manipulation tool suite that requires zero sign-up or email
                     registrations. Fast, 100% private, and completely free.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-merge-pdf-files-free.html" class="blog-card" data-category="howto">
+                </div>\n            </a>
+            <a href="how-to-merge-pdf-files-free.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 1, 2026</p>
                 <h2>How to Merge PDF Files for Free (No Upload Required)</h2>
                 <p>Learn how to combine multiple PDFs into one document using Quick Do PDF's free browser-based tool. No
                     sign-up, no uploads, complete privacy.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-unlock-pdf-bank-statements.html" class="blog-card" data-category="security">
+            <a href="how-to-unlock-pdf-bank-statements.html" class="blog-card" data-category="security">\n                <div class="card-img-wrap"><img src="images/thumb_security.png" class="card-img" alt="security Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-security">Security</span>
                 <p class="date">March 2, 2026</p>
                 <h2>How to Unlock PDF Bank Statements Securely</h2>
                 <p>Learn how to safely remove the password from secured bank statements for easy viewing and printing
                     without uploading your data online.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="pdf-vs-word-which-is-better.html" class="blog-card" data-category="compare">
-                <span class="tag tag-compare">Compare</span>
+            <a href="pdf-vs-word-which-is-better.html" class="blog-card" data-category="software">\n                <div class="card-img-wrap"><img src="images/thumb_software.png" class="card-img" alt="software Thumbnail"></div>\n                <div class="card-body">
+                <span class="tag tag-software">Software</span>
                 <p class="date">March 2, 2026</p>
                 <h2>PDF vs Word: Which Format is Better for You?</h2>
                 <p>Discover the pros, cons, and best use cases for both file types in our comprehensive guide to modern
                     document formats.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="best-ways-to-compress-pdf.html" class="blog-card" data-category="guide">
+            <a href="best-ways-to-compress-pdf.html" class="blog-card" data-category="guide">\n                <div class="card-img-wrap"><img src="images/thumb_guide.png" class="card-img" alt="guide Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-guide">Guide</span>
                 <p class="date">March 1, 2026</p>
                 <h2>5 Best Ways to Compress a PDF Without Losing Quality</h2>
                 <p>Reduce PDF file size for email, uploads, and sharing. Discover techniques that keep your documents
                     looking sharp while saving space.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-sign-pdf-document-online.html" class="blog-card" data-category="howto">
+            <a href="how-to-sign-pdf-document-online.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 2, 2026</p>
                 <h2>How to Digitally Sign a PDF Document Online</h2>
                 <p>Add your electronic signature to any contract or form directly in your web browser. Legally binding
                     and 100% free.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="why-is-my-pdf-so-large.html" class="blog-card" data-category="guide">
+            <a href="why-is-my-pdf-so-large.html" class="blog-card" data-category="guide">\n                <div class="card-img-wrap"><img src="images/thumb_guide.png" class="card-img" alt="guide Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-guide">Guide</span>
                 <p class="date">March 2, 2026</p>
                 <h2>Why Is My PDF So Large? (And How to Fix It)</h2>
                 <p>Uncover the hidden culprits that bloat your document size and learn the exact techniques to compress
                     them properly.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-convert-images-to-pdf.html" class="blog-card" data-category="howto">
+            <a href="how-to-convert-images-to-pdf.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 2, 2026</p>
                 <h2>How to Convert Images into a Single PDF Document</h2>
                 <p>Stitch fifty photos, Mockups, or receipts into one continuous file. Fast, secure, and entirely
                     private.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="pdf-to-word-conversion-guide.html" class="blog-card" data-category="tips">
+            <a href="pdf-to-word-conversion-guide.html" class="blog-card" data-category="tips">\n                <div class="card-img-wrap"><img src="images/thumb_tips.png" class="card-img" alt="tips Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-tips">Tips</span>
                 <p class="date">March 1, 2026</p>
                 <h2>PDF to Word Conversion: Complete Guide for 2026</h2>
                 <p>Everything you need to know about converting PDFs to editable Word documents — methods, tips, and how
                     to preserve formatting.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
-            <a href="how-to-merge-multiple-jpg-to-one-pdf.html" class="blog-card" data-category="howto">
+                </div>\n            </a>
+            <a href="how-to-merge-multiple-jpg-to-one-pdf.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 15, 2026</p>
                 <h2>How to Merge Multiple JPGs to One PDF Free</h2>
                 <p>Learn the fastest offline method to combine multiple image files (JPG, PNG) into a single PDF document without losing quality or compromising privacy.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="is-it-safe-to-unlock-pdf-online.html" class="blog-card" data-category="security">
+            <a href="is-it-safe-to-unlock-pdf-online.html" class="blog-card" data-category="security">\n                <div class="card-img-wrap"><img src="images/thumb_security.png" class="card-img" alt="security Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-security">Security</span>
                 <p class="date">March 15, 2026</p>
                 <h2>Is It Safe To Unlock PDF Files Online?</h2>
                 <p>A comprehensive analysis of online PDF unlocking safety, privacy risks of cloud servers, and how offline browser tools protect your passwords.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-fix-pdf-text-mojibake-garbled.html" class="blog-card" data-category="guide">
+            <a href="how-to-fix-pdf-text-mojibake-garbled.html" class="blog-card" data-category="guide">\n                <div class="card-img-wrap"><img src="images/thumb_guide.png" class="card-img" alt="guide Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-guide">Guide</span>
                 <p class="date">March 15, 2026</p>
                 <h2>Why is My PDF Text Showing Weird Symbols? Fixing Mojibake</h2>
                 <p>Discover why extracting text from PDFs sometimes results in weird, garbled symbols and how modern OCR and native conversion tools fix PDF encoding errors.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-extract-photos-from-pdf.html" class="blog-card" data-category="tips">
+            <a href="how-to-extract-photos-from-pdf.html" class="blog-card" data-category="tips">\n                <div class="card-img-wrap"><img src="images/thumb_tips.png" class="card-img" alt="tips Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-tips">Tips</span>
                 <p class="date">March 15, 2026</p>
                 <h2>How to Natively Extract Original Images from PDF Documents</h2>
                 <p>Stop using screenshot tools! Learn how to natively extract the original, high-resolution original JPG and PNG images embedded directly inside PDF files.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="what-is-pdf-a-compliance.html" class="blog-card" data-category="guide">
+            <a href="what-is-pdf-a-compliance.html" class="blog-card" data-category="guide">\n                <div class="card-img-wrap"><img src="images/thumb_guide.png" class="card-img" alt="guide Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-guide">Guide</span>
                 <p class="date">March 15, 2026</p>
                 <h2>What is PDF/A? A Guide to Long-Term Document Archiving</h2>
                 <p>Understand the technical differences between a standard PDF and a PDF/A document, and why governments and legal institutions mandate PDF/A compliance.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-compress-pdf-exactly-100kb.html" class="blog-card" data-category="howto">
+            <a href="how-to-compress-pdf-exactly-100kb.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 15, 2026</p>
                 <h2>How to Compress a PDF to Under 100KB for Government Portals</h2>
                 <p>Struggling to upload your resume or ID to a job portal because the file size is too big? Learn how to compress any PDF to exactly 100KB.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-fix-detached-arraybuffer-error-pdf.html" class="blog-card" data-category="guide">
+            <a href="how-to-fix-detached-arraybuffer-error-pdf.html" class="blog-card" data-category="guide">\n                <div class="card-img-wrap"><img src="images/thumb_guide.png" class="card-img" alt="guide Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-guide">Guide</span>
                 <p class="date">March 15, 2026</p>
                 <h2>Understanding and Fixing the Detached ArrayBuffer Error in PDF Software</h2>
                 <p>Are you getting technical javascript errors when editing PDFs online? Learn what a Detached ArrayBuffer is and how QuickDoPDF prevents browser memory crashes.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-replace-text-in-pdf-free.html" class="blog-card" data-category="howto">
+            <a href="how-to-replace-text-in-pdf-free.html" class="blog-card" data-category="howto">\n                <div class="card-img-wrap"><img src="images/thumb_howto.png" class="card-img" alt="howto Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-howto">How-To</span>
                 <p class="date">March 15, 2026</p>
                 <h2>How to Erase and Replace Text in a PDF (Without Acrobat)</h2>
                 <p>Discover the hidden methods to completely erase and replace existing text internally on a PDF document using our Free 100% offline Editor overlay.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-compress-pdf-mac-preview.html" class="blog-card" data-category="compare">
-                <span class="tag tag-compare">Compare</span>
+            <a href="how-to-compress-pdf-mac-preview.html" class="blog-card" data-category="software">\n                <div class="card-img-wrap"><img src="images/thumb_software.png" class="card-img" alt="software Thumbnail"></div>\n                <div class="card-body">
+                <span class="tag tag-software">Software</span>
                 <p class="date">March 15, 2026</p>
                 <h2>Why Compressing PDFs on Mac Preview Ruins Your Documents</h2>
                 <p>Are you using Mac Preview to reduce file size, only to end up with a blurry, unreadable mess? Learn why Apple's native tool fails and the better free alternative.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
 
-            <a href="how-to-print-protected-pdf.html" class="blog-card" data-category="security">
+            <a href="how-to-print-protected-pdf.html" class="blog-card" data-category="security">\n                <div class="card-img-wrap"><img src="images/thumb_security.png" class="card-img" alt="security Thumbnail"></div>\n                <div class="card-body">
                 <span class="tag tag-security">Security</span>
                 <p class="date">March 15, 2026</p>
                 <h2>How to Fix the Greyed-Out Print Button on Protected PDFs</h2>
                 <p>Unable to print your bank statement because the print icon is greyed out? Learn how to remove PDF printing restrictions legally and for free.</p>
                 <span class="read-more">Read Article →</span>
-            </a>
+                </div>\n            </a>
         </div>
 
         <div class="load-more-container" id="loadMoreCont">
