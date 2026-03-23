@@ -75,7 +75,7 @@
     }
 
     .tool-header { text-align: center; margin-bottom: 40px; }
-    .tool-header h1 { font-size: 42px; font-weight: 900; background: linear-gradient(135deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+    .tool-header h1 { font-size: 42px; font-weight: 900; background: linear-gradient(135deg, var(--c1), var(--c2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
     .tool-header p { color: var(--muted); font-size: 18px; }
 
     .ai-setup {
@@ -334,7 +334,7 @@
 
     async function callGeminiAPI(question) {
       const apiKey = apiKeyInput.value.trim();
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro", "gemini-1.0-pro"];
       
       const prompt = `You are a helpful assistant assisting a user with their PDF document. 
       Here is the extracted text from their document:
@@ -344,15 +344,21 @@
       User's Question: ${question}
       Answer clearly and concisely based ONLY on the document context provided.`;
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
-      });
+      let response, data;
+      for (const model of modelsToTry) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        
+        data = await response.json();
+        if (response.ok) break;
+        // If error is not 404 (Not Found), it means auth/quota issue, so stop trying other models
+        if (data.error && data.error.code !== 404) break; 
+      }
 
-      const data = await response.json();
       if (!response.ok) {
         console.error("API Error:", data);
         throw new Error(data.error?.message || "Invalid API Key or API error.");
