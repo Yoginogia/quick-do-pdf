@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Chat with your PDF documents using AI. Instantly ask questions and extract insights. 100% private extraction, powered by Gemini AI.">
+  <meta name="keywords" content="chat with pdf, ai pdf chat, ask pdf questions, gemini pdf chat, ai pdf tool">
+  <meta name="author" content="Quick Do PDF">
+  <link rel="canonical" href="https://quickdopdf.com/chat-with-pdf.html">
+  <meta name="theme-color" content="#ff2a5f">
+  
+  <meta property="og:title" content="Chat with PDF (AI) – Quick Do PDF">
+  <meta property="og:description"
+    content="Upload a PDF and ask questions to our AI. Quick, accurate, and secure document chats.">
+  
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Chat with PDF (AI) | Fast & Secure Document Q&A</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  </script>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #03040b;
+      --surface: rgba(18, 19, 28, 0.6);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8f9fc;
+      --muted: #8b92a5;
+      --glass-blur: blur(24px);
+      --c1: #fbbf24;
+      --c2: #d97706; /* AI Gold Theme */
+    }
+
+    body.theme-light {
+      --bg: #f8fafc;
+      --surface: rgba(255, 255, 255, 0.85);
+      --border: rgba(0, 0, 0, 0.08);
+      --text: #0f172a;
+      --muted: #64748b;
+    }
+    
+    body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; min-height: 100vh; display:flex; flex-direction:column; }
+    
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px; background: rgba(3, 4, 11, 0.5);
+      backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--border);
+    }
+    body.theme-light header { background: rgba(255, 255, 255, 0.5); }
+    
+    .logo {
+      font-weight: 900; font-size: 24px; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ff2a5f, #ff6b3d);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-decoration:none;
+    }
+    
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    
+    .theme-toggle-btn {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.3s;
+    }
+
+    main {
+      flex: 1; margin-top: 100px; max-width: 900px; width: 100%; margin-inline: auto; padding: 20px;
+    }
+
+    .tool-header { text-align: center; margin-bottom: 40px; }
+    .tool-header h1 { font-size: 42px; font-weight: 900; background: linear-gradient(135deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+    .tool-header p { color: var(--muted); font-size: 18px; }
+
+    .ai-setup {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      padding: 24px; margin-bottom: 30px; backdrop-filter: var(--glass-blur);
+    }
+    .ai-setup h3 { font-size: 18px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;}
+    .api-key-input {
+      width: 100%; padding: 14px 20px; border-radius: 12px; border: 1px solid var(--border);
+      background: rgba(0,0,0,0.2); color: var(--text); font-size: 16px; font-family:inherit;
+      outline: none; transition: border-color 0.3s; margin-bottom: 12px;
+    }
+    body.theme-light .api-key-input { background: #fff; }
+    .api-key-input:focus { border-color: var(--c1); }
+    
+    .api-help { color: var(--muted); font-size: 14px; }
+    .api-help a { color: var(--c1); font-weight: 600; text-decoration:none;}
+
+    .upload-area {
+      border: 2px dashed var(--border); border-radius: 20px; padding: 60px 20px;
+      text-align: center; cursor: pointer; transition: 0.3s; background: var(--surface);
+      backdrop-filter: var(--glass-blur); margin-bottom:30px;
+    }
+    .upload-area:hover, .upload-area.dragover { border-color: var(--c1); background: rgba(251, 191, 36, 0.05); }
+    .upload-icon { font-size: 48px; margin-bottom: 16px;}
+    .upload-text { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .upload-sub { color: var(--muted); font-size: 15px; }
+
+    #fileInput { display: none; }
+
+    .chat-container {
+      display: none; flex-direction: column; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 20px; height: 600px;
+      overflow: hidden; backdrop-filter: var(--glass-blur);
+    }
+
+    .chat-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      font-weight: 700; display:flex; justify-content:space-between; align-items:center;
+    }
+    .file-badge { font-size:13px; background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 100px; color:var(--muted);}
+    
+    .chat-box { flex: 1; padding: 20px; overflow-y: auto; display:flex; flex-direction:column; gap:16px; }
+    
+    .message { max-width: 80%; padding: 12px 16px; border-radius: 16px; line-height:1.5; font-size:15px; }
+    .message.user { background: var(--border); align-self: flex-end; border-bottom-right-radius: 4px; }
+    .message.ai { background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(217,119,6,0.1)); border: 1px solid rgba(251,191,36,0.3); align-self: flex-start; border-bottom-left-radius: 4px; }
+    
+    .message-content p { margin-bottom:8px; }
+    .message-content p:last-child { margin-bottom:0; }
+    .message-content strong { color: var(--c1); }
+
+    .chat-input-area {
+      padding: 16px; border-top: 1px solid var(--border); display:flex; gap:12px;
+      background: rgba(0,0,0,0.2);
+    }
+    body.theme-light .chat-input-area { background: #f8fafc; }
+
+    .chat-input {
+      flex: 1; padding: 14px 20px; border-radius: 100px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-size: 16px;
+      outline: none; font-family:inherit;
+    }
+    .chat-input:focus { border-color: var(--c1); }
+
+    .send-btn {
+      background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff;
+      border: none; width:50px; height:50px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; font-size:18px; transition:0.3s; font-weight:bold;
+    }
+    .send-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--c1); }
+    .send-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none;}
+
+    .loading-spinner { display:none; text-align:center; padding: 40px; color:var(--c1); font-weight:600;}
+
+    footer {
+      text-align: center; padding: 32px; border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 14px; margin-top: 40px;
+    }
+    footer a { color: var(--c1); text-decoration: none; }
+    
+  </style>
+  <script src="theme.js"></script>
+</head>
+
+<body>
+  <header>
+    <a href="index.html" class="logo">Quick Do PDF</a>
+    <div class="header-right">
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+        <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="tool-header">
+      <h1>Chat with PDF</h1>
+      <p>Ask questions, extract summaries, and learn instantly from your document.</p>
+    </div>
+
+    <div class="ai-setup" id="setupArea">
+      <h3>🔑 Fast & Secure Setup</h3>
+      <input type="password" id="apiKey" class="api-key-input" placeholder="Paste your Google Gemini API Key here (Required)">
+      <div class="api-help">Your API key is stored only in your browser and used to securely chat via Google Gemini API. <a href="https://aistudio.google.com/app/apikey" target="_blank">Get a free key here</a>.</div>
+    </div>
+
+    <div class="upload-area" id="dropZone">
+      <div class="upload-icon">📄</div>
+      <div class="upload-text">Choose a PDF or drag it here</div>
+      <div class="upload-sub">Only text-based PDFs are supported. Files never leave your browser.</div>
+      <input type="file" id="fileInput" accept="application/pdf">
+    </div>
+
+    <div class="loading-spinner" id="loadingSpinner">
+      Extracting text from PDF locally... please wait.
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+      <div class="chat-header">
+        <span>AI Assistant <span id="modelTag" style="font-size:11px; color:var(--c1); margin-left:8px;">GEMINI AI</span></span>
+        <span class="file-badge" id="fileNameBadge">document.pdf</span>
+      </div>
+      <div class="chat-box" id="chatBox">
+        <div class="message ai">
+          <div class="message-content">Hello! I've read your document. What would you like to know about it?</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="userInput" class="chat-input" placeholder="Ask a question about your PDF...">
+        <button class="send-btn" id="sendBtn">↑</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Built with ❤️ by <span>Yogesh</span> · Quick Do PDF · 
+    <a href="about.html">About</a> · <a href="privacy-policy.html">Privacy</a>
+  </footer>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const apiKeyInput = document.getElementById('apiKey');
+    const setupArea = document.getElementById('setupArea');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const chatContainer = document.getElementById('chatContainer');
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const fileNameBadge = document.getElementById('fileNameBadge');
+
+    let pdfTextContext = "";
+
+    // File Upload Handlers
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    async function handleFile(file) {
+      if (file.type !== "application/pdf") return alert("Please upload a valid PDF file.");
+      if (!apiKeyInput.value.trim()) {
+        apiKeyInput.focus();
+        return alert("Please enter your Gemini API Key first.");
+      }
+
+      fileNameBadge.textContent = file.name;
+      dropZone.style.display = 'none';
+      setupArea.style.display = 'none';
+      loadingSpinner.style.display = 'block';
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        await extractTextFromPDF(arrayBuffer);
+        loadingSpinner.style.display = 'none';
+        chatContainer.style.display = 'flex';
+        userInput.focus();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to read PDF. Ensure it's not password protected or corrupted.");
+        location.reload();
+      }
+    }
+
+    async function extractTextFromPDF(arrayBuffer) {
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        // Limit to first 25 pages to avoid massive prompts for free keys
+        if(i > 25) break; 
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(" ");
+        fullText += pageText + "\n";
+      }
+      pdfTextContext = fullText.substring(0, 30000); // Truncate to avoid payload too large (approx 10k words)
+    }
+
+    // Chat Handlers
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      appendMessage('user', text);
+      userInput.value = '';
+      sendBtn.disabled = true;
+
+      const loadingMsgId = appendMessage('ai', 'Thinking...');
+      
+      try {
+        const responseText = await callGeminiAPI(text);
+        updateMessage(loadingMsgId, responseText);
+      } catch (err) {
+        updateMessage(loadingMsgId, "⚠️ Error: " + err.message);
+      }
+      
+      sendBtn.disabled = false;
+      userInput.focus();
+    }
+
+    function appendMessage(sender, text) {
+      const id = 'msg-' + Date.now();
+      const div = document.createElement('div');
+      div.className = `message ${sender}`;
+      div.id = id;
+      div.innerHTML = `<div class="message-content">${formatText(text)}</div>`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return id;
+    }
+
+    function updateMessage(id, text) {
+      const div = document.getElementById(id);
+      if(div) {
+        div.innerHTML = `<div class="message-content">${formatText(text)}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+
+    function formatText(text) {
+      return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    }
+
+    async function callGeminiAPI(question) {
+      const apiKey = apiKeyInput.value.trim();
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      
+      const prompt = `You are a helpful assistant assisting a user with their PDF document. 
+      Here is the extracted text from their document:
+      ---
+      ${pdfTextContext}
+      ---
+      User's Question: ${question}
+      Answer clearly and concisely based ONLY on the document context provided.`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        console.error("API Error:", data);
+        throw new Error(data.error?.message || "Invalid API Key or API error.");
+      }
+
+      return data.candidates[0].content.parts[0].text;
+    }
+  </script>
+</body>
+</html>

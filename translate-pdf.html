@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Translate PDF documents into over 100 languages instantly using AI. Fast, accurate, and 100% private in your browser.">
+  <meta name="keywords" content="translate pdf, ai translator, pdf language translator, translate document">
+  <meta name="author" content="Quick Do PDF">
+  <link rel="canonical" href="https://quickdopdf.com/translate-pdf.html">
+  <meta name="theme-color" content="#ff2a5f">
+  
+  <meta property="og:title" content="AI PDF Translator – Quick Do PDF">
+  <meta property="og:description"
+    content="Instantly translate long PDFs into over 100 languages using Gemini AI.">
+  
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Translate PDF (AI) | Fast & Accurate Document Translator</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  </script>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #03040b; --surface: rgba(18, 19, 28, 0.6); --border: rgba(255, 255, 255, 0.08);
+      --text: #f8f9fc; --muted: #8b92a5; --glass-blur: blur(24px);
+      --c1: #a3e635; --c2: #22c55e; /* AI Green Theme for Translation */
+    }
+
+    body.theme-light {
+      --bg: #f8fafc; --surface: rgba(255, 255, 255, 0.85); --border: rgba(0, 0, 0, 0.08);
+      --text: #0f172a; --muted: #64748b;
+    }
+    
+    body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; min-height: 100vh; display:flex; flex-direction:column; }
+    
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px; background: rgba(3, 4, 11, 0.5); border-bottom: 1px solid var(--border);
+      backdrop-filter: var(--glass-blur);
+    }
+    body.theme-light header { background: rgba(255, 255, 255, 0.5); }
+    
+    .logo {
+      font-weight: 900; font-size: 24px; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ff2a5f, #ff6b3d);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration:none;
+    }
+    
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    
+    .theme-toggle-btn {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s;
+    }
+
+    main { flex: 1; margin-top: 100px; max-width: 900px; width: 100%; margin-inline: auto; padding: 20px; }
+
+    .tool-header { text-align: center; margin-bottom: 40px; }
+    .tool-header h1 { font-size: 42px; font-weight: 900; background: linear-gradient(135deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+    .tool-header p { color: var(--muted); font-size: 18px; }
+
+    .ai-setup {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      padding: 24px; margin-bottom: 30px; backdrop-filter: var(--glass-blur);
+    }
+    .ai-setup h3 { font-size: 18px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;}
+    .api-key-input {
+      width: 100%; padding: 14px 20px; border-radius: 12px; border: 1px solid var(--border);
+      background: rgba(0,0,0,0.2); color: var(--text); font-size: 16px; font-family:inherit;
+      outline: none; transition: 0.3s; margin-bottom: 12px;
+    }
+    body.theme-light .api-key-input { background: #fff; }
+    .api-key-input:focus { border-color: var(--c1); }
+    
+    .api-help { color: var(--muted); font-size: 14px; }
+    .api-help a { color: var(--c1); font-weight: 600; text-decoration:none;}
+
+    .upload-area {
+      border: 2px dashed var(--border); border-radius: 20px; padding: 60px 20px;
+      text-align: center; cursor: pointer; transition: 0.3s; background: var(--surface);
+      backdrop-filter: var(--glass-blur); margin-bottom:30px;
+    }
+    .upload-area:hover, .upload-area.dragover { border-color: var(--c1); background: rgba(34, 197, 94, 0.05); }
+    .upload-icon { font-size: 48px; margin-bottom: 16px;}
+    .upload-text { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .upload-sub { color: var(--muted); font-size: 15px; }
+
+    #fileInput { display: none; }
+    
+    .app-btn {
+      background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff;
+      border: none; padding: 14px 32px; border-radius: 100px;
+      font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
+    }
+    .app-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3); }
+
+    .summary-options { display: none; text-align: center; margin-bottom: 30px; }
+    
+    .loading-spinner { display:none; text-align:center; padding: 40px; color:var(--c1); font-weight:600;}
+    .loader-dot { display:inline-block; font-size: 24px; animation: blink 1.4s infinite both; }
+    .loader-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0% {opacity:.2;} 20% {opacity:1;} 100% {opacity:.2;} }
+
+    .summary-container { display: none; flex-direction: column; opacity:0; transition: opacity 0.5s; }
+    .summary-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 30px; line-height: 1.8; font-size: 16px; min-height: 200px;
+      backdrop-filter: var(--glass-blur); color: var(--text); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      white-space: pre-wrap; font-family: 'Outfit', sans-serif;
+    }
+    
+    footer {
+      text-align: center; padding: 32px; border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 14px; margin-top: auto;
+    }
+    footer a { color: var(--c1); text-decoration: none; }
+  </style>
+  <script src="theme.js"></script>
+</head>
+
+<body>
+  <header>
+    <a href="index.html" class="logo">Quick Do PDF</a>
+    <div class="header-right">
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+        <svg id="themeIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="tool-header">
+      <h1>Translate PDF (AI)</h1>
+      <p>Break language barriers. Translate your documents accurately into Native-sounding text.</p>
+    </div>
+
+    <div class="ai-setup" id="setupArea">
+      <h3>🔑 One-Time Setup</h3>
+      <input type="password" id="apiKey" class="api-key-input" placeholder="Paste your Google Gemini API Key here (Required)">
+      <div class="api-help">Ensure maximum privacy. Your API key enables processing directly in your browser. <a href="https://aistudio.google.com/app/apikey" target="_blank">Get a free key here</a>.</div>
+    </div>
+
+    <div class="upload-area" id="dropZone">
+      <div class="upload-icon">📄</div>
+      <div class="upload-text">Choose a PDF or drag it here</div>
+      <div class="upload-sub">Only text-based PDFs are supported. Extracted accurately via local AI.</div>
+      <input type="file" id="fileInput" accept="application/pdf">
+    </div>
+
+    <div class="summary-options" id="summaryOptions">
+      <span style="font-weight:bold; margin-right:12px;">Translate To:</span>
+      <select id="targetLanguage" class="api-key-input" style="width: auto; display: inline-block; padding: 10px 20px; cursor:pointer;">
+        <option value="Hindi">Hindi</option>
+        <option value="Spanish">Spanish</option>
+        <option value="French">French</option>
+        <option value="German">German</option>
+        <option value="Arabic">Arabic</option>
+        <option value="Chinese (Mandarin)">Chinese (Mandarin)</option>
+        <option value="Japanese">Japanese</option>
+        <option value="Russian">Russian</option>
+        <option value="Portuguese">Portuguese</option>
+        <option value="Italian">Italian</option>
+        <option value="Korean">Korean</option>
+        <option value="Bengali">Bengali</option>
+        <option value="Urdu">Urdu</option>
+        <option value="English">English</option>
+      </select>
+      <button id="generateBtn" class="app-btn" style="margin-left: 12px;">Translate Now</button>
+    </div>
+
+    <div class="loading-spinner" id="loadingSpinner">
+      Translating your document accurately
+      <span class="loader-dot">.</span><span class="loader-dot">.</span><span class="loader-dot">.</span>
+      <div style="font-size:13px; color:var(--muted); margin-top:8px; font-weight:normal;">This may take up to 30 seconds for longer documents.</div>
+    </div>
+
+    <div class="summary-container" id="summaryContainer">
+      <div class="summary-box" id="summaryBox"></div>
+      <button id="copyBtn" class="api-key-input" style="width:100%; text-align:center; margin-top:16px; cursor:pointer; font-weight:bold; background:var(--surface);">📋 Copy Translation to Clipboard</button>
+    </div>
+  </main>
+
+  <footer>
+    Built with ❤️ by <span>Yogesh</span> · Quick Do PDF · 
+    <a href="about.html">About</a> · <a href="privacy-policy.html">Privacy</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const apiKeyInput = document.getElementById('apiKey');
+    const setupArea = document.getElementById('setupArea');
+    const summaryOptions = document.getElementById('summaryOptions');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const summaryContainer = document.getElementById('summaryContainer');
+    const summaryBox = document.getElementById('summaryBox');
+    const generateBtn = document.getElementById('generateBtn');
+    const copyBtn = document.getElementById('copyBtn');
+
+    let pdfTextContext = "";
+
+    // File Upload Handlers
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    async function handleFile(file) {
+      if (file.type !== "application/pdf") return alert("Please upload a valid PDF file.");
+      if (!apiKeyInput.value.trim()) {
+        apiKeyInput.focus();
+        return alert("Please enter your Gemini API Key first.");
+      }
+
+      dropZone.style.display = 'none';
+      setupArea.style.display = 'none';
+      loadingSpinner.style.display = 'block';
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        await extractTextFromPDF(arrayBuffer);
+        
+        loadingSpinner.style.display = 'none';
+        summaryOptions.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        alert("Failed to read PDF. Ensure it's not password protected or corrupted.");
+        location.reload();
+      }
+    }
+
+    async function extractTextFromPDF(arrayBuffer) {
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        // Limit to first 25 pages to avoid massive prompts
+        if(i > 25) break; 
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(" ");
+        fullText += pageText + "\n";
+      }
+      pdfTextContext = fullText.substring(0, 30000); 
+    }
+
+    generateBtn.addEventListener('click', async () => {
+      summaryOptions.style.display = 'none';
+      loadingSpinner.style.display = 'block';
+      
+      const language = document.getElementById('targetLanguage').value;
+      
+      try {
+        const translatedText = await generateTranslationWithGemini(language);
+        
+        summaryBox.innerHTML = marked.parse(translatedText);
+        
+        loadingSpinner.style.display = 'none';
+        summaryContainer.style.display = 'flex';
+        setTimeout(() => summaryContainer.style.opacity = '1', 10);
+      } catch (err) {
+        alert("⚠️ Error: " + err.message);
+        summaryOptions.style.display = 'block';
+        loadingSpinner.style.display = 'none';
+      }
+    });
+
+    async function generateTranslationWithGemini(language) {
+      const apiKey = apiKeyInput.value.trim();
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      
+      const prompt = `You are a highly skilled professional translator.
+      Please accurately translate the following document text into ${language}.
+      Maintain the original formatting and meaning as closely as possible. 
+      Only return the translated text without any conversational filler or introductions.
+      ---
+      ${pdfTextContext}
+      `;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message || "API error.");
+      return data.candidates[0].content.parts[0].text;
+    }
+
+    copyBtn.addEventListener('click', () => {
+      const textToCopy = summaryBox.innerText;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalText = copyBtn.innerText;
+        copyBtn.innerText = "✅ Copied Successfully!";
+        setTimeout(() => copyBtn.innerText = originalText, 2000);
+      });
+    });
+  </script>
+</body>
+</html>
