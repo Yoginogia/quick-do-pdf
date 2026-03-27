@@ -138,6 +138,23 @@
         .report-item label { font-size: 12px; color: #666; font-weight: 700; text-transform: uppercase; }
         .report-item div { font-size: 22px; font-weight: 800; }
 
+        .manual-input {
+            width: 120px;
+            background: rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px 10px;
+            color: var(--accent);
+            font-size: 18px;
+            font-weight: 800;
+            text-align: right;
+            outline: none;
+            transition: 0.3s;
+        }
+        body.theme-light .manual-input { background: rgba(0,0,0,0.03); }
+        .manual-input:focus { border-color: var(--accent); background: rgba(0,0,0,0.2); }
+        body.theme-light .manual-input:focus { background: #fff; }
+
         @media (max-width: 900px) {
             .calc-grid { grid-template-columns: 1fr; }
             header { padding: 12px 20px; }
@@ -168,7 +185,7 @@
                 <div class="input-group">
                     <div class="input-label">
                         <span>Loan Amount (₹)</span>
-                        <div class="input-val" id="amt-val">₹ 10,00,000</div>
+                        <input type="number" id="amt-manual" class="manual-input" value="1000000">
                     </div>
                     <input type="range" id="loanAmount" min="50000" max="20000000" step="50000" value="1000000">
                 </div>
@@ -176,7 +193,7 @@
                 <div class="input-group">
                     <div class="input-label">
                         <span>Interest Rate (%)</span>
-                        <div class="input-val" id="rate-val">8.5%</div>
+                        <input type="number" id="rate-manual" class="manual-input" step="0.1" value="8.5">
                     </div>
                     <input type="range" id="interestRate" min="5" max="25" step="0.1" value="8.5">
                 </div>
@@ -184,7 +201,7 @@
                 <div class="input-group">
                     <div class="input-label">
                         <span>Loan Tenure (Years)</span>
-                        <div class="input-val" id="tenure-val">15 Years</div>
+                        <input type="number" id="tenure-manual" class="manual-input" value="15">
                     </div>
                     <input type="range" id="loanTenure" min="1" max="40" step="1" value="15">
                 </div>
@@ -279,10 +296,10 @@
             const totalRepayment = emi * N;
             const totalInterest = totalRepayment - P;
 
-            // Update UI
-            document.getElementById('amt-val').innerText = formatCurrency(P);
-            document.getElementById('rate-val').innerText = rateInput.value + '%';
-            document.getElementById('tenure-val').innerText = tenureInput.value + ' Years';
+            // Update Manual Inputs
+            document.getElementById('amt-manual').value = P;
+            document.getElementById('rate-manual').value = rateInput.value;
+            document.getElementById('tenure-manual').value = tenureInput.value;
 
             document.getElementById('res-emi').innerText = formatCurrency(Math.round(emi));
             document.getElementById('res-principal').innerText = formatCurrency(P);
@@ -383,6 +400,20 @@
 
         [amtInput, rateInput, tenureInput].forEach(inp => {
             inp.addEventListener('input', calculateEMI);
+        });
+
+        // Sync manual inputs back to sliders
+        document.getElementById('amt-manual').addEventListener('input', (e) => {
+            amtInput.value = e.target.value;
+            calculateEMI();
+        });
+        document.getElementById('rate-manual').addEventListener('input', (e) => {
+            rateInput.value = e.target.value;
+            calculateEMI();
+        });
+        document.getElementById('tenure-manual').addEventListener('input', (e) => {
+            tenureInput.value = e.target.value;
+            calculateEMI();
         });
 
         // Toggle observer for chart theme
