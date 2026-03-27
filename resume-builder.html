@@ -111,6 +111,15 @@
         .tpl-creative .tpl-mock::before { content:''; position:absolute; top:0; left:0; width:100%; height:20px; background: linear-gradient(135deg, #00A3FF, #00d2ff); }
         .tpl-academic .tpl-mock { border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; }
         .tpl-executive .sidebar { width: 30%; background: #f8fafc; border-right: 2px solid #e2e8f0; height: 100%; position: absolute; left: 0; top: 0; }
+        
+        /* New Template Mockups (9-15) */
+        .tpl-elegant .tpl-mock { font-family: 'Playfair Display', serif; border: 1px solid #eee; padding: 25px; }
+        .tpl-bold .tpl-mock::before { content:''; position:absolute; top:0; left:0; width:100%; height:40px; background: #000; }
+        .tpl-startup .sidebar-right { width: 30%; background: #f0f9ff; border-left: 2px solid #e0f2fe; height: 100%; position: absolute; right: 0; top: 0; }
+        .tpl-simple .tpl-mock { padding: 40px; display: flex; flex-direction: column; gap: 5px; }
+        .tpl-industrial .tpl-mock { border: 2px solid #334155; }
+        .tpl-vibrant .tpl-mock::before { content:''; position:absolute; top:0; left:0; width:100%; height:30px; background: linear-gradient(90deg, #8b5cf6, #3b82f6); }
+        .tpl-centered .tpl-mock { text-align: center; justify-content: center; }
 
         /* CHOICE MODAL */
         #choice-modal { position: fixed; inset:0; z-index: 2000; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; }
@@ -165,10 +174,32 @@
             padding: 10px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; gap: 10px; align-items: center;
         }
 
-        @media (max-width: 1024px) {
-            .editor-split { grid-template-columns: 1fr; }
-            .preview-area { display: none; }
-        }
+        /* 15. ARTISTIC CENTER */
+        #resume-canvas.tpl-centered { text-align: center; padding: 60px; font-family: 'Playfair Display', serif; }
+        #resume-canvas.tpl-centered .r-section-title { display: flex; align-items: center; gap: 20px; justify-content: center; }
+        #resume-canvas.tpl-centered .r-section-title::before, #resume-canvas.tpl-centered .r-section-title::after { content: ""; flex: 1; height: 1px; background: #ddd; }
+        
+        /* DYNAMIC LAYOUT HELPERS */
+        #resume-canvas { display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .r-side { width: 33%; background: #f8fafc; border-right: 1.5px solid #e2e8f0; padding: 40px 30px; display: flex; flex-direction: column; gap: 25px; }
+        .r-head { width: 100%; padding: 40px; }
+        .r-main { flex: 1; padding: 40px; }
+        .r-split { display: flex; flex: 1; min-height: 297mm; }
+        .r-section { margin-bottom: 25px; }
+        .r-section-title { font-size: 14px; font-weight: 900; color: #1e293b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .r-item { margin-bottom: 15px; }
+        .r-item-head { display: flex; justify-content: space-between; font-weight: 800; font-size: 13.5px; margin-bottom: 3px; }
+        .r-item-sub { font-size: 11px; color: #64748b; margin-bottom: 5px; font-weight: 600; }
+        .r-item-desc { font-size: 12.5px; color: #334155; line-height: 1.6; }
+        
+        #resume-canvas.tpl-executive .r-side { width: 240px; background: #1e293b; color: #fff; border:none; }
+        #resume-canvas.tpl-executive .r-side .r-section-title { color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #resume-canvas.tpl-startup .r-side { order: 2; border-right: none; border-left: 1.5px solid #e2e8f0; width: 260px; background: #f0f9ff; }
+        #resume-canvas.tpl-startup .r-section-title { color: #0284c7; }
+        #resume-canvas.tpl-industrial .r-section-title { background: #1e293b; color: #fff; padding: 4px 10px; display: inline-block; }
+        #resume-canvas.tpl-vibrant .r-head { background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: #fff; }
+        #resume-canvas.tpl-bold .r-head { background: #000; color: #fff; }
+        #resume-canvas.tpl-bold #view-name { font-size: 44px; letter-spacing: -1px; }
     </style>
 </head>
 
@@ -262,6 +293,56 @@
                     </div>
                     <h4>Professional Split <span class="tpl-badge">PDF • DOCX</span></h4>
                 </div>
+                <!-- 7 NEW TEMPLATES -->
+                <div class="template-card tpl-elegant" onclick="openChoiceModal('tpl-elegant')">
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock" style="padding-top:40px;"><div class="tpl-line" style="width:40%; margin:0 auto; background:#333;"></div><div class="tpl-line" style="width:100%; height:1px; background:#eee; margin:10px 0;"></div><div class="tpl-line"></div></div>
+                    </div>
+                    <h4>Elegant Serif <span class="tpl-badge">PDF • DOCX</span></h4>
+                </div>
+                <div class="template-card tpl-bold" onclick="openChoiceModal('tpl-bold')">
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock"><div style="height:45px; background:#000; margin:-15px -15px 15px -15px; display:flex; align-items:center; padding-left:15px;"><div style="width:40%; height:6px; background:#fff;"></div></div><div class="tpl-line"></div></div>
+                    </div>
+                    <h4>Bold High Contrast <span class="tpl-badge">PDF • DOCX</span></h4>
+                </div>
+                <div class="template-card tpl-startup" onclick="openChoiceModal('tpl-startup')">
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock"><div class="sidebar-right"></div><div style="flex:1; padding-right:35%;"><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
+                    </div>
+                    <h4>Startup Tech <span class="tpl-badge">PDF • DOCX</span></h4>
+                </div>
+                <div class="template-card tpl-simple" onclick="openChoiceModal('tpl-simple')">
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock" style="padding:40px; justify-content:flex-start;"><div class="tpl-line" style="width:30%;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div>
+                    </div>
+                    <h4>Clean ATS <span class="tpl-badge">PDF • DOCX</span></h4>
+                </div>
+                <div class="template-card tpl-industrial" onclick="openChoiceModal('tpl-industrial')">
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock" style="border:2px solid #334155;"><div style="padding:10px; border-bottom:1px solid #334155;"><div class="tpl-line" style="width:40%;"></div></div><div style="padding:10px;"><div class="tpl-line"></div></div></div>
+                    </div>
+                    <h4>Modern Industrial <span class="tpl-badge">PDF • DOCX</span></h4>
+                </div>
+                <div class="template-card tpl-vibrant" onclick="openChoiceModal('tpl-vibrant')">
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock"><div style="height:35px; background:linear-gradient(90deg,#8b5cf6,#3b82f6); margin:-15px -15px 15px -15px;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div>
+                    </div>
+                    <h4>Vibrant Creative <span class="tpl-badge">PDF • DOCX</span></h4>
+                </div>
+                <div class="template-card tpl-centered" onclick="openChoiceModal('tpl-centered')">
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock" style="text-align:center; padding-top:50px;"><div class="tpl-line" style="width:50%; margin:0 auto;"></div><div class="tpl-line" style="width:30%; margin:10px auto;"></div><div class="tpl-line" style="margin-top:20px;"></div></div>
+                    </div>
+                    <h4>Artistic Center <span class="tpl-badge">PDF • DOCX</span></h4>
+                </div>
             </div>
         </div>
     </main>
@@ -350,17 +431,11 @@
 
                 <div class="preview-area">
                     <div class="preview-header">
-                        <div class="score-pill"><span id="score-pct">0%</span> Your resume score 🔥</div>
+                         <div class="score-pill"><span id="score-pct">0%</span> Your resume score 🔥</div>
                         <div style="font-size: 11px; color:#666; font-weight:700;">LIVE PREVIEW</div>
                     </div>
                     <div id="resume-canvas" class="tpl-modern">
-                        <div class="r-main" style="padding: 40px;">
-                            <div id="view-name" style="font-size:32px; font-weight:900;">JOHN DOE</div>
-                            <div id="view-title" style="font-weight:700; color:#444;">Software Engineer</div>
-                            <div id="view-contact" style="font-size:12px; margin-bottom:30px; color:#666;">john.doe@email.com | +1 234</div>
-                            <div class="r-section"><div style="font-size:14px; font-weight:800; border-bottom:1px solid #000; padding-bottom:5px; margin-bottom:15px;">SUMMARY</div><div id="view-summary" style="font-size:13px; line-height:1.6;">...</div></div>
-                            <div class="r-section"><div style="font-size:14px; font-weight:800; border-bottom:1px solid #000; padding-bottom:5px; margin-bottom:15px; margin-top:20px;">EXPERIENCE</div><div id="view-experience-list"></div></div>
-                        </div>
+                        <!-- Dynamic HTML Injected by updatePreview() -->
                     </div>
                 </div>
             </div>
@@ -377,6 +452,13 @@
                 <option value="tpl-minimal">Minimal</option>
                 <option value="tpl-creative">Creative</option>
                 <option value="tpl-executive">Executive</option>
+                <option value="tpl-elegant">Elegant</option>
+                <option value="tpl-bold">Bold</option>
+                <option value="tpl-startup">Startup</option>
+                <option value="tpl-simple">Simple ATS</option>
+                <option value="tpl-industrial">Industrial</option>
+                <option value="tpl-vibrant">Vibrant</option>
+                <option value="tpl-centered">Centered</option>
             </select>
             <button class="btn" style="padding:4px 10px; font-size:11px;" onclick="exportPDF()">Download</button>
         </div>
@@ -535,10 +617,95 @@
         }
 
         function updatePreview() {
-            document.getElementById('view-name').innerText = (resumeData.fname + ' ' + (resumeData.lname||'')).trim().toUpperCase() || "JOHN DOE";
-            document.getElementById('view-title').innerText = resumeData.title || "Software Engineer";
-            document.getElementById('view-contact').innerText = `${resumeData.email || 'email@example.com'} | ${resumeData.phone || '+1 234'}`;
-            document.getElementById('view-summary').innerText = resumeData.summary || "...";
+            const canvas = document.getElementById('resume-canvas');
+            canvas.className = resumeData.template;
+            
+            // Build Structure Based on Template Type
+            let html = '';
+            const t = resumeData.template;
+            const isSidebar = (t === 'tpl-executive' || t === 'tpl-startup');
+            const hasHeader = (t === 'tpl-bold' || t === 'tpl-vibrant' || t === 'tpl-creative');
+
+            const headerHTML = `
+                <div class="${hasHeader ? 'r-head':'r-info'}">
+                    <div id="view-name" style="font-size:32px; font-weight:900;">${(resumeData.fname + ' ' + (resumeData.lname||'')).trim().toUpperCase() || "JOHN DOE"}</div>
+                    <div id="view-title" style="font-weight:700; color:${hasHeader ? '#fff':'var(--primary)'}; font-size:16px;">${resumeData.title || "Software Engineer"}</div>
+                    <div id="view-contact" style="font-size:12px; margin-top:5px;">${resumeData.email || 'email@example.com'} | ${resumeData.phone || '+1 234'}</div>
+                </div>
+            `;
+
+            const summaryHTML = `
+                <div class="r-section">
+                    <div class="r-section-title">Professional Summary</div>
+                    <div id="view-summary" style="font-size:12.5px; line-height:1.6;">${resumeData.summary || "..."}</div>
+                </div>
+            `;
+
+            const expHTML = `
+                <div class="r-section">
+                    <div class="r-section-title">Experience</div>
+                    <div id="view-experience-list">
+                        ${resumeData.experience.map(exp => `
+                            <div class="r-item">
+                                <div class="r-item-head"><span>${exp.company || 'Company Name'}</span> <span>${exp.duration || '2020 - Present'}</span></div>
+                                <div class="r-item-sub">${exp.title || 'Job Title'} • ${exp.location || 'Location'}</div>
+                                <div class="r-item-desc">${exp.desc || 'Responsibilities...'}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            const eduHTML = `
+                <div class="r-section">
+                    <div class="r-section-title">Education</div>
+                    <div id="view-education-list">
+                        ${resumeData.education.map(edu => `
+                            <div class="r-item">
+                                <div class="r-item-head"><span>${edu.school || 'School Name'}</span> <span>${edu.year || '2020'}</span></div>
+                                <div class="r-item-sub">${edu.degree || 'Degree Title'}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            const skillsHTML = `
+                <div class="r-section">
+                    <div class="r-section-title">Skills</div>
+                    <div style="font-size:12.5px; line-height:1.6;">${resumeData.skills || "Add your skills..."}</div>
+                </div>
+            `;
+
+            if (isSidebar) {
+                html = `
+                    <div class="r-split">
+                        <div class="r-side">
+                            ${t === 'tpl-executive' ? headerHTML : ''}
+                            ${skillsHTML}
+                            ${eduHTML}
+                        </div>
+                        <div class="r-main">
+                            ${t === 'tpl-startup' ? headerHTML : ''}
+                            ${summaryHTML}
+                            ${expHTML}
+                        </div>
+                    </div>
+                `;
+            } else {
+                html = `
+                    ${headerHTML}
+                    <div class="r-main">
+                        ${summaryHTML}
+                        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:40px;">
+                            <div>${expHTML}</div>
+                            <div>${eduHTML} ${skillsHTML}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            canvas.innerHTML = html;
             updateScore();
         }
 
@@ -549,7 +716,7 @@
 
         function changeTemplate(tpl) {
             resumeData.template = tpl;
-            document.getElementById('resume-canvas').className = tpl;
+            updatePreview();
         }
 
         function renderAll() {
