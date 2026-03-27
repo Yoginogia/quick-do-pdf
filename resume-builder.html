@@ -605,6 +605,92 @@
             if(next >= 0 && next <= 5) jumpTo(next);
         }
 
+        function addItem(type) {
+            const item = (type === 'education') ? {id:Date.now(), school:'', degree:'', year:''} : 
+                        (type === 'projects') ? {id:Date.now(), name:'', link:'', desc:''} :
+                        {id:Date.now(), company:'', title:'', duration:'', location:'', desc:''};
+            resumeData[type].push(item);
+            renderForms(type); updatePreview(); save();
+        }
+
+        function removeItem(type, id) {
+            resumeData[type] = resumeData[type].filter(i => i.id !== id);
+            renderForms(type); updatePreview(); save();
+        }
+
+        function renderForms(type) {
+            const container = document.getElementById(`${type}-form-list`);
+            container.innerHTML = '';
+            resumeData[type].forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'form-group-item';
+                div.style = 'border: 1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:20px; position:relative;';
+                
+                let fields = '';
+                if(type === 'experience') {
+                    fields = `
+                        <div class="input-grid">
+                            <input type="text" class="form-input" placeholder="Company" value="${item.company}" oninput="updateItem('${type}', ${item.id}, 'company', this.value)">
+                            <input type="text" class="form-input" placeholder="Duration" value="${item.duration}" oninput="updateItem('${type}', ${item.id}, 'duration', this.value)">
+                        </div>
+                        <input type="text" class="form-input" placeholder="Title" value="${item.title}" oninput="updateItem('${type}', ${item.id}, 'title', this.value)" style="margin: 10px 0;">
+                        <textarea class="form-input" placeholder="Description..." oninput="updateItem('${type}', ${item.id}, 'desc', this.value)" style="height:80px; margin-top:10px;">${item.desc}</textarea>
+                    `;
+                } else if(type === 'education') {
+                    fields = `
+                        <div class="input-grid">
+                            <input type="text" class="form-input" placeholder="School" value="${item.school}" oninput="updateItem('${type}', ${item.id}, 'school', this.value)">
+                            <input type="text" class="form-input" placeholder="Year" value="${item.year}" oninput="updateItem('${type}', ${item.id}, 'year', this.value)">
+                        </div>
+                        <input type="text" class="form-input" placeholder="Degree" value="${item.degree}" oninput="updateItem('${type}', ${item.id}, 'degree', this.value)" style="margin-top:10px;">
+                    `;
+                } else {
+                    fields = `
+                        <input type="text" class="form-input" placeholder="Project Name" value="${item.name}" oninput="updateItem('${type}', ${item.id}, 'name', this.value)">
+                        <textarea class="form-input" placeholder="Project Description..." oninput="updateItem('${type}', ${item.id}, 'desc', this.value)" style="height:80px; margin-top:10px;">${item.desc}</textarea>
+                    `;
+                }
+
+                div.innerHTML = `
+                    ${fields}
+                    <button class="btn" onclick="removeItem('${type}', ${item.id})" style="position:absolute; top:10px; right:10px; padding:4px 8px; font-size:10px; background:#fee2e2; color:#ef4444; border:none;">Remove</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateItem(type, id, key, val) {
+            const item = resumeData[type].find(i => i.id === id);
+            if(item) { item[key] = val; updatePreview(); save(); }
+        }
+
+        async function refineSummary() {
+            const key = localStorage.getItem('gemini_api_key');
+            if(!key) { openAIModal(); return; }
+            if(!resumeData.summary) { alert("Please write something first."); return; }
+            
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "✨ Refining...";
+            
+            try {
+                const prompt = `Refine this resume professional summary to be more impactful and recruitment-focused. Keep it professional. Summary: ${resumeData.summary}`;
+                const res = await callAI(prompt, key); // Re-using existing callAI but need careful parsing
+                if(res && typeof res === 'object') {
+                   // If AI returns a JSON structure, we might need a simpler refined text return
+                }
+                const simpleRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] })
+                });
+                const data = await simpleRes.json();
+                const refined = data.candidates[0].content.parts[0].text.trim();
+                resumeData.summary = refined;
+                renderAll();
+            } catch(e) { alert("Refine Error: " + e.message); }
+            finally { btn.innerText = originalText; }
+        }
+
         function bindSync() {
             document.querySelectorAll('.sync').forEach(inp => {
                 inp.oninput = (e) => {
@@ -660,10 +746,24 @@
                 <div class="r-section">
                     <div class="r-section-title">Education</div>
                     <div id="view-education-list">
-                        ${resumeData.education.map(edu => `
+                        ${resumeData.education.length > 0 ? resumeData.education.map(edu => `
                             <div class="r-item">
                                 <div class="r-item-head"><span>${edu.school || 'School Name'}</span> <span>${edu.year || '2020'}</span></div>
                                 <div class="r-item-sub">${edu.degree || 'Degree Title'}</div>
+                            </div>
+                        `).join('') : '<div style="font-size:12px; color:#94a3b8;">No education added</div>'}
+                    </div>
+                </div>
+            `;
+
+            const projHTML = `
+                <div class="r-section">
+                    <div class="r-section-title">Projects</div>
+                    <div id="view-projects-list">
+                        ${resumeData.projects.map(p => `
+                            <div class="r-item">
+                                <div class="r-item-head">${p.name || 'Project Name'}</div>
+                                <div class="r-item-desc">${p.desc || 'Project details...'}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -673,7 +773,7 @@
             const skillsHTML = `
                 <div class="r-section">
                     <div class="r-section-title">Skills</div>
-                    <div style="font-size:12.5px; line-height:1.6;">${resumeData.skills || "Add your skills..."}</div>
+                    <div style="font-size:12.5px; line-height:1.6; color:#334155;">${resumeData.skills || "Add your skills..."}</div>
                 </div>
             `;
 
@@ -689,16 +789,17 @@
                             ${t === 'tpl-startup' ? headerHTML : ''}
                             ${summaryHTML}
                             ${expHTML}
+                            ${projHTML}
                         </div>
                     </div>
                 `;
             } else {
                 html = `
                     ${headerHTML}
-                    <div class="r-main">
+                    <div class="r-main" style="padding: 40px 60px;">
                         ${summaryHTML}
-                        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:40px;">
-                            <div>${expHTML}</div>
+                        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:50px;">
+                            <div>${expHTML} ${projHTML}</div>
                             <div>${eduHTML} ${skillsHTML}</div>
                         </div>
                     </div>
@@ -754,8 +855,12 @@
 
         window.onload = () => {
             const s = localStorage.getItem('qd-res-v6');
-            if(s) resumeData = JSON.parse(s);
+            if(s) {
+                const parsed = JSON.parse(s);
+                resumeData = {...resumeData, ...parsed};
+            }
             bindSync(); renderAll();
+            ['experience', 'education', 'projects'].forEach(t => renderForms(t));
         };
     </script>
 </body>
