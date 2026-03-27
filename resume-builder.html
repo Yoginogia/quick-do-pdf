@@ -100,11 +100,11 @@
             box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2);
         }
         .ai-ideas {
-            bottom: -20px; right: -40px; background: #fff; border: 1px solid #eee; border-radius: 12px;
+            bottom: -15px; right: -40px; background: #fff; border: 1px solid #eee; border-radius: 12px;
             padding: 20px; width: 260px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
-        .ai-ideas h5 { font-size: 12px; color: #00A3FF; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
-        .ai-tip { font-size: 11px; font-weight: 600; color: #475569; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+        .ai-ideas h5 { font-size: 12px; color: #00A3FF; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .ai-tip { font-size: 11px; font-weight: 600; color: #475569; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
         .ai-tip .icon { min-width: 16px; height: 16px; background: #e0f2fe; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #00A3FF; font-size: 10px; }
 
         /* OVERLAYS */
@@ -112,15 +112,58 @@
         .overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; }
         .overlay-content { background: var(--bg); padding: 40px; border-radius: 24px; max-width: 450px; width: 100%; border: 1px solid var(--border); }
 
-        /* EDITOR UI (Inherited but lightly updated) */
+        /* EDITOR UI */
         .editor-container { width: 100%; height: 100%; display: grid; grid-template-columns: 320px 1fr 1fr; }
-        .editor-sidebar { border-right: 1px solid var(--border); background: var(--surface); padding: 30px 20px; }
+        .editor-sidebar { border-right: 1px solid var(--border); background: var(--surface); padding: 30px 20px; display: flex; flex-direction: column; gap: 8px; }
         .step-btn {
-            padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; cursor: pointer;
-            font-weight: 600; font-size: 14px; transition: 0.2s; color: var(--muted);
+            padding: 12px 16px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px;
+            font-weight: 600; font-size: 14px; color: var(--muted); transition: 0.2s;
         }
+        .step-btn:hover { background: rgba(0,0,0,0.05); }
         .step-btn.active { background: #00A3FF; color: #fff; }
-        .step-btn:hover:not(.active) { background: rgba(0,0,0,0.05); }
+
+        .strength-meter { margin-top: auto; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 16px; }
+        .strength-bar { height: 6px; background: var(--border); border-radius: 10px; margin-top: 8px; overflow: hidden; }
+        .strength-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
+
+        .editor-form { padding: 40px; overflow-y: auto; height: 100%; border-right: 1px solid var(--border); background: var(--bg); }
+        .form-title { font-size: 24px; font-weight: 900; margin-bottom: 24px; }
+        
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-group label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+        .form-input, .form-textarea {
+            width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border);
+            background: rgba(0,0,0,0.03); color: var(--text); font-size: 14px; outline: none; transition: 0.3s;
+        }
+        body.dark .form-input, body.dark .form-textarea { background: rgba(255,255,255,0.05); }
+        .form-input:focus, .form-textarea:focus { border-color: #00A3FF; background: var(--bg); shadow: 0 0 0 4px rgba(0, 163, 255, 0.1); }
+        .form-textarea { min-height: 120px; resize: vertical; }
+
+        .preview-pane { height: 100%; overflow-y: auto; background: #e2e8f0; padding: 50px; display: flex; justify-content: center; }
+        body.dark .preview-pane { background: #111; }
+        
+        #resume-canvas {
+            width: 210mm; min-height: 297mm; background: #fff; color: #000;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.2); transition: 0.3s; transform-origin: top center;
+            padding: 50px; box-sizing: border-box;
+        }
+
+        /* RESUME PREVIEW STYLES */
+        .r-name { font-size: 32px; font-weight: 900; margin-bottom: 5px; }
+        .r-contact { display: flex; flex-wrap: wrap; gap: 15px; color: #666; font-size: 12px; margin-bottom: 30px; }
+        .r-section-title { font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 15px; font-weight: 800; text-transform: uppercase; }
+        .r-item { margin-bottom: 20px; }
+        .r-item-head { display: flex; justify-content: space-between; font-weight: 800; font-size: 15px; margin-bottom: 2px; }
+        .r-item-sub { display: flex; justify-content: space-between; font-size: 13px; color: #444; font-weight: 700; margin-bottom: 5px; }
+        .r-item-desc { font-size: 13px; color: #333; line-height: 1.6; }
+
+        /* MODALS */
+        #ai-modal { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
+        .modal-body { background: var(--bg); border: 1px solid var(--border); padding: 40px; border-radius: 24px; width: 100%; max-width: 450px; text-align: center; }
+
+        .parsing-overlay { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0, 163, 255, 0.9); flex-direction: column; align-items: center; justify-content: center; color: #fff; text-align: center; }
+        .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; margin-bottom: 20px; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 1024px) {
             .hero { grid-template-columns: 1fr; text-align: center; }
@@ -129,21 +172,23 @@
             .hero-actions { justify-content: center; }
             .stats { justify-content: center; }
             h1 { font-size: 40px; }
+            .editor-container { grid-template-columns: 1fr; }
+            .editor-sidebar, .preview-pane { display: none; }
         }
     </style>
     <script src="theme.js"></script>
 </head>
 
-<body>
+<body class="theme-light">
     <header id="app-header">
         <a href="index.html" class="logo">Better Resume Builder</a>
         <div class="header-actions">
-            <!-- Dynamic Actions -->
+            <button class="btn btn-ghost" id="btn-back-tpl" onclick="switchView('template')">🎨 Templates</button>
             <button class="btn btn-blue hidden" id="btn-export" onclick="exportPDF()">Download PDF</button>
         </div>
     </header>
 
-    <!-- START SCREEN (BetterCV Styled) -->
+    <!-- START SCREEN -->
     <main id="view-start">
         <div class="hero">
             <div class="hero-left">
@@ -182,7 +227,6 @@
                     <div class="mock-line" style="width: 100%;"></div>
                     <div class="mock-line" style="width: 90%;"></div>
                     
-                    <!-- Floating Elements -->
                     <div class="floating tag-ats">✓ ATS Perfect</div>
                     <div class="floating ai-ideas">
                         <h5>✨ AI-powered ideas:</h5>
@@ -200,69 +244,311 @@
         </div>
     </main>
 
-    <!-- TEMPLATE SELECTION (Refined) -->
-    <main id="view-template" class="hidden" style="background: #f8fafc; flex-direction: column;">
-        <h2 style="margin-top: 50px; font-weight: 900; font-size: 32px;">Choose a Template</h2>
-        <div style="display:grid; grid-template-columns: repeat(4, 250px); gap: 30px; margin-top: 50px;">
-            <div class="resume-mock" style="width:250px; height:350px; border-radius:12px; cursor:pointer;" onclick="selectTemplate('tpl-modern')">
-                <div style="height:10px; background:#00A3FF; border-radius:4px; margin-bottom:10px;"></div>
-                <div style="font-weight:700; font-size:12px; border-top:1px solid #eee; padding-top:10px; text-align:center;">Modern / Clean</div>
+    <!-- TEMPLATE SELECTION -->
+    <main id="view-template" class="hidden" style="background: #f8fafc; flex-direction: column; overflow-y:auto; justify-content: flex-start; padding: 60px 20px;">
+        <h2 style="font-weight: 900; font-size: 32px; margin-bottom: 40px;">Choose a Template</h2>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; width:100%; max-width:1200px;">
+            <div class="resume-mock" style="width:100%; height:350px; cursor:pointer;" onclick="selectTemplate('tpl-modern')">
+                <div style="height:10px; background:#00A3FF; border-radius:4px; margin-bottom:20px;"></div>
+                <div style="font-weight:700; font-size:14px; text-align:center; padding-top:40px; color:#64748b;">Modern / Clean</div>
             </div>
-            <div class="resume-mock" style="width:250px; height:350px; border-radius:12px; cursor:pointer;" onclick="selectTemplate('tpl-classic')">
-                <div style="height:1px; background:#333; margin-bottom:15px;"></div>
-                <div style="font-weight:700; font-size:12px; text-align:center;">Classic / Serif</div>
+            <div class="resume-mock" style="width:100%; height:350px; cursor:pointer;" onclick="selectTemplate('tpl-classic')">
+                <div style="height:2px; background:#333; margin-bottom:20px;"></div>
+                <div style="font-weight:700; font-size:14px; text-align:center; padding-top:40px; color:#64748b;">Classic / Serif</div>
             </div>
-            <!-- More templates... -->
+            <div class="resume-mock" style="width:100%; height:350px; cursor:pointer;" onclick="selectTemplate('tpl-executive')">
+                <div style="display:flex; height:100%; margin-top:-40px; margin-left:-40px; width:calc(100% + 80px);">
+                    <div style="width:30%; background:#f1f5f9; height:100%;"></div>
+                </div>
+                <div style="position:absolute; bottom:20px; left:0; width:100%; font-weight:700; font-size:14px; text-align:center; color:#64748b;">Executive</div>
+            </div>
+            <div class="resume-mock" style="width:100%; height:350px; cursor:pointer;" onclick="selectTemplate('tpl-creative')">
+                <div style="height:20px; background:linear-gradient(90deg, #00A3FF, #ff2a5f); margin-top:-40px; margin-left:-40px; width:calc(100% + 80px);"></div>
+                <div style="font-weight:700; font-size:14px; text-align:center; padding-top:40px; color:#64748b;">Creative</div>
+            </div>
         </div>
     </main>
 
-    <!-- EDITOR (Main App) -->
+    <!-- EDITOR -->
     <main id="view-editor" class="hidden">
-        <!-- New Editor Code Inherited and Updated -->
-        <!-- Logic stays the same to ensure AI parsing works -->
+        <div class="editor-container">
+            <div class="editor-sidebar">
+                <div class="step-btn active" onclick="jumpTo(0)" data-idx="0">👤 Personal</div>
+                <div class="step-btn" onclick="jumpTo(1)" data-idx="1">✍️ Summary</div>
+                <div class="step-btn" onclick="jumpTo(2)" data-idx="2">💼 Experience</div>
+                <div class="step-btn" onclick="jumpTo(3)" data-idx="3">🚀 Projects</div>
+                <div class="step-btn" onclick="jumpTo(4)" data-idx="4">🎓 Education</div>
+                <div class="step-btn" onclick="jumpTo(5)" data-idx="5">🛠️ Skills & More</div>
+                
+                <div class="strength-meter">
+                    <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800;">
+                        <span>Resume Score</span>
+                        <span id="score-val">0%</span>
+                    </div>
+                    <div class="strength-bar"><div class="strength-fill" id="score-fill"></div></div>
+                </div>
+            </div>
+
+            <div class="editor-form">
+                <!-- STEP 0 -->
+                <div class="wiz-step" id="step-0">
+                    <div class="form-title">Personal Info</div>
+                    <div class="input-group"><label>Full Name</label><input type="text" class="form-input sync" data-key="name"></div>
+                    <div class="input-group"><label>Email</label><input type="email" class="form-input sync" data-key="email"></div>
+                    <div class="input-group"><label>Phone</label><input type="text" class="form-input sync" data-key="phone"></div>
+                    <div class="input-group"><label>Location</label><input type="text" class="form-input sync" data-key="location"></div>
+                </div>
+                <!-- STEP 1 -->
+                <div class="wiz-step hidden" id="step-1">
+                    <div class="form-title">Summary</div>
+                    <div class="input-group">
+                        <label>Highlights</label>
+                        <textarea class="form-textarea sync" data-key="summary"></textarea>
+                    </div>
+                </div>
+                <!-- STEP 2 -->
+                <div class="wiz-step hidden" id="step-2">
+                    <div class="form-title">Experience <button class="btn btn-blue" style="padding:4px 12px; font-size:11px;" onclick="addItem('experience')">+ Add</button></div>
+                    <div id="experience-form-list"></div>
+                </div>
+                <!-- STEP 3 -->
+                <div class="wiz-step hidden" id="step-3">
+                    <div class="form-title">Projects <button class="btn btn-blue" style="padding:4px 12px; font-size:11px;" onclick="addItem('projects')">+ Add</button></div>
+                    <div id="projects-form-list"></div>
+                </div>
+                <!-- STEP 4 -->
+                <div class="wiz-step hidden" id="step-4">
+                    <div class="form-title">Education <button class="btn btn-blue" style="padding:4px 12px; font-size:11px;" onclick="addItem('education')">+ Add</button></div>
+                    <div id="education-form-list"></div>
+                </div>
+                <!-- STEP 5 -->
+                <div class="wiz-step hidden" id="step-5">
+                    <div class="form-title">Skills & Languages</div>
+                    <div class="input-group"><label>Skills</label><textarea class="form-textarea sync" data-key="skills"></textarea></div>
+                    <div class="input-group"><label>Languages</label><input type="text" class="form-input sync" data-key="languages"></div>
+                </div>
+
+                <div style="margin-top:40px; display:flex; gap:15px;">
+                    <button id="btn-prev" class="btn btn-ghost hidden" onclick="moveStep(-1)">← Back</button>
+                    <button id="btn-next" class="btn btn-blue" onclick="moveStep(1)">Next Step →</button>
+                </div>
+            </div>
+
+            <div class="preview-pane">
+                <div id="resume-canvas" class="tpl-modern">
+                    <div class="r-head">
+                        <div class="r-name" id="view-name">John Doe</div>
+                        <div class="r-contact"><span id="view-email">email@example.com</span> | <span id="view-phone">+1 234</span></div>
+                    </div>
+                    <div class="r-section"><div class="r-section-title">Summary</div><div class="r-item-desc" id="view-summary">...</div></div>
+                    <div class="r-section"><div class="r-section-title">Experience</div><div id="view-experience-list"></div></div>
+                    <div class="r-section"><div class="r-section-title">Projects</div><div id="view-projects-list"></div></div>
+                    <div class="r-section"><div class="r-section-title">Education</div><div id="view-education-list"></div></div>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <div class="overlay" id="parsing-overlay">
-        <div style="text-align: center; color: white;">
-            <h2>AI is analyzing your resume...</h2>
-            <p>Wait a moment while we build your professional profile.</p>
+    <div id="ai-modal">
+        <div class="modal-body">
+            <h2>✨ AI Key Required</h2>
+            <p style="color:var(--muted); margin-bottom:30px;">Input Gemini Key to parse PDF.</p>
+            <input type="password" id="apiKeyInp" class="form-input" placeholder="Gemini API Key">
+            <button class="btn btn-blue" style="width:100%; margin-top:20px;" onclick="saveKey()">Save & Continue</button>
         </div>
     </div>
 
+    <div class="parsing-overlay" id="parsing-overlay">
+        <div class="loader"></div>
+        <h2>AI Parsing in Progress...</h2>
+    </div>
+
     <script>
-        // Logic from previous version refined
+        let curStep = 0;
         let resumeData = {
-            name: '', email: '', phone: '', location: '', summary: '',
+            name: '', email: '', phone: '', location: '', summary: '', skills: '', languages: '',
             template: 'tpl-modern',
-            experience: [], education: []
+            experience: [], education: [], projects: []
         };
 
-        function switchView(viewId) {
-            document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
-            document.getElementById(`view-${viewId}`).classList.remove('hidden');
-            if(viewId === 'editor') document.getElementById('btn-export').classList.remove('hidden');
+        function init() {
+            const saved = localStorage.getItem('qd-res-v4');
+            if (saved) {
+                resumeData = JSON.parse(saved);
+                renderAll();
+                updateScore();
+            }
+            bindSync();
         }
 
-        function triggerFileUpload() { document.getElementById('resume-upload').click(); }
+        function switchView(vid) {
+            document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
+            document.getElementById(`view-${vid}`).classList.remove('hidden');
+            if(vid === 'editor') document.getElementById('btn-export').classList.remove('hidden');
+            else document.getElementById('btn-export').classList.add('hidden');
+        }
 
-        // Reuse previous logic for handleFileUpload, selectTemplate, etc.
+        function jumpTo(idx) {
+            document.querySelectorAll('.wiz-step').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`step-${idx}`).classList.remove('hidden');
+            document.querySelector(`[data-idx="${idx}"]`).classList.add('active');
+            curStep = idx;
+            document.getElementById('btn-prev').classList.toggle('hidden', idx === 0);
+            document.getElementById('btn-next').innerText = idx === 5 ? "Finish Preview" : "Next Step →";
+        }
+
+        function moveStep(dir) {
+            const n = curStep + dir;
+            if(n >= 0 && n <= 5) jumpTo(n);
+        }
+
+        function bindSync() {
+            document.querySelectorAll('.sync').forEach(inp => {
+                inp.oninput = (e) => {
+                    const k = e.target.dataset.key;
+                    resumeData[k] = e.target.value;
+                    const v = document.getElementById(`view-${k}`);
+                    if(v) v.innerText = e.target.value || "...";
+                    updateScore();
+                    save();
+                };
+            });
+        }
+
         function selectTemplate(tpl) {
             resumeData.template = tpl;
+            const c = document.getElementById('resume-canvas');
+            c.className = tpl;
             switchView('editor');
         }
 
+        function addItem(t) {
+            const id = Date.now();
+            if(t === 'experience') resumeData[t].push({id, title:'', company:'', date:'', desc:''});
+            else if(t === 'projects') resumeData[t].push({id, name:'', link:'', desc:''});
+            else resumeData[t].push({id, degree:'', school:'', year:''});
+            renderForms(t); renderPreview(t); save();
+        }
+
+        function removeItem(t, id) {
+            resumeData[t] = resumeData[t].filter(i => i.id !== id);
+            renderForms(t); renderPreview(t); save();
+        }
+
+        function updateItem(t, id, k, v) {
+            const idx = resumeData[t].findIndex(i => i.id === id);
+            resumeData[t][idx][k] = v;
+            renderPreview(t);
+            save();
+        }
+
+        function renderForms(t) {
+            const c = document.getElementById(`${t}-form-list`);
+            c.innerHTML = '';
+            resumeData[t].forEach(item => {
+                const h = t === 'experience' ? 
+                    `<div class="input-group" style="background:rgba(0,0,0,0.02); padding:15px; border-radius:10px; margin-bottom:10px;">
+                        <span style="float:right; cursor:pointer;" onclick="removeItem('experience', ${item.id})">✕</span>
+                        <label>Title</label><input type="text" class="form-input" value="${item.title}" oninput="updateItem('experience', ${item.id}, 'title', this.value)">
+                        <label>Company</label><input type="text" class="form-input" value="${item.company}" oninput="updateItem('experience', ${item.id}, 'company', this.value)">
+                        <label>Date</label><input type="text" class="form-input" value="${item.date}" oninput="updateItem('experience', ${item.id}, 'date', this.value)">
+                        <label>Desc</label><textarea class="form-textarea" oninput="updateItem('experience', ${item.id}, 'desc', this.value)">${item.desc}</textarea>
+                    </div>` : t === 'projects' ?
+                    `<div class="input-group">
+                        <span style="float:right; cursor:pointer;" onclick="removeItem('projects', ${item.id})">✕</span>
+                        <label>Name</label><input type="text" class="form-input" value="${item.name}" oninput="updateItem('projects', ${item.id}, 'name', this.value)">
+                        <label>Desc</label><textarea class="form-textarea" oninput="updateItem('projects', ${item.id}, 'desc', this.value)">${item.desc}</textarea>
+                    </div>` :
+                    `<div class="input-group">
+                        <span style="float:right; cursor:pointer;" onclick="removeItem('education', ${item.id})">✕</span>
+                        <label>Degree</label><input type="text" class="form-input" value="${item.degree}" oninput="updateItem('education', ${item.id}, 'degree', this.value)">
+                        <label>School</label><input type="text" class="form-input" value="${item.school}" oninput="updateItem('education', ${item.id}, 'school', this.value)">
+                    </div>`;
+                c.insertAdjacentHTML('beforeend', h);
+            });
+        }
+
+        function renderPreview(t) {
+            const c = document.getElementById(`view-${t}-list`);
+            c.innerHTML = '';
+            resumeData[t].forEach(item => {
+                const h = t === 'experience' ? 
+                    `<div class="r-item"><div class="r-item-head"><span>${item.title}</span><span>${item.date}</span></div><div class="r-item-sub">${item.company}</div><div class="r-item-desc">${item.desc}</div></div>` :
+                    t === 'projects' ? `<div class="r-item"><div class="r-item-head">${item.name}</div><div class="r-item-desc">${item.desc}</div></div>` :
+                    `<div class="r-item"><div class="r-item-head"><span>${item.degree}</span></div><div class="r-item-sub">${item.school}</div></div>`;
+                c.insertAdjacentHTML('beforeend', h);
+            });
+        }
+
+        function renderAll() {
+            Object.keys(resumeData).forEach(k => {
+                if(typeof resumeData[k] === 'string') {
+                    const i = document.querySelector(`[data-key="${k}"]`);
+                    if(i) i.value = resumeData[k];
+                    const v = document.getElementById(`view-${k}`);
+                    if(v) v.innerText = resumeData[k] || "...";
+                }
+            });
+            ['experience', 'education', 'projects'].forEach(t => { renderForms(t); renderPreview(t); });
+        }
+
+        function updateScore() {
+            let s = 0;
+            if(resumeData.name) s += 20; if(resumeData.experience.length) s += 30; if(resumeData.education.length) s += 20; if(resumeData.summary) s += 30;
+            document.getElementById('score-val').innerText = s + "%";
+            document.getElementById('score-fill').style.width = s + "%";
+        }
+
+        function save() { localStorage.setItem('qd-res-v4', JSON.stringify(resumeData)); }
+
+        // AI UPLOAD LOGIC
+        function triggerFileUpload() { document.getElementById('resume-upload').click(); }
+
         async function handleFileUpload(e) {
-            // Placeholder for the AI logic implemented earlier
+            const file = e.target.files[0]; if(!file) return;
+            const key = localStorage.getItem('gemini_api_key');
+            if(!key) { document.getElementById('ai-modal').style.display = 'flex'; return; }
             document.getElementById('parsing-overlay').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('parsing-overlay').style.display = 'none';
-                switchView('template');
-            }, 2000);
+            
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                let fullText = '';
+                for(let i=1; i<=pdf.numPages; i++){
+                    const page = await pdf.getPage(i);
+                    const contents = await page.getTextContent();
+                    fullText += contents.items.map(it => it.str).join(' ');
+                }
+                const parsed = await callAI(fullText, key);
+                if(parsed) { resumeData = {...resumeData, ...parsed}; renderAll(); updateScore(); switchView('template'); }
+            } catch(e) { alert("Error parsing PDF."); } finally { document.getElementById('parsing-overlay').style.display = 'none'; }
+        }
+
+        async function callAI(text, key) {
+            const prompt = `Map this resume text to JSON: name, email, phone, summary, experience (array: title, company, date, desc), education (array: degree, school, year). Text: ${text}`;
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] })
+                });
+                const data = await res.json();
+                const jsonText = data.candidates[0].content.parts[0].text.match(/\{[\s\S]*\}/)[0];
+                return JSON.parse(jsonText);
+            } catch(e) { return null; }
+        }
+
+        function saveKey() {
+            const k = document.getElementById('apiKeyInp').value;
+            if(k) { localStorage.setItem('gemini_api_key', k); document.getElementById('ai-modal').style.display = 'none'; }
         }
 
         function exportPDF() {
-            // html2pdf logic
+            const opt = { margin: 0, filename: 'BetterResume.pdf', html2canvas: { scale: 3 }, jsPDF: { format: 'a4' } };
+            html2pdf().set(opt).from(document.getElementById('resume-canvas')).save();
         }
+
+        init();
     </script>
 </body>
 </html>
