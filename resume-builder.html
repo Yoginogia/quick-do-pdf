@@ -82,10 +82,11 @@
             transition: 0.3s; cursor: pointer; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
         }
         .template-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-        .template-preview { height: 380px; background: #f8fafc; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .tpl-mock { width: 100%; height: 100%; background: #fff; border: 1px solid #eee; box-shadow:0 10px 20px rgba(0,0,0,0.05); padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .tpl-line { height: 4px; background: #f1f5f9; border-radius: 2px; }
-        .template-card h4 { padding: 16px; font-weight: 800; font-size: 15px; }
+        .template-preview { height: 320px; background: #f1f5f9; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; padding: 30px; }
+        .tpl-mock { width: 100%; height: 100%; background: #fff; border: 1px solid #ddd; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; }
+        .tpl-line { height: 4px; background: #e2e8f0; border-radius: 2px; }
+        .template-card h4 { padding: 16px; font-weight: 800; font-size: 15px; color: var(--text); }
+        .tpl-mock::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: var(--primary); }
 
         /* CHOICE MODAL */
         #choice-modal { position: fixed; inset:0; z-index: 2000; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; }
@@ -387,13 +388,28 @@
                     fullText = res.value;
                 } else { fullText = await file.text(); }
 
+                if (!fullText.trim()) throw new Error("No text found in file.");
+
                 const parsed = await callAI(fullText, key);
                 if(parsed) {
+                    // Update resumeData and explicitly handle collections
                     resumeData = {...resumeData, ...parsed};
-                    renderAll(); switchView('editor');
+                    if (parsed.experience) resumeData.experience = parsed.experience.map(exp => ({id: Date.now() + Math.random(), ...exp}));
+                    if (parsed.education) resumeData.education = parsed.education.map(edu => ({id: Date.now() + Math.random(), ...edu}));
+                    
+                    renderAll(); 
+                    ['experience', 'education', 'projects'].forEach(t => renderForms(t));
+                    switchView('editor');
+                    alert("Resume parsed successfully!");
+                } else {
+                    throw new Error("AI could not extract data. Please try again or fill manually.");
                 }
-            } catch(e) { alert("Error parsing file."); }
-            finally { document.getElementById('parsing-overlay').classList.add('hidden'); }
+            } catch(e) { 
+                alert("Error: " + e.message); 
+                console.error(e);
+            } finally { 
+                document.getElementById('parsing-overlay').classList.add('hidden'); 
+            }
         }
 
         async function callAI(text, key) {
