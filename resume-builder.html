@@ -410,6 +410,7 @@
                     ['experience', 'education', 'projects'].forEach(t => renderForms(t));
                     switchView('editor');
                     alert("Resume parsed successfully!");
+                }
             } catch(e) { 
                 document.getElementById('parsing-overlay').classList.add('hidden'); 
                 setTimeout(() => alert("Error: " + e.message), 100);
