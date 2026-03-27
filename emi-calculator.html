@@ -388,6 +388,7 @@
             document.getElementById('r-interest').innerText = document.getElementById('res-interest').innerText;
             document.getElementById('r-total').innerText = document.getElementById('res-total').innerText;
             
+            const P = parseFloat(amtInput.value);
             const R = parseFloat(rateInput.value) / 12 / 100;
             const N = parseFloat(tenureInput.value) * 12;
             const emi = P * R * Math.pow(1 + R, N) / (Math.pow(1 + R, N) - 1);
@@ -401,8 +402,9 @@
                 margin: 10,
                 filename: 'EMI_Report_QuickDo.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
