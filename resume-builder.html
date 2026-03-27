@@ -175,7 +175,8 @@
 <body>
     <header>
         <a href="index.html" class="logo">Quick Resume Builder</a>
-        <div class="header-actions">
+        <div class="header-actions" style="display:flex; gap:10px;">
+            <button class="btn" style="background:rgba(0,163,255,0.1); color:var(--primary); padding: 8px 16px; border:none;" onclick="openAIModal()">✨ AI Setup</button>
             <!-- Download Button Hidden on Landing -->
             <button class="btn btn-primary hidden" id="header-dl" style="padding: 8px 16px;" onclick="exportPDF()">Download PDF</button>
         </div>
@@ -389,12 +390,24 @@
     </div>
 
     <!-- API Modal -->
-    <div id="ai-modal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:5000;">
-        <div class="choice-modal-body">
-            <h3>✨ Enable AI Features</h3>
-            <p style="margin: 15px 0;">Enter Gemini API Key to continue.</p>
-            <input type="password" id="gemKey" class="form-input" style="border:1px solid #ddd; padding:10px; border-radius:10px;">
-            <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="saveKey()">Save Key</button>
+    <div id="ai-modal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; z-index:5000;">
+        <div class="choice-modal-body" style="max-width: 400px; padding: 40px; text-align: left;">
+            <h3 style="font-weight: 900; font-size: 1.5rem; margin-bottom: 10px;">✨ AI Settings</h3>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--muted); line-height: 1.6;">
+                Enter your Gemini API key to enable instant AI resume parsing. Your key is stored locally on your device.
+            </p>
+            
+            <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; display: block;">Gemini API Key</label>
+            <input type="password" id="gemKey" class="form-input" placeholder="Enter API Key..." style="border: 1.5px solid var(--border); padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 15px;">
+            
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size: 12px; color: var(--primary); font-weight: 800; text-decoration: none; display: block; margin-bottom: 30px;">
+                🔗 Get your free API key here (Google AI Studio)
+            </a>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="saveKey()">Save Key</button>
+                <button class="btn" style="flex: 1; border: 1.5px solid var(--border);" onclick="closeAIModal()">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -553,7 +566,23 @@
         }
 
         function save() { localStorage.setItem('qd-res-v6', JSON.stringify(resumeData)); }
-        function saveKey() { localStorage.setItem('gemini_api_key', document.getElementById('gemKey').value); document.getElementById('ai-modal').classList.add('hidden'); }
+        
+        function openAIModal() { 
+            document.getElementById('ai-modal').classList.remove('hidden'); 
+            const k = localStorage.getItem('gemini_api_key');
+            if(k) document.getElementById('gemKey').value = k;
+        }
+
+        function closeAIModal() { document.getElementById('ai-modal').classList.add('hidden'); }
+
+        function saveKey() { 
+            const k = document.getElementById('gemKey').value.trim();
+            if(!k) { alert("Please enter a valid key."); return; }
+            localStorage.setItem('gemini_api_key', k); 
+            alert("AI Key saved successfully!");
+            closeAIModal(); 
+        }
+
         function exportPDF() { html2pdf().set({margin:0, filename:'Resume.pdf', html2canvas:{scale:2}, jsPDF:{format:'a4'}}).from(document.getElementById('resume-canvas')).save(); }
 
         window.onload = () => {
