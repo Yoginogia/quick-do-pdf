@@ -140,6 +140,25 @@
         .repeatable-entry:last-child { border: none; }
         .remove-icon { position: absolute; right: 0; top: 0; color: var(--c1); cursor: pointer; font-size: 12px; font-weight: bold; }
 
+        /* Template: Modern (Default) */
+        #resume-canvas.tpl-modern .r-name { font-size: 28px; font-weight: 800; text-transform: uppercase; border-bottom: 3px solid #000; display: inline-block; padding-bottom: 5px; margin-bottom: 8px; }
+        #resume-canvas.tpl-modern .r-section-title { font-size: 14px; font-weight: 800; text-transform: uppercase; color: #000; background: #f0f0f0; padding: 4px 8px; margin-bottom: 12px; display: block; border-left: 5px solid #000; }
+
+        /* Template: Classic */
+        #resume-canvas.tpl-classic { font-family: 'Times New Roman', Times, serif; }
+        #resume-canvas.tpl-classic .r-header { text-align: center; border-bottom: 1px solid #000; padding-bottom: 10px; }
+        #resume-canvas.tpl-classic .r-name { font-size: 32px; border:none; text-transform: none; }
+        #resume-canvas.tpl-classic .r-contact { justify-content: center; border-bottom: none; margin-bottom: 15px; }
+        #resume-canvas.tpl-classic .r-section-title { background: none; border-left: none; border-bottom: 1px solid #333; text-align: center; font-size: 16px; margin-bottom: 15px; }
+        #resume-canvas.tpl-classic .r-item-header { font-size: 15px; }
+
+        /* Template: Minimal */
+        #resume-canvas.tpl-minimal .r-name { font-size: 24px; border: none; color: #1a1a1a; margin-bottom: 4px; }
+        #resume-canvas.tpl-minimal .r-contact { gap: 8px; color: #666; margin-bottom: 30px; }
+        #resume-canvas.tpl-minimal .r-section-title { background: none; border-left: none; color: #1a73e8; font-size: 13px; font-weight: 700; border-bottom: 1px solid #eee; }
+        #resume-canvas.tpl-minimal .r-item-header { color: #1a1a1a; }
+        #resume-canvas.tpl-minimal .r-item-sub { color: #1a73e8; font-style: normal; }
+
         /* Modal */
         #ai-modal {
             display: none; position: fixed; inset: 0; z-index: 200;
@@ -160,6 +179,11 @@
     <header>
         <a href="index.html" class="logo">Quick Do Resume</a>
         <div class="header-actions">
+            <select id="tplSelect" class="btn" style="border-radius:6px; padding: 6px 10px;" onchange="changeTemplate(this.value)">
+                <option value="tpl-modern">Modern Template</option>
+                <option value="tpl-classic">Classic Template</option>
+                <option value="tpl-minimal">Minimal Template</option>
+            </select>
             <button class="theme-toggle-btn" id="themeToggle">🌙</button>
             <button class="btn primary" onclick="exportPDF()">Download PDF</button>
         </div>
@@ -249,6 +273,7 @@
     <script>
         let resumeData = {
             name: '', email: '', phone: '', location: '', link: '', summary: '', skills: '',
+            template: 'tpl-modern',
             experience: [], education: []
         };
 
@@ -260,6 +285,11 @@
             const saved = localStorage.getItem('qd-resume-v1');
             if (saved) {
                 resumeData = JSON.parse(saved);
+                if (resumeData.template) {
+                    const canvas = document.getElementById('resume-canvas');
+                    canvas.classList.add(resumeData.template);
+                    document.getElementById('tplSelect').value = resumeData.template;
+                }
                 renderAll();
             } else {
                 addItem('experience');
@@ -362,6 +392,14 @@
         }
 
         function save() { localStorage.setItem('qd-resume-v1', JSON.stringify(resumeData)); }
+
+        function changeTemplate(tpl) {
+            resumeData.template = tpl;
+            const canvas = document.getElementById('resume-canvas');
+            canvas.className = ''; 
+            canvas.classList.add(tpl);
+            save();
+        }
 
         function exportPDF() {
             const element = document.getElementById('resume-canvas');
