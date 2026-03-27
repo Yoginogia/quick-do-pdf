@@ -21,6 +21,7 @@
     <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
@@ -199,7 +200,7 @@
                 <div class="hero-actions">
                     <button class="btn btn-blue" onclick="switchView('template')">Create New Resume</button>
                     <button class="btn btn-ghost" onclick="triggerFileUpload()">Improve My Resume</button>
-                    <input type="file" id="resume-upload" class="hidden" accept=".pdf" onchange="handleFileUpload(event)">
+                    <input type="file" id="resume-upload" class="hidden" accept=".pdf,.docx,.html,.htm,.txt" onchange="handleFileUpload(event)">
                 </div>
 
                 <div class="stats">
@@ -509,20 +510,48 @@
             const file = e.target.files[0]; if(!file) return;
             const key = localStorage.getItem('gemini_api_key');
             if(!key) { document.getElementById('ai-modal').style.display = 'flex'; return; }
+            
             document.getElementById('parsing-overlay').style.display = 'flex';
             
             try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                const ext = file.name.split('.').pop().toLowerCase();
                 let fullText = '';
-                for(let i=1; i<=pdf.numPages; i++){
-                    const page = await pdf.getPage(i);
-                    const contents = await page.getTextContent();
-                    fullText += contents.items.map(it => it.str).join(' ');
+
+                if (ext === 'pdf') {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                    for(let i=1; i<=pdf.numPages; i++){
+                        const page = await pdf.getPage(i);
+                        const contents = await page.getTextContent();
+                        fullText += contents.items.map(it => it.str).join(' ');
+                    }
+                } else if (ext === 'docx') {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
+                    fullText = result.value;
+                } else if (ext === 'html' || ext === 'htm') {
+                    const text = await file.text();
+                    const doc = new DOMParser().parseFromString(text, 'text/html');
+                    fullText = doc.body.innerText;
+                } else if (ext === 'txt') {
+                    fullText = await file.text();
                 }
+
+                if (!fullText.trim()) throw new Error("Empty text");
+
                 const parsed = await callAI(fullText, key);
-                if(parsed) { resumeData = {...resumeData, ...parsed}; renderAll(); updateScore(); switchView('template'); }
-            } catch(e) { alert("Error parsing PDF."); } finally { document.getElementById('parsing-overlay').style.display = 'none'; }
+                if(parsed) { 
+                    resumeData = {...resumeData, ...parsed}; 
+                    renderAll(); 
+                    updateScore(); 
+                    switchView('template'); 
+                }
+            } catch(e) { 
+                console.error(e);
+                alert("Error parsing " + file.name + ". Try another format."); 
+            } finally { 
+                document.getElementById('parsing-overlay').style.display = 'none'; 
+            }
         }
 
         async function callAI(text, key) {
