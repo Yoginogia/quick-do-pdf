@@ -270,8 +270,20 @@
         </div>
         <div style="margin-top: 50px;">
             <h3>Amortization Schedule</h3>
-            <table id="report-table" style="width: 100%; border: 1px solid #eee; margin-top: 20px;">
-                <!-- Cloned from main table -->
+            <table style="width: 100%; border: 1px solid #eee; margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #eee; padding: 8px;">Month</th>
+                        <th style="border: 1px solid #eee; padding: 8px;">Opening Balance</th>
+                        <th style="border: 1px solid #eee; padding: 8px;">EMI</th>
+                        <th style="border: 1px solid #eee; padding: 8px;">Interest</th>
+                        <th style="border: 1px solid #eee; padding: 8px;">Principal</th>
+                        <th style="border: 1px solid #eee; padding: 8px;">Closing Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="report-table-body">
+                    <!-- Dynamic -->
+                </tbody>
             </table>
         </div>
     </div>
@@ -337,20 +349,19 @@
             });
         }
 
-        function updateTable(P, R, N, emi) {
-            const tableBody = document.getElementById('table-body');
+        function updateTable(P, R, N, emi, isFull = false) {
+            const tableBody = isFull ? document.getElementById('report-table-body') : document.getElementById('table-body');
             tableBody.innerHTML = '';
             
             let balance = P;
-            // Show only first 24 months to keep UI clean, full table for report
             for (let i = 1; i <= N; i++) {
                 const interestPayable = balance * R;
                 const principalPayable = emi - interestPayable;
                 const closingBalance = Math.max(0, balance - principalPayable);
 
-                if (i <= 24 || i === N) {
+                if (isFull || i <= 24 || i === N) {
                     const row = `<tr>
-                        <td>Month ${i}</td>
+                        <td>${i}</td>
                         <td>${formatCurrency(Math.round(balance))}</td>
                         <td>${formatCurrency(Math.round(emi))}</td>
                         <td>${formatCurrency(Math.round(interestPayable))}</td>
@@ -359,7 +370,7 @@
                     </tr>`;
                     tableBody.insertAdjacentHTML('beforeend', row);
                     
-                    if (i === 24 && N > 25) {
+                    if (!isFull && i === 24 && N > 25) {
                         tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan="6" style="text-align:center; color:var(--muted)">... showing first 2 years ...</td></tr>`);
                     }
                 }
@@ -377,10 +388,11 @@
             document.getElementById('r-interest').innerText = document.getElementById('res-interest').innerText;
             document.getElementById('r-total').innerText = document.getElementById('res-total').innerText;
             
-            // Full Table for PDF
-            const reportTable = document.getElementById('report-table');
-            const mainTable = document.getElementById('monthlyTable');
-            reportTable.innerHTML = mainTable.innerHTML;
+            const R = parseFloat(rateInput.value) / 12 / 100;
+            const N = parseFloat(tenureInput.value) * 12;
+            const emi = P * R * Math.pow(1 + R, N) / (Math.pow(1 + R, N) - 1);
+            
+            updateTable(P, R, N, emi, true); // Generate full table for report
 
             const element = document.getElementById('report-export');
             element.style.display = 'block';
