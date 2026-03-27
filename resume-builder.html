@@ -82,11 +82,17 @@
             transition: 0.3s; cursor: pointer; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
         }
         .template-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-        .template-preview { height: 320px; background: #f1f5f9; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; padding: 30px; }
-        .tpl-mock { width: 100%; height: 100%; background: #fff; border: 1px solid #ddd; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; }
-        .tpl-line { height: 4px; background: #e2e8f0; border-radius: 2px; }
-        .template-card h4 { padding: 16px; font-weight: 800; font-size: 15px; color: var(--text); }
-        .tpl-mock::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: var(--primary); }
+        .template-preview { height: 320px; background: #e2e8f0; border-bottom: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; padding: 25px; }
+        .tpl-mock { width: 100%; height: 100%; background: #fff; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; border: 1px solid #ddd; }
+        .tpl-line { height: 4px; background: #f1f5f9; border-radius: 2px; }
+        .template-card h4 { padding: 16px; font-weight: 800; font-size: 15px; background: #fff; border-top: 1px solid #f1f5f9; }
+        
+        /* Template Specific Coloring in Mockups */
+        .tpl-modern .tpl-mock::before { content:''; position:absolute; top:0; left:0; width:100%; height:8px; background: var(--primary); }
+        .tpl-classic .tpl-mock { border-top: 4px solid #333; }
+        .tpl-impact .tpl-mock { background: #0f172a; }
+        .tpl-impact .tpl-line { background: #334155; }
+        .tpl-creative .tpl-mock::before { content:''; position:absolute; top:0; left:0; width:100%; height:15px; background: linear-gradient(90deg, #00A3FF, #ff2a5f); }
 
         /* CHOICE MODAL */
         #choice-modal { position: fixed; inset:0; z-index: 2000; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; }
@@ -172,36 +178,36 @@
             <h1>Choose Your Style</h1>
             <p>You can change your template anytime during editing.</p>
             <div class="template-grid">
-                <div class="template-card" onclick="openChoiceModal('tpl-modern')">
-                    <div class="template-preview"><div class="tpl-mock"><div style="height:15px; background:var(--primary); margin-bottom:10px;"></div><div class="tpl-line" style="width:40%;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
+                <div class="template-card tpl-modern" onclick="openChoiceModal('tpl-modern')">
+                    <div class="template-preview"><div class="tpl-mock"><div class="tpl-line" style="width:40%;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
                     <h4>Modern Clean</h4>
                 </div>
-                <div class="template-card" onclick="openChoiceModal('tpl-classic')">
-                    <div class="template-preview"><div class="tpl-mock" style="border-top:5px solid #333;"><div class="tpl-line" style="width:60%; margin: 10px auto;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
+                <div class="template-card tpl-classic" onclick="openChoiceModal('tpl-classic')">
+                    <div class="template-preview"><div class="tpl-mock"><div class="tpl-line" style="width:60%; margin: 10px auto;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
                     <h4>Classic Executive</h4>
                 </div>
-                <div class="template-card" onclick="openChoiceModal('tpl-technical')">
-                    <div class="template-preview"><div class="tpl-mock"><div style="display:flex; gap:10px;"><div style="width:30%; height:100px; background:#f1f5f9;"></div><div style="flex:1;"><div class="tpl-line"></div><div class="tpl-line"></div><div class="tpl-line"></div></div></div></div></div>
+                <div class="template-card tpl-technical" onclick="openChoiceModal('tpl-technical')">
+                    <div class="template-preview"><div class="tpl-mock" style="border-left: 15px solid #00A3FF;"><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
                     <h4>Tech Master</h4>
                 </div>
-                <div class="template-card" onclick="openChoiceModal('tpl-minimal')">
-                    <div class="template-preview"><div class="tpl-mock" style="border-left:4px solid var(--primary);"><div class="tpl-line" style="width:50%;"></div><div class="tpl-line"></div></div></div>
+                <div class="template-card tpl-minimal" onclick="openChoiceModal('tpl-minimal')">
+                    <div class="template-preview"><div class="tpl-mock" style="padding: 30px;"><div class="tpl-line" style="width:30%;"></div><div class="tpl-line"></div></div></div>
                     <h4>Minimal Blue</h4>
                 </div>
-                <div class="template-card" onclick="openChoiceModal('tpl-impact')">
-                    <div class="template-preview"><div class="tpl-mock" style="background:#0f172a; color:#fff;"><div style="height:20px; background:var(--primary);"></div><div style="height:10px; background:#fff; margin:10px 0; width:40%;"></div></div></div>
+                <div class="template-card tpl-impact" onclick="openChoiceModal('tpl-impact')">
+                    <div class="template-preview"><div class="tpl-mock"><div style="height:20px; background:var(--primary);"></div><div style="height:5px; background:#fff; width:30%; margin-top:10px;"></div></div></div>
                     <h4>Bold Impact</h4>
                 </div>
-                <div class="template-card" onclick="openChoiceModal('tpl-academic')">
-                    <div class="template-preview"><div class="tpl-mock"><div style="text-align:center;"><div class="tpl-line" style="width:60%; margin:0 auto 10px;"></div></div><div class="tpl-line"></div><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
+                <div class="template-card tpl-academic" onclick="openChoiceModal('tpl-academic')">
+                    <div class="template-preview"><div class="tpl-mock" style="text-align:center;"><div class="tpl-line" style="width:50%; margin: 0 auto;"></div><div class="tpl-line"></div></div></div>
                     <h4>Academic CV</h4>
                 </div>
-                <div class="template-card" onclick="openChoiceModal('tpl-creative')">
-                    <div class="template-preview"><div class="tpl-mock"><div style="height:30px; background:linear-gradient(90deg, #00A3FF, #00d2ff); margin-top:-15px; margin-left:-15px; width:calc(100% + 30px);"></div><div class="tpl-line" style="margin-top:20px;"></div></div></div>
+                <div class="template-card tpl-creative" onclick="openChoiceModal('tpl-creative')">
+                    <div class="template-preview"><div class="tpl-mock"><div class="tpl-line" style="margin-top:20px;"></div><div class="tpl-line"></div></div></div>
                     <h4>Creative Vibe</h4>
                 </div>
-                 <div class="template-card" onclick="openChoiceModal('tpl-executive')">
-                    <div class="template-preview"><div class="tpl-mock"><div style="display:flex; height:100%;"><div style="width:30%; background:#f8fafc; border-right:1px solid #eee;"></div><div style="flex:1; padding-left:10px;"><div class="tpl-line"></div></div></div></div></div>
+                 <div class="template-card tpl-executive" onclick="openChoiceModal('tpl-executive')">
+                    <div class="template-preview"><div class="tpl-mock"><div style="display:flex; height:100%;"><div style="width:25%; background:#f8fafc; border-right:1px solid #eee;"></div><div style="flex:1; padding-left:10px;"><div class="tpl-line"></div></div></div></div></div>
                     <h4>Professional Split</h4>
                 </div>
             </div>
@@ -413,16 +419,27 @@
         }
 
         async function callAI(text, key) {
-            const prompt = `Convert resume text to JSON: fname, lname, title, email, phone, summary, experience (array: title, company, desc), education (array: degree, school). Text: ${text}`;
+            const prompt = `Convert resume text to a raw JSON object with these keys: fname, lname, title, email, phone, summary, experience (array: title, company, desc), education (array: degree, school). Strictly follow JSON syntax. Do NOT use markdown code blocks. Output ONLY raw JSON: ${text}`;
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
                     method:'POST', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] })
                 });
                 const data = await res.json();
-                const jsonText = data.candidates[0].content.parts[0].text;
-                return JSON.parse(jsonText.match(/\{[\s\S]*\}/)[0]);
-            } catch(e) { return null; }
+                if (!data.candidates || !data.candidates[0].content.parts[0].text) throw new Error("API returned an empty response.");
+                
+                let jsonText = data.candidates[0].content.parts[0].text.trim();
+                // Handle possible markdown blocks
+                const match = jsonText.match(/\{[\s\S]*\}/);
+                if (!match) {
+                    console.error("No JSON block found in AI response:", jsonText);
+                    return null;
+                }
+                return JSON.parse(match[0]);
+            } catch(e) { 
+                console.error("AI Extraction Error:", e);
+                return null; 
+            }
         }
 
         function jumpTo(idx) {
