@@ -19,6 +19,7 @@
     <title>AI Resume Builder | 8+ Professional Templates & Smart AI Parsing</title>
 
     <!-- Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -69,23 +70,37 @@
             cursor: pointer; transition: 0.3s; border: 2px solid transparent; display: inline-flex; align-items: center; gap: 8px;
         }
         .btn-primary { background: var(--primary); color: #fff; }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 163, 255, 0.2); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 163, 255, 0.2); }        /* PREMIUM TEMPLATE GRID SECTION */
+        .template-screen { width: 100%; height: 100%; overflow-y: auto; padding: 60px 40px; text-align: center; background: #f3f4f6; }
+        .template-screen h1 { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 900; margin-bottom: 20px; }
+        .template-screen p { font-size: 16px; color: var(--muted); margin-bottom: 50px; }
 
-        /* TEMPLATE GRID SECTION */
-        .template-screen { width: 100%; height: 100%; overflow-y: auto; padding: 60px 20px; text-align: center; background: #fff; }
+        .category-bar { display: flex; justify-content: center; gap: 30px; margin-bottom: 60px; }
+        .cat-btn { font-weight: 700; font-size: 14px; color: var(--muted); cursor: pointer; padding-bottom: 8px; border-bottom: 2px solid transparent; transition: 0.3s; }
+        .cat-btn.active { color: var(--primary); border-color: var(--primary); }
+
         .template-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 40px;
-            max-width: 1400px; margin: 50px auto;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 60px;
+            max-width: 1400px; margin: 0 auto 50px auto;
         }
         .template-card {
-            background: #fff; border: 1px solid #efefef; border-radius: 20px; overflow: hidden;
-            transition: 0.3s; cursor: pointer; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            background: #fff; border-radius: 4px; overflow: hidden;
+            transition: 0.4s; cursor: pointer; position: relative;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.08); display: flex; flex-direction: column;
         }
-        .template-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-        .template-preview { height: 320px; background: #f1f5f9; border-bottom: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; padding: 25px; transition: 0.3s; }
-        .tpl-mock { width: 100%; height: 100%; background: #fff; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); padding: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; border: 1.5px solid #cbd5e1; }
-        .tpl-line { height: 5px; background: #94a3b8; border-radius: 4px; opacity: 0.8; }
-        .template-card h4 { padding: 16px; font-weight: 900; font-size: 15px; background: #fff; border-top: 1px solid #f1f5f9; color: var(--text); }
+        .template-card:hover { transform: translateY(-12px); box-shadow: 0 60px 120px rgba(0,0,0,0.15); }
+
+        .template-preview { height: 420px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 30px; position: relative; }
+        .hover-overlay {
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.05); backdrop-filter: blur(2px);
+            display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; z-index: 10;
+        }
+        .template-card:hover .hover-overlay { opacity: 1; }
+        .btn-use { background: var(--primary); color: #fff; padding: 12px 24px; border-radius: 100px; font-weight: 800; font-size: 13px; transform: scale(0.9); transition: 0.3s; }
+        .template-card:hover .btn-use { transform: scale(1); }
+
+        .template-card h4 { padding: 16px; font-weight: 900; font-size: 15px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .tpl-badge { font-size: 10px; color: var(--muted); background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-weight: 800; }
         
         /* High-Contrast Template Mockups */
         .tpl-modern .tpl-mock::before { content:''; position:absolute; top:0; left:0; width:100%; height:12px; background: var(--primary); }
@@ -179,39 +194,72 @@
     <main id="view-template" class="hidden">
         <div class="template-screen">
             <h1>Choose Your Style</h1>
-            <p>You can change your template anytime during editing.</p>
+            <p>Pick a design that fits your career. You can change your template anytime later.</p>
+            
+            <div class="category-bar">
+                <div class="cat-btn active">ALL TEMPLATES</div>
+                <div class="cat-btn">MODERN</div>
+                <div class="cat-btn">PROFESSIONAL</div>
+                <div class="cat-btn">SIMPLE</div>
+                <div class="cat-btn">CREATIVE</div>
+            </div>
+
             <div class="template-grid">
                 <div class="template-card tpl-modern" onclick="openChoiceModal('tpl-modern')">
-                    <div class="template-preview"><div class="tpl-mock"><div class="tpl-line" style="width:50%; background:var(--primary);"></div><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
-                    <h4>Modern Clean</h4>
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock"><div class="tpl-line" style="width:50%; background:var(--primary);"></div><div class="tpl-line"></div><div class="tpl-line"></div></div>
+                    </div>
+                    <h4>Modern Clean <span class="tpl-badge">PDF • DOCX</span></h4>
                 </div>
                 <div class="template-card tpl-classic" onclick="openChoiceModal('tpl-classic')">
-                    <div class="template-preview"><div class="tpl-mock"><div class="tpl-line" style="width:70%; margin: 15px auto; background:#1e293b;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
-                    <h4>Classic Executive</h4>
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock"><div class="tpl-line" style="width:70%; margin: 15px auto; background:#1e293b;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div>
+                    </div>
+                    <h4>Classic Executive <span class="tpl-badge">PDF • DOCX</span></h4>
                 </div>
                 <div class="template-card tpl-technical" onclick="openChoiceModal('tpl-technical')">
-                    <div class="template-preview"><div class="tpl-mock"><div class="tpl-line" style="width:40%;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
-                    <h4>Tech Master</h4>
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock"><div class="tpl-line" style="width:40%;"></div><div class="tpl-line"></div><div class="tpl-line"></div></div>
+                    </div>
+                    <h4>Tech Master <span class="tpl-badge">PDF • DOCX</span></h4>
                 </div>
                 <div class="template-card tpl-minimal" onclick="openChoiceModal('tpl-minimal')">
-                    <div class="template-preview"><div class="tpl-mock" style="padding: 35px;"><div class="tpl-line" style="width:40%; background:var(--primary);"></div><div class="tpl-line" style="opacity:0.5;"></div></div></div>
-                    <h4>Minimal Blue</h4>
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock" style="padding: 35px;"><div class="tpl-line" style="width:40%; background:var(--primary);"></div><div class="tpl-line" style="opacity:0.5;"></div></div>
+                    </div>
+                    <h4>Minimal Blue <span class="tpl-badge">PDF • DOCX</span></h4>
                 </div>
                 <div class="template-card tpl-impact" onclick="openChoiceModal('tpl-impact')">
-                    <div class="template-preview"><div class="tpl-mock"><div style="height:25px; background:var(--primary); margin-bottom:15px;"></div><div class="tpl-line" style="width:50%; background:#fff;"></div></div></div>
-                    <h4>Bold Impact</h4>
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock"><div style="height:25px; background:var(--primary); margin-bottom:15px;"></div><div class="tpl-line" style="width:50%; background:#fff;"></div></div>
+                    </div>
+                    <h4>Bold Impact <span class="tpl-badge">PDF • DOCX</span></h4>
                 </div>
                 <div class="template-card tpl-academic" onclick="openChoiceModal('tpl-academic')">
-                    <div class="template-preview"><div class="tpl-mock" style="text-align:center;"><div class="tpl-line" style="width:60%; margin: 0 auto 15px; background:#1e293b;"></div><div class="tpl-line"></div></div></div>
-                    <h4>Academic CV</h4>
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock" style="text-align:center;"><div class="tpl-line" style="width:60%; margin: 0 auto 15px; background:#1e293b;"></div><div class="tpl-line"></div></div>
+                    </div>
+                    <h4>Academic CV <span class="tpl-badge">PDF • DOCX</span></h4>
                 </div>
                 <div class="template-card tpl-creative" onclick="openChoiceModal('tpl-creative')">
-                    <div class="template-preview"><div class="tpl-mock"><div class="tpl-line" style="margin-top:25px; background:var(--primary);"></div><div class="tpl-line"></div></div></div>
-                    <h4>Creative Vibe</h4>
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock"><div class="tpl-line" style="margin-top:25px; background:var(--primary);"></div><div class="tpl-line"></div></div>
+                    </div>
+                    <h4>Creative Vibe <span class="tpl-badge">PDF • DOCX</span></h4>
                 </div>
                 <div class="template-card tpl-executive" onclick="openChoiceModal('tpl-executive')">
-                    <div class="template-preview"><div class="tpl-mock"><div class="sidebar"></div><div style="flex:1; padding-left:35%;"><div class="tpl-line"></div><div class="tpl-line"></div></div></div></div>
-                    <h4>Professional Split</h4>
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock"><div class="sidebar"></div><div style="flex:1; padding-left:35%;"><div class="tpl-line"></div><div class="tpl-line"></div></div></div>
+                    </div>
+                    <h4>Professional Split <span class="tpl-badge">PDF • DOCX</span></h4>
                 </div>
             </div>
         </div>
