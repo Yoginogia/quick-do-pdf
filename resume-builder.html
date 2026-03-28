@@ -16,14 +16,14 @@
         content="Build your professional resume. Pick a template and use AI to parse your data or build from scratch.">
 
     <link rel="icon" type="image/png" href="favicon.png">
-    <title>AI Resume Builder | 8+ Professional Templates & Smart AI Parsing</title>
+    <title>AI Resume Builder | 15+ Premium Templates & Smart AI Parsing</title>
 
     <!-- Libraries -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js?v=2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js?v=2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js?v=2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js?v=2"></script>
 
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -92,11 +92,11 @@
 
         .template-preview { height: 420px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 30px; position: relative; }
         .hover-overlay {
-            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.05); backdrop-filter: blur(2px);
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.02);
             display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; z-index: 10;
         }
         .template-card:hover .hover-overlay { opacity: 1; }
-        .btn-use { background: var(--primary); color: #fff; padding: 12px 24px; border-radius: 100px; font-weight: 800; font-size: 13px; transform: scale(0.9); transition: 0.3s; }
+        .btn-use { background: var(--primary); color: #fff; padding: 12px 24px; border-radius: 100px; font-weight: 800; font-size: 13px; transform: scale(0.9); transition: 0.3s; box-shadow: 0 10px 20px rgba(0,163,255,0.3); }
         .template-card:hover .btn-use { transform: scale(1); }
 
         .template-card h4 { padding: 16px; font-weight: 900; font-size: 15px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
@@ -227,7 +227,7 @@
     <main id="view-start">
         <div class="landing-screen">
             <h1>Create a <span>Professional</span> Resume that Wins Interviews.</h1>
-            <p>Select from 8+ premium templates and build your resume in minutes. Use AI to parse your existing profile or build from scratch.</p>
+            <p>Select from 15+ premium templates and build your resume in minutes. Use AI to parse your existing profile or build from scratch.</p>
             <button class="btn btn-primary" onclick="switchView('template')">Get Started Now ✨</button>
         </div>
     </main>
@@ -236,7 +236,7 @@
     <main id="view-template" class="hidden">
         <div class="template-screen">
             <h1>Choose Your Style</h1>
-            <p>Pick a design that fits your career. You can change your template anytime later.</p>
+            <p>Pick from 15+ designs that fit your career. You can change your template anytime later.</p>
             
             <div class="category-bar">
                 <div class="cat-btn active">ALL TEMPLATES</div>
@@ -251,25 +251,27 @@
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
                         <div class="tpl-mock">
-                            <div class="mock-name"></div><div class="mock-title"></div>
+                            <div class="mock-name" style="width:40%;">KELLY BLACKWELL</div>
+                            <div class="mock-title">Senior Creative Director</div>
                             <div class="mock-section">EXPERIENCE</div>
                             <div class="tpl-line"></div><div class="tpl-line"></div><div class="tpl-line short"></div>
                             <div class="mock-section">EDUCATION</div>
                             <div class="tpl-line"></div><div class="tpl-line short"></div>
                         </div>
                     </div>
-                    <h4>Modern Executive <span class="tpl-badge">Kelly Blackwell Style</span></h4>
+                    <h4>Modern Executive <span class="tpl-badge">Professional Clean</span></h4>
                 </div>
                 <div class="template-card tpl-classic" onclick="openChoiceModal('tpl-classic')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock">
-                            <div class="mock-name"></div><div class="mock-title"></div>
+                        <div class="tpl-mock" style="text-align:center;">
+                            <div class="mock-name" style="margin:0 auto; font-family:'Playfair Display';">HOWARD JONES</div>
+                            <div class="mock-title" style="margin:0 auto 10px;">Executive Business Strategist</div>
                             <div style="height:1px; background:#e2e8f0; margin:5px 0 10px 0;"></div>
-                            <div class="mock-section">SUMMARY</div>
-                            <div class="tpl-line" style="width:100%;"></div><div class="tpl-line short"></div>
-                            <div class="mock-section">EXPERIENCE</div>
-                            <div class="tpl-line"></div><div class="tpl-line"></div><div class="tpl-line short"></div>
+                            <div class="mock-section" style="margin:0 auto 5px;">SUMMARY</div>
+                            <div class="tpl-line" style="width:100%;"></div><div class="tpl-line short" style="margin:0 auto;"></div>
+                            <div class="mock-section" style="margin:10px auto 5px;">EXPERIENCE</div>
+                            <div class="tpl-line"></div><div class="tpl-line"></div>
                         </div>
                     </div>
                     <h4>Howard Jones <span class="tpl-badge">Traditional Serif</span></h4>
@@ -277,15 +279,15 @@
                 <div class="template-card tpl-executive" onclick="openChoiceModal('tpl-executive')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock">
-                            <div class="sidebar">
-                                <div class="mock-profile" style="background:rgba(255,255,255,0.2);"></div>
-                                <div class="mock-name" style="width:100%; height:6px;"></div>
-                                <div class="mock-section" style="background:#fff; opacity:0.3;">CONTACT</div>
+                        <div class="tpl-mock" style="flex-direction:row; padding:0;">
+                            <div class="sidebar" style="width:35%; background:#1e293b; padding:15px; color:#fff;">
+                                <div class="mock-profile" style="background:rgba(255,255,255,0.2); width:40px; height:40px;"></div>
+                                <div class="mock-name" style="background:#fff; width:100%; height:8px;"></div>
+                                <div class="mock-section" style="background:rgba(255,255,255,0.4); width:40%;">CONTACT</div>
                                 <div class="tpl-line" style="background:rgba(255,255,255,0.1);"></div>
                                 <div class="tpl-line" style="background:rgba(255,255,255,0.1); width:60%;"></div>
                             </div>
-                            <div class="main-content">
+                            <div class="main-content" style="flex:1; padding:15px;">
                                 <div class="mock-section">SUMMARY</div>
                                 <div class="tpl-line"></div><div class="tpl-line"></div><div class="tpl-line short"></div>
                                 <div class="mock-section">EXPERIENCE</div>
@@ -298,10 +300,13 @@
                 <div class="template-card tpl-creative" onclick="openChoiceModal('tpl-creative')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock">
-                            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                                <div class="mock-profile" style="background:var(--primary);"></div>
-                                <div style="flex:1;"><div class="mock-name"></div><div class="mock-title"></div></div>
+                        <div class="tpl-mock" style="background: linear-gradient(135deg, #f0f9ff 20%, #fff 20%);">
+                            <div style="display:flex; gap:12px; margin-bottom:15px;">
+                                <div class="mock-profile" style="background:var(--primary); width:45px; height:45px;"></div>
+                                <div style="flex:1;">
+                                    <div class="mock-name" style="width:80%;">ALEX RIVERA</div>
+                                    <div class="mock-title">Modern UI/UX Designer</div>
+                                </div>
                             </div>
                             <div class="mock-section">PORTFOLIO</div>
                             <div class="tpl-line"></div><div class="tpl-line short"></div>
@@ -314,15 +319,16 @@
                 <div class="template-card tpl-technical" onclick="openChoiceModal('tpl-technical')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock">
-                            <div class="sidebar"><div class="mock-profile"></div></div>
-                            <div class="main-content">
-                                <div class="mock-name"></div><div class="mock-title"></div>
-                                <div class="mock-section">SKILLS</div>
-                                <div style="display:flex; gap:5px; margin-bottom:10px;">
-                                    <div style="width:20px; height:4px; background:#e2e8f0;"></div>
-                                    <div style="width:25px; height:4px; background:#e2e8f0;"></div>
-                                    <div style="width:15px; height:4px; background:#e2e8f0;"></div>
+                        <div class="tpl-mock" style="flex-direction:row; padding:0;">
+                            <div style="width:12px; background:#00A3FF; height:100%;"></div>
+                            <div style="flex:1; padding:20px;">
+                                <div class="mock-name" style="width:60%;">DAVID CHEN</div>
+                                <div class="mock-title">Fullstack Developer</div>
+                                <div class="mock-section" style="background:#00A3FF; color:#fff; padding:2px 6px; display:inline-block; font-size:6px;">SKILLS</div>
+                                <div style="display:flex; gap:5px; margin-top:5px; margin-bottom:10px;">
+                                    <div style="width:20px; height:6px; background:#e2e8f0; border-radius:1px;"></div>
+                                    <div style="width:25px; height:6px; background:#e2e8f0; border-radius:1px;"></div>
+                                    <div style="width:15px; height:6px; background:#e2e8f0; border-radius:1px;"></div>
                                 </div>
                                 <div class="mock-section">EDUCATION</div>
                                 <div class="tpl-line"></div>
@@ -330,15 +336,15 @@
                         </div>
                     </div>
                     <h4>Tech Master <span class="tpl-badge">ATS Optimized</span></h4>
-                </div>
-                <div class="template-card tpl-minimal" onclick="openChoiceModal('tpl-minimal')">
+                </div>                <div class="template-card tpl-minimal" onclick="openChoiceModal('tpl-minimal')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
                         <div class="tpl-mock" style="padding: 30px;">
-                            <div class="mock-name" style="background:var(--primary); height:8px;"></div>
-                            <div class="mock-title" style="margin-bottom:15px;"></div>
+                            <div class="mock-name" style="background:var(--primary); height:8px; width:40%;">MARKUS VANCE</div>
+                            <div class="mock-title">Minimalist Product Designer</div>
+                            <div style="height:1px; background:#f1f5f9; margin-bottom:15px;"></div>
                             <div class="tpl-line"></div><div class="tpl-line"></div><div class="tpl-line short"></div>
-                            <div class="mock-section" style="width:15%;"></div>
+                            <div class="mock-section" style="width:15%;">PROFILE</div>
                             <div class="tpl-line"></div>
                         </div>
                     </div>
@@ -347,9 +353,9 @@
                 <div class="template-card tpl-impact" onclick="openChoiceModal('tpl-impact')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="background:#0f172a;">
-                            <div class="mock-name" style="background:#fff; width:70%;"></div>
-                            <div class="mock-title" style="background:rgba(255,255,255,0.2); width:40%;"></div>
+                        <div class="tpl-mock" style="background:#0f172a; padding:25px;">
+                            <div class="mock-name" style="background:#fff; width:70%;">JONATHAN WICK</div>
+                            <div class="mock-title" style="background:rgba(255,255,255,0.2); width:40%;">Strategic Security Specialist</div>
                             <div class="mock-section" style="background:var(--primary); margin-top:20px;">EXPERIENCE</div>
                             <div class="tpl-line" style="background:rgba(255,255,255,0.1);"></div>
                             <div class="tpl-line" style="background:rgba(255,255,255,0.1); width:60%;"></div>
@@ -360,9 +366,9 @@
                 <div class="template-card tpl-academic" onclick="openChoiceModal('tpl-academic')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="text-align:center; padding:25px;">
-                            <div class="mock-name" style="margin:0 auto; width:80%;"></div>
-                            <div class="mock-title" style="margin:0 auto 10px;"></div>
+                        <div class="tpl-mock" style="text-align:center; padding:25px; border:1px solid #cbd5e1;">
+                            <div class="mock-name" style="margin:0 auto; width:80%;">DR. ELIZABETH SWAN</div>
+                            <div class="mock-title" style="margin:0 auto 10px;">Professor of Marine Biology</div>
                             <div style="height:1px; background:#e2e8f0; margin-bottom:15px;"></div>
                             <div class="mock-section" style="margin:0 auto 5px; background:#64748b;">PUBLICATIONS</div>
                             <div class="tpl-line" style="width:90%; margin:0 auto;"></div>
@@ -389,8 +395,8 @@
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
                         <div class="tpl-mock" style="padding:0;">
                             <div style="background:#000; padding:20px 15px; color:#fff;">
-                                <div class="mock-name" style="background:#fff; width:60%;"></div>
-                                <div class="mock-title" style="background:rgba(255,255,255,0.3); width:30%;"></div>
+                                <div class="mock-name" style="background:#fff; width:60%;">MARCUS THORNE</div>
+                                <div class="mock-title" style="background:rgba(255,255,255,0.3); width:30%;">Creative Visionary</div>
                             </div>
                             <div style="padding:15px;">
                                 <div class="mock-section" style="background:#000;">STRENGTHS</div>
@@ -421,8 +427,9 @@
                 <div class="template-card tpl-simple" onclick="openChoiceModal('tpl-simple')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="border-top:5px solid #64748b;">
-                            <div class="mock-name" style="background:#0f172a;"></div><div class="mock-title"></div>
+                        <div class="tpl-mock" style="border-top:5px solid #64748b; padding:25px;">
+                            <div class="mock-name" style="background:#0f172a; color:#fff; padding:2px 8px;">PETER QUIL</div>
+                            <div class="mock-title">Global Logistics Manager</div>
                             <div class="mock-section" style="background:#64748b;">Core Competencies</div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
                                 <div class="tpl-line"></div><div class="tpl-line"></div>
@@ -435,9 +442,9 @@
                 <div class="template-card tpl-industrial" onclick="openChoiceModal('tpl-industrial')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="border:4px solid #334155;">
-                            <div class="mock-name" style="border-radius:0;"></div>
-                            <div class="mock-title" style="border-radius:0;"></div>
+                        <div class="tpl-mock" style="border:4px solid #334155; padding:20px;">
+                            <div class="mock-name" style="border-radius:0; width:80%;">STARK INDUSTRIES</div>
+                            <div class="mock-title" style="border-radius:0;">Advanced Engineering</div>
                             <div class="mock-section" style="background:#334155; border-radius:0;">KEY PROJECTS</div>
                             <div class="tpl-line" style="border-radius:0;"></div><div class="tpl-line" style="border-radius:0;"></div>
                         </div>
@@ -717,21 +724,23 @@
             }
 
             try {
-                // PRIMARY: flash-latest
+                // PRIMARY: flash
                 let jsonText;
                 try {
-                    jsonText = await attempt('gemini-1.5-flash-latest');
+                    jsonText = await attempt('gemini-1.5-flash');
                 } catch(e) {
                     console.warn("Flash failed, trying Pro fallback...", e);
                     jsonText = await attempt('gemini-pro');
                 }
 
                 const match = jsonText.match(/\{[\s\S]*\}/);
-                if (!match) throw new Error("Could not find a valid JSON block in AI response.");
+                if (!match) throw new Error("The AI returned content in an unexpected format. Please try again or fill manually.");
                 return JSON.parse(match[0]);
             } catch(e) { 
                 console.error("AI Extraction Error:", e);
-                throw e; 
+                const msg = e.message.includes("404") ? "Model not found. Please check your API project settings." : 
+                            e.message.includes("403") ? "Invalid API Key. Please update your key in setup." : e.message;
+                throw new Error(msg); 
             }
         }
 
