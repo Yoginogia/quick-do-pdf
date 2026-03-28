@@ -47,6 +47,7 @@
         }
 
         body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background 0.3s; }
+        body.scroll-enabled { overflow: auto; height: auto; }
 
         header {
             height: 60px; z-index: 1000;
@@ -59,6 +60,7 @@
 
         .hidden { display: none !important; }
         main { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        main.template-main { display: block; overflow-y: auto; flex: none; }
 
         /* UNIQUE LANDING SCREEN */
         .landing-screen { text-align: center; max-width: 1000px; width: 100%; padding: 40px; }
@@ -90,7 +92,7 @@
         }
         .template-card:hover { transform: translateY(-12px); box-shadow: 0 60px 120px rgba(0,0,0,0.15); }
 
-        .template-preview { height: 420px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 30px; position: relative; }
+        .template-preview { height: 420px; background: #fff; display: flex; align-items: stretch; justify-content: center; padding: 20px; position: relative; overflow: hidden; }
         .hover-overlay {
             position: absolute; inset: 0; background: rgba(0, 0, 0, 0.02);
             display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; z-index: 10;
@@ -104,15 +106,15 @@
         
         /* Realistic 'Actual Resume' Mockups (Gallery) */
         .tpl-mock { 
-            width: 100%; height: 100%; background: #fff; position: relative; border-radius: 4px; border: 1px solid #f1f5f9; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; overflow: hidden; padding: 15px; 
-            gap: 4px; pointer-events: none; transition: 0.3s;
+            width: 100%; height: 100%; background: #fff; position: relative; border-radius: 4px; border: 1px solid #e2e8f0; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; overflow: hidden; padding: 18px 14px; 
+            gap: 3px; pointer-events: none;
         }
-        .mock-profile { width: 30px; height: 30px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; margin-bottom: 5px; }
-        .mock-name { font-size: 9px; font-weight: 900; color: #1e293b; line-height: 1.1; margin-bottom: 2px; }
-        .mock-title { font-size: 7px; font-weight: 600; color: #94a3b8; line-height: 1.1; margin-bottom: 6px; }
-        .mock-section { font-size: 6px; font-weight: 900; color: var(--primary); line-height: 1.1; margin: 8px 0 4px 0; letter-spacing: 0.5px; }
-        .tpl-line { height: 2px; background: #f1f5f9; border-radius: 1px; width: 100%; margin-bottom: 1px; }
+        .mock-profile { width: 36px; height: 36px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; margin-bottom: 6px; }
+        .mock-name { font-size: 10px; font-weight: 900; color: #1e293b; line-height: 1.2; margin-bottom: 2px; letter-spacing: 0.3px; }
+        .mock-title { font-size: 7.5px; font-weight: 600; color: #64748b; line-height: 1.2; margin-bottom: 8px; }
+        .mock-section { font-size: 6.5px; font-weight: 900; color: var(--primary); line-height: 1.2; margin: 10px 0 5px 0; letter-spacing: 0.8px; text-transform: uppercase; }
+        .tpl-line { height: 3px; background: #e2e8f0; border-radius: 2px; width: 100%; margin-bottom: 3px; }
         .tpl-line.short { width: 60%; }
         
         /* Layout-specific mockup improvements */
@@ -238,7 +240,7 @@
     </main>
 
     <!-- TEMPLATE SELECTION -->
-    <main id="view-template" class="hidden">
+    <main id="view-template" class="hidden template-main">
         <div class="template-screen">
             <h1>Choose Your Style</h1>
             <p>Pick from 15+ designs that fit your career. You can change your template anytime later.</p>
@@ -659,8 +661,11 @@
 
         function switchView(vid) {
             document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
-            document.getElementById(`view-${vid}`).classList.remove('hidden');
+            const target = document.getElementById(`view-${vid}`);
+            target.classList.remove('hidden');
             document.getElementById('header-dl').classList.toggle('hidden', vid !== 'editor');
+            // Allow body/page to scroll when gallery is visible
+            document.body.classList.toggle('scroll-enabled', vid === 'template');
             window.scrollTo(0, 0);
         }
 
@@ -681,11 +686,19 @@
         }
 
         async function handleFileUpload(e) {
-            const file = e.target.files[0]; if(!file) return;
+            const file = e.target.files[0];
+            // Reset input so same file can be re-selected
+            e.target.value = '';
+            if(!file) return;
+
             const key = localStorage.getItem('gemini_api_key');
-            if(!key) { document.getElementById('ai-modal').classList.remove('hidden'); return; }
+            if(!key) { 
+                openAIModal(); 
+                // Store file for retry after key is saved
+                window._pendingFile = file;
+                return; 
+            }
             
-            document.getElementById('choice-modal').style.display = 'none';
             document.getElementById('parsing-overlay').classList.remove('hidden');
             
             try {
@@ -693,35 +706,38 @@
                 let fullText = '';
                 if(ext === 'pdf') {
                     const arrayBuffer = await file.arrayBuffer();
+                    // Set worker for pdf.js
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
                     const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
                     for(let i=1; i<=pdf.numPages; i++){
                         const page = await pdf.getPage(i);
                         const c = await page.getTextContent();
-                        fullText += c.items.map(it => it.str).join(' ');
+                        fullText += c.items.map(it => it.str).join(' ') + '\n';
                     }
                 } else if(ext === 'docx') {
                     const res = await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()});
                     fullText = res.value;
-                } else { fullText = await file.text(); }
+                } else { 
+                    fullText = await file.text(); 
+                }
 
-                if (!fullText.trim()) throw new Error("No text found in file.");
+                if (!fullText.trim()) throw new Error('No text could be extracted from the file. Please try a different format.');
 
                 const parsed = await callAI(fullText, key);
                 if(parsed) {
-                    // Update resumeData and explicitly handle collections
                     resumeData = {...resumeData, ...parsed};
-                    if (parsed.experience) resumeData.experience = parsed.experience.map(exp => ({id: Date.now() + Math.random(), ...exp}));
-                    if (parsed.education) resumeData.education = parsed.education.map(edu => ({id: Date.now() + Math.random(), ...edu}));
-                    
-                    renderAll(); 
+                    if (Array.isArray(parsed.experience)) resumeData.experience = parsed.experience.map(exp => ({id: Date.now() + Math.random(), ...exp}));
+                    if (Array.isArray(parsed.education)) resumeData.education = parsed.education.map(edu => ({id: Date.now() + Math.random(), ...edu}));
+                    if (Array.isArray(parsed.projects)) resumeData.projects = parsed.projects.map(p => ({id: Date.now() + Math.random(), ...p}));
+                    save();
+                    renderAll();
                     ['experience', 'education', 'projects'].forEach(t => renderForms(t));
                     switchView('editor');
-                    alert("Resume parsed successfully!");
+                    updatePreview();
                 }
-            } catch(e) { 
-                document.getElementById('parsing-overlay').classList.add('hidden'); 
-                setTimeout(() => alert("Error: " + e.message), 100);
-                console.error(e);
+            } catch(err) { 
+                console.error('Upload error:', err);
+                setTimeout(() => alert('Error parsing resume: ' + err.message + '\n\nTip: Make sure your Gemini API key is valid and the file is not empty.'), 100);
             } finally { 
                 document.getElementById('parsing-overlay').classList.add('hidden'); 
             }
@@ -1011,19 +1027,45 @@
 
         function saveKey() { 
             const k = document.getElementById('gemKey').value.trim();
-            if(!k) { alert("Please enter a valid key."); return; }
+            if(!k) { alert('Please enter a valid API key.'); return; }
             localStorage.setItem('gemini_api_key', k); 
-            alert("AI Key saved successfully!");
-            closeAIModal(); 
+            closeAIModal();
+            // Fire event so pending upload can retry
+            window.dispatchEvent(new Event('keyaved'));
+            // If there's a pending file, pick it up now
+            if(window._pendingFile) {
+                const f = window._pendingFile;
+                window._pendingFile = null;
+                handleFileUpload({ target: { files: [f], value: '' } });
+            } else {
+                alert('AI Key saved! You can now upload your resume.');
+            }
         }
 
         function exportPDF() { html2pdf().set({margin:0, filename:'Resume.pdf', html2canvas:{scale:2}, jsPDF:{format:'a4'}}).from(document.getElementById('resume-canvas')).save(); }
 
+        // When key is saved, retry pending upload if any
+        const _origSaveKey = window.saveKey;
+        window.addEventListener('keysaved', () => {
+            if(window._pendingFile) {
+                const f = window._pendingFile;
+                window._pendingFile = null;
+                // Fake an event object
+                handleFileUpload({ target: { files: [f], value: '' } });
+            }
+        });
+
         window.onload = () => {
+            // Set PDF.js worker immediately
+            if(typeof pdfjsLib !== 'undefined') {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
             const s = localStorage.getItem('qd-res-v6');
             if(s) {
-                const parsed = JSON.parse(s);
-                resumeData = {...resumeData, ...parsed};
+                try {
+                    const parsed = JSON.parse(s);
+                    resumeData = {...resumeData, ...parsed};
+                } catch(e) { console.warn('Could not restore saved data'); }
             }
             bindSync(); renderAll();
             ['experience', 'education', 'projects'].forEach(t => renderForms(t));
