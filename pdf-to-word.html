@@ -213,6 +213,67 @@
             ldr.classList.remove('active');
         }
     </script>
+
+
+<style>
+.faq-section { max-width: 800px; margin: 60px auto 0; padding: 0 24px 60px; }
+.faq-section h2 { font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; color: var(--text); }
+.faq-section .faq-subtitle { color: var(--muted); margin-bottom: 32px; font-size: 0.95rem; line-height: 1.6; }
+.faq-item { border: 1px solid var(--border, #e5e7eb); border-radius: 14px; margin-bottom: 12px; overflow: hidden; background: var(--card-bg, #fff); }
+.faq-q { padding: 18px 22px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.97rem; color: var(--text); }
+.faq-q:hover { background: var(--hover-bg, #f9fafb); }
+.faq-icon { font-size: 1.1rem; transition: transform 0.25s; flex-shrink: 0; }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 22px; color: var(--muted); font-size: 0.93rem; line-height: 1.75; }
+.faq-item.open .faq-a { max-height: 300px; padding: 0 22px 18px; }
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){
+      var item=q.closest('.faq-item');
+      item.classList.toggle('open');
+    });
+  });
+});
+</script>
+
+<section class="faq-section" itemscope itemtype="https://schema.org/FAQPage">
+  <h2>Frequently Asked Questions</h2>
+  <p class="faq-subtitle">Everything you need to know about using this tool. Can't find your answer? <a href="contact.html" style="color:var(--a1, #6366f1);">Contact us</a>.</p>
+  
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">Will the Word document match my original PDF layout? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">For most PDFs with standard text and images, the formatting is preserved very well. Complex layouts with unusual fonts or advanced InDesign exports may have minor differences.</span>
+      </div>
+    </div>
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">Is the PDF to Word converter free? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">Yes, completely free. No limits, no account needed, and no watermarks on the output.</span>
+      </div>
+    </div>
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">What formats can I convert to? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">You can convert PDF to DOCX (Microsoft Word format) which is compatible with Word 2007 and newer, as well as LibreOffice and Google Docs.</span>
+      </div>
+    </div>
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">Can I convert a scanned PDF to Word? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">Scanned PDFs are images and require OCR (Optical Character Recognition). Use our PDF OCR tool first to make the text selectable, then convert.</span>
+      </div>
+    </div>
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">Is there a file size limit for conversion? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">No server-side limit. The conversion runs in your browser so it depends on your device's capability.</span>
+      </div>
+    </div>
+</section>
+
 </body>
 
 </html>

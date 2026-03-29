@@ -153,6 +153,67 @@
       } catch (e) { ldr.classList.remove('active'); alert('Error: ' + e.message); }
     }
   </script>
+
+
+<style>
+.faq-section { max-width: 800px; margin: 60px auto 0; padding: 0 24px 60px; }
+.faq-section h2 { font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; color: var(--text); }
+.faq-section .faq-subtitle { color: var(--muted); margin-bottom: 32px; font-size: 0.95rem; line-height: 1.6; }
+.faq-item { border: 1px solid var(--border, #e5e7eb); border-radius: 14px; margin-bottom: 12px; overflow: hidden; background: var(--card-bg, #fff); }
+.faq-q { padding: 18px 22px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.97rem; color: var(--text); }
+.faq-q:hover { background: var(--hover-bg, #f9fafb); }
+.faq-icon { font-size: 1.1rem; transition: transform 0.25s; flex-shrink: 0; }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 22px; color: var(--muted); font-size: 0.93rem; line-height: 1.75; }
+.faq-item.open .faq-a { max-height: 300px; padding: 0 22px 18px; }
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.faq-q').forEach(function(q){
+    q.addEventListener('click',function(){
+      var item=q.closest('.faq-item');
+      item.classList.toggle('open');
+    });
+  });
+});
+</script>
+
+<section class="faq-section" itemscope itemtype="https://schema.org/FAQPage">
+  <h2>Frequently Asked Questions</h2>
+  <p class="faq-subtitle">Everything you need to know about using this tool. Can't find your answer? <a href="contact.html" style="color:var(--a1, #6366f1);">Contact us</a>.</p>
+  
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">Can I split a PDF into individual pages? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">Yes. You can extract every page as a separate PDF, or specify a custom range like pages 1-5 to split into one file.</span>
+      </div>
+    </div>
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">Is there a page limit for splitting? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">No, there is no limit. You can split a 500-page document just as easily as a 10-page one.</span>
+      </div>
+    </div>
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">Will splitting a PDF reduce quality? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">No. Splitting extracts pages exactly as they are — there is no re-encoding or quality loss at all.</span>
+      </div>
+    </div>
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">Can I split a password-protected PDF? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">You need to unlock the PDF first using our Unlock PDF tool, then you can split it freely.</span>
+      </div>
+    </div>
+    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <div class="faq-q" itemprop="name">What happens to my file after splitting? <span class="faq-icon">+</span></div>
+      <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <span itemprop="text">Nothing — your file is processed entirely in your browser and never stored anywhere.</span>
+      </div>
+    </div>
+</section>
+
 </body>
 
 </html>
