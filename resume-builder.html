@@ -200,7 +200,62 @@
             padding: 10px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; gap: 10px; align-items: center;
         }
 
-        #resume-canvas.tpl-bold #view-name { font-size: 44px; letter-spacing: -1px; }
+        /* --- TEMPLATE SPECIFIC CANVAS STYLES --- */
+        /* --- BETTERCV EXACT CLONE STYLES --- */
+        #resume-canvas { width: 100%; min-height: 297mm; background: #fff; position: relative; box-shadow: 0 0 0px rgba(0,0,0,0); }
+        
+        /* 1. BCV Modern (Sidebar Left, Dual Tone) */
+        .bcv-modern { display: flex; font-family: 'Inter', sans-serif; }
+        .bcv-modern .m-sidebar { width: 33%; background: #1E2B3C; color: #fff; padding: 40px 30px; }
+        .bcv-modern .m-main { width: 67%; padding: 40px 50px; }
+        .bcv-modern .m-photo { width: 130px; height: 130px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); object-fit: cover; margin: 0 auto 30px auto; display: block; }
+        .bcv-modern .m-name { font-size: 38px; font-weight: 900; color: #1E2B3C; letter-spacing: -1px; line-height: 1.1; margin-bottom: 5px; text-transform: uppercase; }
+        .bcv-modern .m-title { font-size: 15px; font-weight: 600; color: #3B82F6; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 25px; }
+        .bcv-modern .m-section-title { font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #1E2B3C; border-bottom: 2px solid #E5E7EB; padding-bottom: 8px; margin-bottom: 25px; margin-top: 35px; }
+        .bcv-modern .m-sidebar .m-section-title { color: #fff; border-bottom-color: rgba(255,255,255,0.2); margin-top: 40px; margin-bottom: 20px;}
+        .bcv-modern .m-contact-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 11.5px; color: #CBD5E1; }
+        .bcv-modern .m-contact-item svg { width: 14px; height: 14px; color: #3B82F6; flex-shrink: 0;}
+        .bcv-modern .m-summary { font-size: 13px; line-height: 1.7; color: #475569; text-align: justify;}
+        
+        /* BCV Modern Grid System for Experience */
+        .bcv-modern .m-exp-grid { display: grid; grid-template-columns: 110px 1fr; gap: 20px; margin-bottom: 24px; }
+        .bcv-modern .m-exp-date { font-size: 12px; font-weight: 600; color: #3B82F6; padding-top: 2px; }
+        .bcv-modern .m-exp-role { font-size: 15px; font-weight: 800; color: #1E2B3C; margin-bottom: 3px; }
+        .bcv-modern .m-exp-company { font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 10px; }
+        .bcv-modern .m-exp-desc { font-size: 12.5px; line-height: 1.6; color: #475569; }
+        .bcv-modern .m-exp-desc ul { padding-left: 15px; margin-top: 5px; }
+        .bcv-modern .m-exp-desc li { margin-bottom: 4px; }
+        .bcv-modern .m-skill-pill { display: inline-block; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 4px; font-size: 11px; margin: 0 6px 8px 0; color: #fff; font-weight: 600;}
+
+        /* 2. BCV Exec (Top Header Block) */
+        .bcv-exec { font-family: 'Outfit', sans-serif; }
+        .bcv-exec .x-header { background: #2563EB; color: #fff; padding: 40px 50px; display: flex; justify-content: space-between; align-items: center; }
+        .bcv-exec .x-name { font-size: 42px; font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; text-transform: uppercase;}
+        .bcv-exec .x-title { font-size: 18px; font-weight: 400; opacity: 0.9; letter-spacing: 1px; text-transform: uppercase;}
+        .bcv-exec .x-contact { font-size: 12px; line-height: 1.8; text-align: right; color: rgba(255,255,255,0.8); }
+        .bcv-exec .x-photo { width: 110px; height: 110px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover;}
+        .bcv-exec .x-body { display: grid; grid-template-columns: 2fr 1fr; gap: 50px; padding: 40px 50px; }
+        .bcv-exec .x-section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 20px; text-transform: uppercase; }
+        .bcv-exec .x-item { margin-bottom: 25px; border-left: 2px solid #e2e8f0; padding-left: 20px; position: relative; }
+        .bcv-exec .x-item::before { content: ''; position: absolute; left: -6px; top: 5px; width: 10px; height: 10px; background: #2563EB; border-radius: 50%; border: 2px solid #fff;}
+        .bcv-exec .x-role { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 2px;}
+        .bcv-exec .x-meta { font-size: 13.5px; color: #3B82F6; margin-bottom: 10px; font-weight: 600; }
+        .bcv-exec .x-meta span { color: #64748b; font-weight: 400;}
+        .bcv-exec .x-desc { font-size: 13px; line-height: 1.6; color: #334155; }
+        .bcv-exec .x-skill { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 13px; font-weight: 600; color: #334155;}
+        .bcv-exec .x-bar { height: 6px; background: #e2e8f0; border-radius: 10px; width: 50%; overflow: hidden; }
+        .bcv-exec .x-bar-fill { height: 100%; background: #2563EB; width: 85%; }
+
+        /* 3. BCV ATS (Minimalist Serif) */
+        .bcv-ats { font-family: 'Playfair Display', serif; padding: 50px 60px; color: #111; }
+        .bcv-ats .a-header { text-align: center; margin-bottom: 30px; }
+        .bcv-ats .a-name { font-size: 46px; font-weight: 900; margin-bottom: 10px; line-height: 1; text-transform: uppercase; letter-spacing: 1px;}
+        .bcv-ats .a-contact { font-size: 13px; font-family: 'Inter', sans-serif; color: #444; }
+        .bcv-ats .a-section-title { font-size: 15px; font-weight: 900; text-transform: uppercase; border-bottom: 1px solid #111; border-top: 1px solid #111; padding: 6px 0; margin: 25px 0 20px 0; letter-spacing: 1.5px; text-align: center;}
+        .bcv-ats .a-item-head { display: flex; justify-content: space-between; font-weight: 900; font-size: 15px; margin-bottom: 2px; }
+        .bcv-ats .a-item-sub { display: flex; justify-content: space-between; font-weight: 600; font-style: italic; font-size: 14px; margin-bottom: 8px; color: #333; }
+        .bcv-ats .a-item-desc { font-family: 'Inter', sans-serif; font-size: 12.5px; line-height: 1.6; margin-bottom: 25px; }
+        .bcv-ats .a-skills { font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.8; text-align: center; }
 
         /* PHOTO PREVIEW */
         .view-photo-container { width: 100px; height: 100px; border-radius: 12px; overflow: hidden; background: #f1f5f9; border: 2px solid var(--border); margin-bottom: 20px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
@@ -211,9 +266,12 @@
 
         /* LAYOUTS */
         .r-split { display: flex; min-height: 297mm; }
-        .r-side { width: 30%; background: #f8fafc; border-right: 1px solid #e2e8f0; padding: 40px 25px; display: flex; flex-direction: column; gap: 25px; }
+        .r-side { width: 33%; background: #f8fafc; border-right: 1px solid #e2e8f0; padding: 40px 30px; display: flex; flex-direction: column; gap: 30px; }
         .r-main { flex: 1; padding: 40px 50px; }
-        .layout-right .r-side { order: 2; border-right: none; border-left: 1px solid #e2e8f0; background: #f0f9ff; }
+        
+        .layout-right .r-side { order: 2; border-right: none; border-left: 1px solid #e2e8f0; }
+        .layout-right .r-main { order: 1; }
+        
         .layout-centered { text-align: center; }
         .layout-centered .r-head { border-bottom: 2px solid #1e293b; margin-bottom: 40px; padding-bottom: 20px; }
         .layout-centered .r-item-head { justify-content: center; gap: 20px; }
@@ -255,235 +313,156 @@
             </div>
 
             <div class="template-grid">
+                <!-- 1. MODERN (Sidebar Left) -->
                 <div class="template-card tpl-modern" onclick="goToSetup('tpl-modern')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock">
-                            <div class="mock-name">ALEXANDER REED</div>
-                            <div class="mock-title">Senior Product Strategist</div>
-                            <div class="mock-section">EXPERIENCE</div>
-                            <div class="tpl-line"></div><div class="tpl-line"></div><div class="tpl-line short"></div>
-                            <div class="mock-section">KEY SKILLS</div>
-                            <div class="tpl-line" style="width:90%;"></div><div class="tpl-line" style="width:70%;"></div>
-                        </div>
-                    </div>
-                    <h4>Modern Executive <span class="tpl-badge">Professional Clean</span></h4>
-                </div>
-                <div class="template-card tpl-classic" onclick="goToSetup('tpl-classic')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="text-align:center;">
-                            <div class="mock-name" style="margin:0 auto; font-family:'Playfair Display';">NATHANIEL HAWTHORNE</div>
-                            <div class="mock-title" style="margin:0 auto 10px;">Executive Business Consultant</div>
-                            <div style="height:1px; background:#e2e8f0; margin:5px 0 10px 0;"></div>
-                            <div class="mock-section" style="margin:0 auto 5px;">SUMMARY</div>
-                            <div class="tpl-line" style="width:100%;"></div><div class="tpl-line short" style="margin:0 auto;"></div>
-                            <div class="mock-section" style="margin:10px auto 5px;">EXPERIENCE</div>
-                            <div class="tpl-line"></div><div class="tpl-line"></div>
-                        </div>
-                    </div>
-                    <h4>The Classic <span class="tpl-badge">Traditional Serif</span></h4>
-                </div>
-                <div class="template-card tpl-executive" onclick="goToSetup('tpl-executive')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="flex-direction:row; padding:0;">
-                            <div class="sidebar" style="width:30%; background:#1e293b; padding:15px; color:#fff;">
-                                <div class="mock-profile" style="background:rgba(255,255,255,0.2); width:40px; height:40px;"></div>
-                                <div class="mock-name" style="color:#fff; font-size:7px;">BEATRICE PRIOR</div>
-                                <div class="mock-section" style="color:rgba(255,255,255,0.4); width:40%;">CONTACT</div>
-                                <div class="tpl-line" style="background:rgba(255,255,255,0.1);"></div>
-                                <div class="tpl-line" style="background:rgba(255,255,255,0.1); width:60%;"></div>
+                        <div class="tpl-mock" style="flex-direction:row; padding:0; background:#fff;">
+                            <div style="width:35%; background:#1E2B3C; padding:15px; color:#fff;">
+                                <div class="mock-profile" style="background:rgba(255,255,255,0.2); width:35px; height:35px; margin:0 auto 10px;"></div>
+                                <div class="tpl-line short" style="background:#3B82F6; margin:0 auto 15px;"></div>
+                                <div class="tpl-line" style="background:rgba(255,255,255,0.1); width:100%;"></div>
+                                <div class="tpl-line" style="background:rgba(255,255,255,0.1); width:80%;"></div>
                             </div>
-                            <div class="main-content" style="flex:1; padding:15px;">
-                                <div class="mock-section">CORE EXPERTISE</div>
-                                <div class="tpl-line"></div><div class="tpl-line"></div><div class="tpl-line short"></div>
-                                <div class="mock-section">CAREER HISTORY</div>
-                                <div class="tpl-line"></div><div class="tpl-line"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <h4>Executive Sidebar <span class="tpl-badge">Sidebar Pro</span></h4>
-                </div>
-                <div class="template-card tpl-creative" onclick="goToSetup('tpl-creative')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="background: linear-gradient(135deg, #f0f9ff 20%, #fff 20%);">
-                            <div style="display:flex; gap:12px; margin-bottom:15px;">
-                                <div class="mock-profile" style="background:var(--primary); width:45px; height:45px;"></div>
-                                <div style="flex:1;">
-                                    <div class="mock-name">ELARA VANCE</div>
-                                    <div class="mock-title">Visual UI/UX Designer</div>
+                            <div style="width:65%; padding:15px;">
+                                <div class="mock-name" style="color:#1E2B3C; margin-bottom:2px;">ALEX REED</div>
+                                <div class="mock-title" style="color:#3B82F6; font-size:6px; margin-bottom:15px;">SOFTWARE ENGINEER</div>
+                                <div class="mock-section" style="color:#1E2B3C;">EXPERIENCE</div>
+                                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                                    <div class="tpl-line" style="width:20px; background:#3B82F6;"></div>
+                                    <div style="flex:1;">
+                                        <div class="tpl-line" style="background:#1E2B3C; width:80%;"></div>
+                                        <div class="tpl-line" style="width:100%;"></div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mock-section">PORTFOLIO & LINKS</div>
-                            <div class="tpl-line"></div><div class="tpl-line short"></div>
-                            <div class="mock-section">DESIGN JOURNEY</div>
-                            <div class="tpl-line"></div>
                         </div>
                     </div>
-                    <h4>Creative Spirit <span class="tpl-badge">Modern Color</span></h4>
+                    <h4>Modern <span class="tpl-badge">Sidebar Pro</span></h4>
                 </div>
-                <div class="template-card tpl-technical" onclick="goToSetup('tpl-technical')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="flex-direction:row; padding:0;">
-                            <div style="width:12px; background:#00A3FF; height:100%;"></div>
-                            <div style="flex:1; padding:20px;">
-                                <div class="mock-name">ETHAN HUNT</div>
-                                <div class="mock-title">Lead Cloud Developer</div>
-                                <div class="mock-section">STACK</div>
-                                <div style="display:flex; gap:5px; margin-top:5px; margin-bottom:10px;">
-                                    <div style="width:20px; height:6px; background:#e2e8f0; border-radius:1px;"></div>
-                                    <div style="width:25px; height:6px; background:#e2e8f0; border-radius:1px;"></div>
-                                    <div style="width:15px; height:6px; background:#e2e8f0; border-radius:1px;"></div>
-                                </div>
-                                <div class="mock-section">EDUCATION</div>
-                                <div class="tpl-line"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <h4>Technical Master <span class="tpl-badge">ATS Optimized</span></h4>
-                </div>
-                <div class="template-card tpl-minimal" onclick="goToSetup('tpl-minimal')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="padding: 30px;">
-                            <div class="mock-name">MARIUS VANCE</div>
-                            <div class="mock-title">Minimalist Design Lead</div>
-                            <div style="height:1px; background:#f1f5f9; margin-bottom:15px;"></div>
-                            <div class="tpl-line"></div><div class="tpl-line"></div><div class="tpl-line short"></div>
-                            <div class="mock-section">PHILOSOPHY</div>
-                            <div class="tpl-line"></div>
-                        </div>
-                    </div>
-                    <h4>Minimalist Hub <span class="tpl-badge">Clean & Simple</span></h4>
-                </div>
+
+                <!-- 2. IMPACT (Modern Variant - Dark Mode) -->
                 <div class="template-card tpl-impact" onclick="goToSetup('tpl-impact')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="background:#0f172a; padding:25px;">
-                            <div class="mock-name" style="color:#fff;">JORDAN WICK</div>
-                            <div class="mock-title" style="color:rgba(255,255,255,0.4);">Cyber Security Expert</div>
-                            <div class="mock-section" style="margin-top:20px;">EXPERIENCE</div>
-                            <div class="tpl-line" style="background:rgba(255,255,255,0.1);"></div>
-                            <div class="tpl-line" style="background:rgba(255,255,255,0.1); width:60%;"></div>
-                        </div>
-                    </div>
-                    <h4>Bold Impact <span class="tpl-badge">Dark Mode</span></h4>
-                </div>
-                <div class="template-card tpl-academic" onclick="goToSetup('tpl-academic')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="text-align:center; padding:25px;">
-                            <div class="mock-name">DR. ELARA MOON</div>
-                            <div class="mock-title">PhD in Astrophysics</div>
-                            <div style="height:1px; background:#e2e8f0; margin-bottom:15px;"></div>
-                            <div class="mock-section" style="margin:0 auto 5px; color:#64748b;">PUBLICATIONS</div>
-                            <div class="tpl-line" style="width:90%; margin:0 auto;"></div>
-                            <div class="mock-section" style="margin:10px auto 5px; color:#64748b;">RESEARCH</div>
-                            <div class="tpl-line" style="width:80%; margin:0 auto;"></div>
-                        </div>
-                    </div>
-                    <h4>Global Academic <span class="tpl-badge">Curriculum Vitae</span></h4>
-                </div>
-                <div class="template-card tpl-elegant" onclick="goToSetup('tpl-elegant')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="text-align:center;">
-                            <div class="mock-name" style="font-family:'Playfair Display'; border-bottom:1px solid #18181b; padding-bottom:5px;">VICTORIA REIGN</div>
-                            <div class="mock-title">Chief Operating Officer</div>
-                            <div class="mock-section" style="color:#18181b; width:40%; margin:0 auto 8px;">BACKGROUND</div>
-                            <div class="tpl-line"></div><div class="tpl-line short" style="margin:0 auto;"></div>
-                        </div>
-                    </div>
-                    <h4>Elegant Serif <span class="tpl-badge">Premium Design</span></h4>
-                </div>
-                <div class="template-card tpl-bold" onclick="goToSetup('tpl-bold')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="padding:0;">
-                            <div style="background:#000; padding:20px 15px; color:#fff;">
-                                <div class="mock-name" style="color:#fff;">TITAN STARK</div>
-                                <div class="mock-title" style="color:rgba(255,255,255,0.3);">Visionary Architect</div>
+                        <div class="tpl-mock" style="flex-direction:row; padding:0; background:#0f172a;">
+                            <div style="width:35%; background:#1e293b; padding:15px; color:#fff;">
+                                <div class="mock-profile" style="background:rgba(56,189,248,0.2); width:35px; height:35px; margin:0 auto 10px;"></div>
+                                <div class="tpl-line short" style="background:#38bdf8; margin:0 auto 15px;"></div>
                             </div>
-                            <div style="padding:15px;">
-                                <div class="mock-section" style="color:#000;">STRENGTHS</div>
-                                <div class="tpl-line"></div><div class="tpl-line"></div>
+                            <div style="width:65%; padding:15px;">
+                                <div class="mock-name" style="color:#fff; margin-bottom:2px;">SARAH CONNOR</div>
+                                <div class="mock-title" style="color:#38bdf8; font-size:6px; margin-bottom:15px;">CYBER EXPERT</div>
+                                <div class="mock-section" style="color:#fff;">EXPERIENCE</div>
+                                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                                    <div class="tpl-line" style="width:20px; background:#38bdf8;"></div>
+                                    <div style="flex:1;">
+                                        <div class="tpl-line" style="background:#cbd5e1; width:80%;"></div>
+                                        <div class="tpl-line" style="background:#64748b; width:100%;"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <h4>Bold Contrast <span class="tpl-badge">Modern Bold</span></h4>
+                    <h4>Impact <span class="tpl-badge">Tech Dark</span></h4>
                 </div>
+
+                <!-- 3. EXECUTIVE (Top Block) -->
+                <div class="template-card tpl-executive" onclick="goToSetup('tpl-executive')">
+                    <div class="template-preview">
+                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
+                        <div class="tpl-mock" style="padding:0; background:#fff;">
+                            <div style="background:#2563EB; padding:15px; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div class="mock-name" style="color:#fff; font-size:8px;">DAVID CHEN</div>
+                                    <div class="mock-title" style="color:rgba(255,255,255,0.7); font-size:5px;">CHIEF EXECUTIVE</div>
+                                </div>
+                                <div class="mock-profile" style="background:rgba(255,255,255,0.3); width:25px; height:25px;"></div>
+                            </div>
+                            <div style="display:flex; padding:15px; gap:15px;">
+                                <div style="flex:2;">
+                                    <div class="mock-section" style="color:#1e293b;">EXPERIENCE</div>
+                                    <div class="tpl-line" style="background:#1e293b; width:60%;"></div>
+                                    <div class="tpl-line" style="width:100%;"></div>
+                                    <div class="tpl-line" style="width:80%;"></div>
+                                </div>
+                                <div style="flex:1;">
+                                    <div class="mock-section" style="color:#1e293b;">SKILLS</div>
+                                    <div class="tpl-line" style="background:#2563EB; width:80%;"></div>
+                                    <div class="tpl-line" style="background:#2563EB; width:60%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h4>Executive <span class="tpl-badge">Top Ribbon</span></h4>
+                </div>
+
+                <!-- 4. STARTUP (Exec Variant - Fun Colors) -->
                 <div class="template-card tpl-startup" onclick="goToSetup('tpl-startup')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="flex-direction:row; padding:0;">
-                            <div style="flex:1; padding:15px;">
-                                <div class="mock-name" style="color:var(--primary);">BENJAMIN HOFF</div>
-                                <div class="mock-title">Growth & Tech Founder</div>
-                                <div class="mock-section">MISSION</div>
-                                <div class="tpl-line"></div><div class="tpl-line short"></div>
+                        <div class="tpl-mock" style="padding:0; background:#fff;">
+                            <div style="background:linear-gradient(90deg, #8b5cf6, #3b82f6); padding:15px; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div class="mock-name" style="color:#fff; font-size:8px;">MIA WONG</div>
+                                    <div class="mock-title" style="color:rgba(255,255,255,0.7); font-size:5px;">GROWTH LEAD</div>
+                                </div>
+                                <div class="mock-profile" style="background:rgba(255,255,255,0.3); width:25px; height:25px;"></div>
                             </div>
-                            <div style="width:40px; background:#f0f9ff; padding:10px;">
-                                <div class="mock-profile" style="width:20px; height:20px; border-radius:4px;"></div>
-                                <div class="tpl-line" style="background:#bae6fd;"></div>
+                            <div style="display:flex; padding:15px; gap:15px;">
+                                <div style="flex:2;">
+                                    <div class="mock-section" style="color:#1e293b;">EXPERIENCE</div>
+                                    <div class="tpl-line" style="background:#1e293b; width:60%;"></div>
+                                    <div class="tpl-line" style="width:100%;"></div>
+                                    <div class="tpl-line" style="width:80%;"></div>
+                                </div>
+                                <div style="flex:1;">
+                                    <div class="mock-section" style="color:#1e293b;">SKILLS</div>
+                                    <div class="tpl-line" style="background:#8b5cf6; width:80%;"></div>
+                                    <div class="tpl-line" style="background:#3b82f6; width:60%;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <h4>Startup Hub <span class="tpl-badge">Blue Accents</span></h4>
+                    <h4>Startup <span class="tpl-badge">Vibrant Box</span></h4>
                 </div>
+
+                <!-- 5. ATS CLASSIC (Minimalist Centered) -->
                 <div class="template-card tpl-simple" onclick="goToSetup('tpl-simple')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="border-top:5px solid #64748b; padding:25px;">
-                            <div class="mock-name">PETER QUILL</div>
-                            <div class="mock-title">Logistics Management</div>
-                            <div class="mock-section" style="color:#64748b;">COMPETENCIES</div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
-                                <div class="tpl-line"></div><div class="tpl-line"></div>
-                                <div class="tpl-line"></div><div class="tpl-line"></div>
+                        <div class="tpl-mock" style="padding:20px; text-align:center; background:#fff;">
+                            <div class="mock-name" style="font-family:'Playfair Display'; color:#111; font-size:10px;">JAMES SMITH</div>
+                            <div class="tpl-line short" style="margin:5px auto; background:#111; width:80%;"></div>
+                            <div class="mock-section" style="color:#111; border-top:1px solid #111; border-bottom:1px solid #111; padding:2px 0; margin-top:15px;">EXPERIENCE</div>
+                            <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                                <div class="tpl-line" style="background:#111; width:40%;"></div>
+                                <div class="tpl-line" style="background:#111; width:20%;"></div>
                             </div>
+                            <div class="tpl-line" style="width:100%; margin-top:5px;"></div>
+                            <div class="tpl-line" style="width:100%;"></div>
                         </div>
                     </div>
-                    <h4>Clean ATS+ <span class="tpl-badge">HR Friendly</span></h4>
+                    <h4>ATS Classic <span class="tpl-badge">Ivy League</span></h4>
                 </div>
-                <div class="template-card tpl-industrial" onclick="goToSetup('tpl-industrial')">
+
+                <!-- 6. ELEGANT (ATS Variant) -->
+                <div class="template-card tpl-elegant" onclick="goToSetup('tpl-elegant')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="border:4px solid #334155; padding:20px;">
-                            <div class="mock-name">STARK MECHANICAL</div>
-                            <div class="mock-title">Industrial Systems Eng.</div>
-                            <div class="mock-section" style="color:#334155;">PROJECTS</div>
-                            <div class="tpl-line"></div><div class="tpl-line"></div>
-                        </div>
-                    </div>
-                    <h4>Industrial <span class="tpl-badge">Structured</span></h4>
-                </div>
-                <div class="template-card tpl-vibrant" onclick="goToSetup('tpl-vibrant')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock">
-                            <div style="height:30px; background:linear-gradient(90deg, #8b5cf6, #3b82f6); margin:-15px -15px 15px -15px; display:flex; align-items:center; padding-left:15px;">
-                                <div class="mock-name" style="color:#fff;">LUNA LEGEND</div>
+                        <div class="tpl-mock" style="padding:20px; text-align:center; background:#f8fafc; border:4px solid #fff; box-shadow:inset 0 0 0 1px #e2e8f0;">
+                            <div class="mock-name" style="font-family:'Playfair Display'; color:#0f172a; font-size:10px;">VICTORIA REIGN</div>
+                            <div class="tpl-line short" style="margin:5px auto; background:#0f172a; width:40%;"></div>
+                            <div class="mock-section" style="color:#0f172a; border-bottom:1px solid #0f172a; padding:2px 0; margin-top:15px;">CAREER</div>
+                            <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                                <div class="tpl-line" style="background:#0f172a; width:40%;"></div>
+                                <div class="tpl-line" style="background:#0f172a; width:20%;"></div>
                             </div>
-                            <div class="mock-section" style="color:#8b5cf6;">LEADERSHIP</div>
-                            <div class="tpl-line"></div><div class="tpl-line short"></div>
+                            <div class="tpl-line" style="width:100%; margin-top:5px;"></div>
+                            <div class="tpl-line" style="width:100%;"></div>
                         </div>
                     </div>
-                    <h4>Vibrant Graduate <span class="tpl-badge">Color Pop</span></h4>
-                </div>
-                <div class="template-card tpl-centered" onclick="goToSetup('tpl-centered')">
-                    <div class="template-preview">
-                        <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
-                        <div class="tpl-mock" style="text-align:center; padding-top:30px;">
-                            <div class="mock-profile" style="margin:0 auto 10px auto; width:35px; height:35px;"></div>
-                            <div class="mock-name">CELIA DANE</div>
-                            <div class="mock-section" style="margin:10px auto 5px auto; color:#1e293b;">BIOGRAPHY</div>
-                            <div class="tpl-line" style="width:100%;"></div><div class="tpl-line short" style="margin:0 auto;"></div>
-                        </div>
-                    </div>
-                    <h4>Artistic Center <span class="tpl-badge">Creative</span></h4>
+                    <h4>Elegant <span class="tpl-badge">Serif Premium</span></h4>
                 </div>
             </div>
         </div>
@@ -551,6 +530,10 @@
                         <div class="input-grid">
                             <div class="input-group"><label>Phone</label><input type="text" class="form-input sync" data-key="phone" placeholder="+1 234 XXX"><span class="input-icon">✓</span></div>
                             <div class="input-group"><label>Email</label><input type="email" class="form-input sync" data-key="email" placeholder="john.doe@email.com"><span class="input-icon">✓</span></div>
+                        </div>
+                        <div class="input-grid" style="margin-top:15px;">
+                            <div class="input-group"><label>Address / Location</label><input type="text" class="form-input sync" data-key="address" placeholder="New York, USA"><span class="input-icon">✓</span></div>
+                            <div class="input-group"><label>LinkedIn</label><input type="text" class="form-input sync" data-key="linkedin" placeholder="linkedin.com/in/john"><span class="input-icon">✓</span></div>
                         </div>
                     </div>
 
@@ -659,7 +642,13 @@
     </div>
 
     <script>
-        let resumeData = { fname:'', lname:'', title:'', email:'', phone:'', photo:'', summary:'', skills:'', template:'tpl-modern', experience:[], education:[], projects:[] };
+        // ==========================================
+        // QUICK DO PDF DIRECT API KEY (OPTION A)
+        // REPLACE THIS STRING WITH YOUR STRICTLY RESTRICTED GEMINI KEY
+        // To secure it: Go to Google AI Studio -> API Keys -> Restrict Key -> Add "quickdopdf.com"
+        const QD_GEMINI_KEY = 'AIzaSyB32zdDoG2AL51coo6BrizX6YLu2B7u-Mo';
+
+        let resumeData = { fname:'', lname:'', title:'', email:'', phone:'', address:'', linkedin:'', photo:'', summary:'', skills:'', template:'tpl-modern', experience:[], education:[], projects:[] };
         let currentStep = 0;
 
         function switchView(vid) {
@@ -694,8 +683,12 @@
             e.target.value = '';
             if(!file) return;
 
-            const key = localStorage.getItem('gemini_api_key');
+            // Option A: Bypass the modal and use hardcoded restricted key directly.
+            // Fallback to localStorage ONLY for people testing locally without modifying code yet.
+            const key = QD_GEMINI_KEY !== 'ENTER_YOUR_RESTRICTED_API_KEY_HERE' ? QD_GEMINI_KEY : localStorage.getItem('gemini_api_key');
+            
             if(!key) { 
+                alert('Developer Notice: Please replace "ENTER_YOUR_RESTRICTED_API_KEY_HERE" in the resume-builder.html code with your Gemini Key to enable completely frictionless uploads like BetterCV, or use the "AI Setup" button to set it temporarily in your browser.');
                 openAIModal(); 
                 // Store file for retry after key is saved
                 window._pendingFile = file;
@@ -729,9 +722,9 @@
                 const parsed = await callAI(fullText, key);
                 if(parsed) {
                     resumeData = {...resumeData, ...parsed};
-                    if (Array.isArray(parsed.experience)) resumeData.experience = parsed.experience.map(exp => ({id: Date.now() + Math.random(), ...exp}));
-                    if (Array.isArray(parsed.education)) resumeData.education = parsed.education.map(edu => ({id: Date.now() + Math.random(), ...edu}));
-                    if (Array.isArray(parsed.projects)) resumeData.projects = parsed.projects.map(p => ({id: Date.now() + Math.random(), ...p}));
+                    resumeData.experience = Array.isArray(parsed.experience) ? parsed.experience.map(exp => ({id: Date.now() + Math.random(), ...exp})) : [];
+                    resumeData.education = Array.isArray(parsed.education) ? parsed.education.map(edu => ({id: Date.now() + Math.random(), ...edu})) : [];
+                    resumeData.projects = Array.isArray(parsed.projects) ? parsed.projects.map(p => ({id: Date.now() + Math.random(), ...p})) : [];
                     save();
                     renderAll();
                     ['experience', 'education', 'projects'].forEach(t => renderForms(t));
@@ -740,7 +733,7 @@
                 }
             } catch(err) { 
                 console.error('Upload error:', err);
-                setTimeout(() => alert('Error parsing resume: ' + err.message + '\n\nTip: Make sure your Gemini API key is valid and the file is not empty.'), 100);
+                setTimeout(() => alert('Error parsing resume: ' + err.message + '\n\nTip: Make sure your API key is valid and the file contains text.'), 100);
             } finally { 
                 document.getElementById('parsing-overlay').classList.add('hidden'); 
             }
@@ -750,7 +743,7 @@
             const prompt = `Extract resume information from the text below and return ONLY a valid JSON object. No markdown, no backticks, no extra text.
 
 JSON format to use:
-{"fname":"","lname":"","title":"","email":"","phone":"","summary":"","skills":"","experience":[{"company":"","title":"","duration":"","desc":""}],"education":[{"school":"","degree":"","year":""}]}
+{"fname":"","lname":"","title":"","email":"","phone":"","address":"","linkedin":"","summary":"","skills":"","experience":[{"company":"","title":"","duration":"","desc":""}],"education":[{"school":"","degree":"","year":""}]}
 
 Resume text:
 ${text.slice(0, 6000)}`;
@@ -764,28 +757,38 @@ ${text.slice(0, 6000)}`;
                 const data = await res.json();
                 if (!res.ok) {
                     const errMsg = data.error?.message || `Model ${model} failed (${res.status})`;
-                    throw new Error(errMsg);
+                    throw new Error(`${res.status}: ${errMsg}`);
                 }
                 return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
             }
 
-            // Try models in order — most available free-tier models first
-            const models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash'];
+            const models = ['gemini-3.1-flash-live-preview', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-1.5-pro'];
             let lastError = null;
 
             for (const model of models) {
-                try {
-                    const jsonText = await attempt(model);
-                    const match = jsonText.match(/\{[\s\S]*\}/);
-                    if (!match) throw new Error('AI returned unexpected format');
-                    return JSON.parse(match[0]);
-                } catch(e) {
-                    console.warn(`${model} failed:`, e.message);
-                    lastError = e;
-                    // Don't retry if it's an API key error
-                    if (e.message.includes('API_KEY_INVALID') || e.message.includes('401') || e.message.includes('403')) {
-                        break;
+                let retries = 2;
+                while (retries > 0) {
+                    try {
+                        const jsonText = await attempt(model);
+                        const match = jsonText.match(/\{[\s\S]*\}/);
+                        if (!match) throw new Error('AI returned unexpected format');
+                        return JSON.parse(match[0]);
+                    } catch(e) {
+                        console.warn(`${model} failed:`, e.message);
+                        lastError = e;
+                        // Don't retry if it's an API key error
+                        if (e.message.includes('API_KEY_INVALID') || e.message.includes('401') || e.message.includes('403') || e.message.includes('API key not valid')) {
+                            break;
+                        }
+                        if (e.message.includes('429') || e.message.includes('quota')) {
+                            // Hit rate limit. Wait 2.5 seconds before retrying this model or moving to next
+                            await new Promise(r => setTimeout(r, 2500));
+                        }
+                        retries--;
                     }
+                }
+                if (lastError && (lastError.message.includes('API_KEY_INVALID') || lastError.message.includes('401') || lastError.message.includes('403'))) {
+                    break; 
                 }
             }
 
@@ -927,85 +930,163 @@ ${text.slice(0, 6000)}`;
 
         function updatePreview() {
             const canvas = document.getElementById('resume-canvas');
-            canvas.className = resumeData.template;
-            
             const t = resumeData.template;
-            const layoutType = (t === 'tpl-executive' || t === 'tpl-modern' || t === 'tpl-creative' || t === 'tpl-technical') ? 'sidebar-left' : 
-                               (t === 'tpl-startup') ? 'sidebar-right' : 'centered';
             
-            if (layoutType === 'sidebar-right') canvas.classList.add('layout-right');
-            else if (layoutType === 'centered') canvas.classList.add('layout-centered');
-
-            const photoHTML = resumeData.photo ? `<img src="${resumeData.photo}" class="r-photo">` : '';
+            let layoutType = 'modern';
+            if(['tpl-startup', 'tpl-vibrant', 'tpl-creative', 'tpl-executive'].includes(t)) layoutType = 'exec';
+            if(['tpl-elegant', 'tpl-academic', 'tpl-bold', 'tpl-simple', 'tpl-industrial'].includes(t)) layoutType = 'ats';
             
-            const headerHTML = `
-                <div class="r-head">
-                    ${photoHTML}
-                    <div id="view-name" style="font-size:32px; font-weight:900;">${(resumeData.fname + ' ' + (resumeData.lname||'')).trim().toUpperCase() || "JOHN DOE"}</div>
-                    <div id="view-title" style="font-weight:700; color:var(--primary); font-size:16px;">${resumeData.title || "SOFTWARE ENGINEER"}</div>
-                    <div id="view-contact" style="font-size:12px; margin-top:5px; color:#64748b;">${resumeData.email || 'email@example.com'} | ${resumeData.phone || '+1 234'}</div>
-                </div>
-            `;
+            canvas.className = '';
+            canvas.classList.add(`bcv-${layoutType}`);
+            // Retain original class for specific modifiers like dark mode
+            if(t === 'tpl-impact') canvas.classList.add('tpl-impact');
 
-            const summaryHTML = `
-                <div class="r-section">
-                    <div class="r-section-title">Professional Summary</div>
-                    <div style="font-size:12.5px; line-height:1.6; color:#334155;">${resumeData.summary || "Experienced professional with a track record of success..."}</div>
-                </div>
-            `;
-
-            const sectionsHTML = `
-                <div class="r-section">
-                    <div class="r-section-title">Experience</div>
-                    ${resumeData.experience.map(exp => `
-                        <div class="r-item">
-                            <div class="r-item-head"><span>${exp.company || 'Company'}</span> <span>${exp.duration || '2020 - 2024'}</span></div>
-                            <div class="r-item-sub">${exp.title || 'Role'}</div>
-                            <div class="r-item-desc">${exp.desc || 'Key achievement or responsibility goes here.'}</div>
-                        </div>
-                    `).join('') || '<div style="font-size:12px; color:#94a3b8;">Add your work experience</div>'}
-                </div>
-                <div class="r-section">
-                    <div class="r-section-title">Education</div>
-                    ${resumeData.education.map(edu => `
-                        <div class="r-item">
-                            <div class="r-item-head"><span>${edu.school || 'University'}</span> <span>${edu.year || '2020'}</span></div>
-                            <div class="r-item-sub">${edu.degree || 'Degree'}</div>
-                        </div>
-                    `).join('') || '<div style="font-size:12px; color:#94a3b8;">Add your education</div>'}
-                </div>
-            `;
+            const photo = resumeData.photo ? resumeData.photo : '';
             
-            const sidebarHTML = `
-                <div class="r-section">
-                    <div class="r-section-title">Skills</div>
-                    <div style="font-size:12px; line-height:1.6; color:#475569;">${resumeData.skills || "Python, JS, React, AI, Node.js"}</div>
-                </div>
-            `;
+            const iconEmail = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>`;
+            const iconPhone = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>`;
+            const iconLocation = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>`;
+            const iconLinkedin = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"></path><circle cx="4" cy="4" r="2" stroke="none" fill="currentColor"></circle></svg>`;
 
-            if (layoutType.startsWith('sidebar')) {
+            const name = (resumeData.fname + ' ' + (resumeData.lname||'')).trim() || "JOHN DOE";
+            const title = resumeData.title || "SOFTWARE ENGINEER";
+            const email = resumeData.email || 'email@example.com';
+            const phone = resumeData.phone || '+1 234 567 890';
+            const address = resumeData.address || '';
+            const linkedin = resumeData.linkedin || '';
+            const summary = resumeData.summary || "Experienced professional with a track record of success.";
+            
+            const expArray = resumeData.experience && resumeData.experience.length ? resumeData.experience : [{company:'Company', duration:'2020 - Present', title:'Job Title', desc:'Key responsibility goes here.'}];
+            const eduArray = resumeData.education && resumeData.education.length ? resumeData.education : [{school:'University', year:'2020', degree:'Degree Name'}];
+            
+            let skillsArray = resumeData.skills ? resumeData.skills.split(',').map(s=>s.trim()).filter(Boolean) : ['Python', 'JavaScript', 'React', 'Team Leadership'];
+
+            if (layoutType === 'modern') {
                 canvas.innerHTML = `
-                    <div class="r-split">
-                        <div class="r-side">
-                            ${layoutType === 'sidebar-left' ? (photoHTML + sidebarHTML) : sidebarHTML}
+                    <div class="m-sidebar">
+                        ${photo ? `<img src="${photo}" class="m-photo">` : ''}
+                        
+                        <div class="m-section-title">Contact</div>
+                        <div class="m-contact-item">${iconEmail} <span>${email}</span></div>
+                        <div class="m-contact-item">${iconPhone} <span>${phone}</span></div>
+                        ${address ? `<div class="m-contact-item">${iconLocation} <span>${address}</span></div>` : ''}
+                        ${linkedin ? `<div class="m-contact-item">${iconLinkedin} <span>${linkedin}</span></div>` : ''}
+                        
+                        <div class="m-section-title">Skills</div>
+                        <div style="display:flex; flex-wrap:wrap;">
+                            ${skillsArray.map(s => `<div class="m-skill-pill">${s}</div>`).join('')}
                         </div>
-                        <div class="r-main">
-                            ${headerHTML}
-                            ${summaryHTML}
-                            ${sectionsHTML}
+                    </div>
+                    <div class="m-main">
+                        <div class="m-name">${name}</div>
+                        <div class="m-title">${title}</div>
+                        
+                        ${summary ? `
+                        <div class="m-section-title">Profile</div>
+                        <div class="m-summary">${summary}</div>
+                        ` : ''}
+                        
+                        <div class="m-section-title">Experience</div>
+                        ${expArray.map(exp => `
+                            <div class="m-exp-grid">
+                                <div class="m-exp-date">${exp.duration || ''}</div>
+                                <div>
+                                    <div class="m-exp-role">${exp.title || 'Role'}</div>
+                                    <div class="m-exp-company">${exp.company || 'Company'}</div>
+                                    <div class="m-exp-desc">${exp.desc ? exp.desc.replace(/•/g, '').split('\n').filter(Boolean).map(line => `<li>${line}</li>`).join('') : ''}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                        
+                        <div class="m-section-title">Education</div>
+                        ${eduArray.map(edu => `
+                            <div class="m-exp-grid">
+                                <div class="m-exp-date">${edu.year || ''}</div>
+                                <div>
+                                    <div class="m-exp-role">${edu.degree || 'Degree'}</div>
+                                    <div class="m-exp-company">${edu.school || 'School'}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (layoutType === 'exec') {
+                canvas.innerHTML = `
+                    <div class="x-header">
+                        <div>
+                            <div class="x-name">${name}</div>
+                            <div class="x-title">${title}</div>
+                        </div>
+                        <div class="x-contact">
+                            <div>${email} | ${phone}</div>
+                            ${address ? `<div>${address}</div>` : ''}
+                            ${linkedin ? `<div>${linkedin}</div>` : ''}
+                        </div>
+                        ${photo ? `<img src="${photo}" class="x-photo">` : ''}
+                    </div>
+                    <div class="x-body">
+                        <div>
+                            ${summary ? `
+                            <div class="x-section-title">Summary</div>
+                            <div class="x-desc" style="margin-bottom: 30px;">${summary}</div>
+                            ` : ''}
+                            
+                            <div class="x-section-title">Experience</div>
+                            ${expArray.map(exp => `
+                                <div class="x-item">
+                                    <div class="x-role">${exp.title || 'Role'}</div>
+                                    <div class="x-meta">${exp.company || 'Company'} &nbsp;|&nbsp; <span>${exp.duration || ''}</span></div>
+                                    <div class="x-desc">${exp.desc ? exp.desc.replace(/•/g, '').split('\n').filter(Boolean).map(line => `<li>${line}</li>`).join('') : ''}</div>
+                                </div>
+                            `).join('')}
+                            
+                            <div class="x-section-title">Education</div>
+                            ${eduArray.map(edu => `
+                                <div class="x-item">
+                                    <div class="x-role">${edu.degree || 'Degree'}</div>
+                                    <div class="x-meta">${edu.school || 'School'} &nbsp;|&nbsp; <span>${edu.year || ''}</span></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div>
+                            <div class="x-section-title" style="margin-left: 10px;">Expertise</div>
+                            ${skillsArray.map(s => `
+                                <div class="x-skill">
+                                    <span>${s}</span>
+                                    <div class="x-bar"><div class="x-bar-fill" style="width: ${s.length > 6 ? '90%' : '75%'}"></div></div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 `;
-            } else {
+            } else { // ats
                 canvas.innerHTML = `
-                    ${headerHTML}
-                    <div class="r-main">
-                        ${summaryHTML}
-                        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:40px;">
-                            <div>${sectionsHTML}</div>
-                            <div>${sidebarHTML}</div>
-                        </div>
+                    <div class="a-header">
+                        <div class="a-name">${name}</div>
+                        <div class="a-contact">${title}  |  ${email}  |  ${phone} ${address ? ` | ${address}` : ''} ${linkedin ? ` | ${linkedin}` : ''}</div>
                     </div>
+                    
+                    ${summary ? `
+                    <div class="a-section-title">Professional Summary</div>
+                    <div class="a-item-desc">${summary}</div>
+                    ` : ''}
+                    
+                    <div class="a-section-title">Experience</div>
+                    ${expArray.map(exp => `
+                        <div class="a-item-head"><span>${exp.company || 'Company'}</span> <span>${exp.duration || ''}</span></div>
+                        <div class="a-item-sub"><span>${exp.title || 'Role'}</span></div>
+                        <div class="a-item-desc">${exp.desc || ''}</div>
+                    `).join('')}
+                    
+                    <div class="a-section-title">Education</div>
+                    ${eduArray.map(edu => `
+                        <div class="a-item-head"><span>${edu.school || 'School'}</span> <span>${edu.year || ''}</span></div>
+                        <div class="a-item-sub"><span>${edu.degree || 'Degree'}</span></div>
+                        <div class="a-item-desc" style="margin-bottom: 10px;"></div>
+                    `).join('')}
+                    
+                    <div class="a-section-title">Core Competencies</div>
+                    <div class="a-skills">${skillsArray.join(' &bull; ')}</div>
                 `;
             }
 
