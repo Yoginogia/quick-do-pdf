@@ -924,15 +924,17 @@
                     const finalColor = editor.style.color;
 
                     // Save edit strongly in our engine memory
+                    // Store coordinates pre-converted to PDF space for accurate export
+                    const cssToPdf = 1 / scaleMultiplier;
                     nativeTextEdits[pageNum].push({
                         id: editId,
                         originalText: originalText,
                         newText: newText,
-                        cssLeft: cssLeft,
-                        cssTop: cssTop,
-                        cssWidth: cssWidth, // width to wipe
-                        cssHeight: cssHeight, // height to wipe
-                        fontSizePx: parseFloat(computedStyle.fontSize),
+                        pdfLeft: cssLeft * cssToPdf,
+                        pdfTop: cssTop * cssToPdf,
+                        pdfWidth: cssWidth * cssToPdf,
+                        pdfHeight: cssHeight * cssToPdf,
+                        fontSizePdf: parseFloat(computedStyle.fontSize) * cssToPdf,
                         fontFamily: fontFamily,
                         color: finalColor
                     });
@@ -1369,13 +1371,12 @@
                     // 1. BURN NATIVE TEXT EDITS (Whiteout + Replace)
                     const pageEdits = nativeTextEdits[pageNum] || [];
                     for (let edit of pageEdits) {
-                        const pdfX = edit.cssLeft * cssToPdfRatio;
-                        // Wipe box height: roughly the height of the word
-                        const pdfWipeH = edit.cssHeight * cssToPdfRatio;
-                        const pdfWipeW = edit.cssWidth * cssToPdfRatio;
+                        const pdfX = edit.pdfLeft;
+                        const pdfWipeH = edit.pdfHeight;
+                        const pdfWipeW = edit.pdfWidth;
 
                         // DOM y is from top. PDF-lib y is from bottom.
-                        const pdfRectY = pdfHeight - ((edit.cssTop + edit.cssHeight) * cssToPdfRatio);
+                        const pdfRectY = pdfHeight - (edit.pdfTop + edit.pdfHeight);
 
                         // A) Draw Whiteout Box
                         pdfPage.drawRectangle({
@@ -1388,7 +1389,7 @@
 
                         // B) Draw New Text (y is the baseline for text, not bottom-left corner)
                         if (edit.newText.trim() !== '') {
-                            const pdfFontSize = edit.fontSizePx * cssToPdfRatio;
+                            const pdfFontSize = edit.fontSizePdf;
                             // Baseline is approx 20% up from the bottom of the bounding box
                             const baselinePdfY = pdfRectY + (pdfFontSize * 0.2);
 
