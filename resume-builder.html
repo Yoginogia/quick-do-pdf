@@ -72,14 +72,43 @@
             cursor: pointer; transition: 0.3s; border: 2px solid transparent; display: inline-flex; align-items: center; gap: 8px;
         }
         .btn-primary { background: var(--primary); color: #fff; }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 163, 255, 0.2); }        /* PREMIUM TEMPLATE GRID SECTION */
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 163, 255, 0.2); }
+
+        /* Animated gradient background for landing */
+        .landing-screen { position: relative; }
+        .landing-screen::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(0,163,255,0.07) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(139,92,246,0.05) 0%, transparent 50%);
+            animation: orb-drift 15s ease-in-out infinite alternate;
+            z-index: 0; pointer-events: none;
+        }
+        @keyframes orb-drift { 0% { transform: translate(0,0); } 100% { transform: translate(30px,-20px); } }
+        .landing-screen > * { position: relative; z-index: 1; }
+
+        /* Auto-save indicator */
+        .auto-save-indicator {
+            position: fixed; bottom: 20px; left: 20px; background: rgba(34,197,94,0.9);
+            color: #fff; padding: 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 700;
+            opacity: 0; transition: opacity 0.3s; z-index: 999; pointer-events: none;
+        }
+        .auto-save-indicator.show { opacity: 1; }
+
+        /* Score tips panel */
+        .score-tips { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.6; max-width: 210mm; }
+        .score-tip { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .score-tip.done { color: var(--green); }
+        .score-tip.pending { color: #f59e0b; }
+
+        /* PREMIUM TEMPLATE GRID SECTION */
         .template-screen { width: 100%; height: 100%; overflow-y: auto; padding: 60px 40px; text-align: center; background: #f3f4f6; }
         .template-screen h1 { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 900; margin-bottom: 20px; }
         .template-screen p { font-size: 16px; color: var(--muted); margin-bottom: 50px; }
 
-        .category-bar { display: flex; justify-content: center; gap: 30px; margin-bottom: 60px; }
-        .cat-btn { font-weight: 700; font-size: 14px; color: var(--muted); cursor: pointer; padding-bottom: 8px; border-bottom: 2px solid transparent; transition: 0.3s; }
-        .cat-btn.active { color: var(--primary); border-color: var(--primary); }
+        .category-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 60px; flex-wrap: wrap; }
+        .cat-btn { font-weight: 700; font-size: 13px; color: var(--muted); cursor: pointer; padding: 8px 20px; border: 1.5px solid var(--border); border-radius: 100px; transition: 0.3s; background: #fff; }
+        .cat-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .cat-btn.active { color: #fff; background: var(--primary); border-color: var(--primary); }
 
         .template-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 60px;
@@ -305,17 +334,17 @@
             <p>Pick from 15+ designs that fit your career. You can change your template anytime later.</p>
             
             <div class="category-bar">
-                <div class="cat-btn active">ALL TEMPLATES</div>
-                <div class="cat-btn">MODERN</div>
-                <div class="cat-btn">PROFESSIONAL</div>
-                <div class="cat-btn">SIMPLE</div>
-                <div class="cat-btn">CREATIVE</div>
-                <div class="cat-btn">ATS FRIENDLY</div>
+                <div class="cat-btn active" onclick="filterTemplates('all')">ALL TEMPLATES</div>
+                <div class="cat-btn" onclick="filterTemplates('modern')">MODERN</div>
+                <div class="cat-btn" onclick="filterTemplates('professional')">PROFESSIONAL</div>
+                <div class="cat-btn" onclick="filterTemplates('simple')">SIMPLE</div>
+                <div class="cat-btn" onclick="filterTemplates('creative')">CREATIVE</div>
+                <div class="cat-btn" onclick="filterTemplates('ats')">ATS FRIENDLY</div>
             </div>
 
             <div class="template-grid">
                 <!-- 1. MODERN (Sidebar Left) -->
-                <div class="template-card tpl-modern" onclick="goToSetup('tpl-modern')">
+                <div class="template-card tpl-modern" data-cat="modern" onclick="goToSetup('tpl-modern')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
                         <div class="tpl-mock" style="flex-direction:row; padding:0; background:#fff;">
@@ -343,7 +372,7 @@
                 </div>
 
                 <!-- 2. IMPACT (Modern Variant - Dark Mode) -->
-                <div class="template-card tpl-impact" onclick="goToSetup('tpl-impact')">
+                <div class="template-card tpl-impact" data-cat="creative" onclick="goToSetup('tpl-impact')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
                         <div class="tpl-mock" style="flex-direction:row; padding:0; background:#0f172a;">
@@ -369,7 +398,7 @@
                 </div>
 
                 <!-- 3. EXECUTIVE (Top Block) -->
-                <div class="template-card tpl-executive" onclick="goToSetup('tpl-executive')">
+                <div class="template-card tpl-executive" data-cat="professional" onclick="goToSetup('tpl-executive')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
                         <div class="tpl-mock" style="padding:0; background:#fff;">
@@ -399,7 +428,7 @@
                 </div>
 
                 <!-- 4. STARTUP (Exec Variant - Fun Colors) -->
-                <div class="template-card tpl-startup" onclick="goToSetup('tpl-startup')">
+                <div class="template-card tpl-startup" data-cat="creative" onclick="goToSetup('tpl-startup')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
                         <div class="tpl-mock" style="padding:0; background:#fff;">
@@ -429,7 +458,7 @@
                 </div>
 
                 <!-- 5. ATS CLASSIC (Minimalist Centered) -->
-                <div class="template-card tpl-simple" onclick="goToSetup('tpl-simple')">
+                <div class="template-card tpl-simple" data-cat="ats simple" onclick="goToSetup('tpl-simple')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
                         <div class="tpl-mock" style="padding:20px; text-align:center; background:#fff;">
@@ -448,7 +477,7 @@
                 </div>
 
                 <!-- 6. ELEGANT (ATS Variant) -->
-                <div class="template-card tpl-elegant" onclick="goToSetup('tpl-elegant')">
+                <div class="template-card tpl-elegant" data-cat="ats professional" onclick="goToSetup('tpl-elegant')">
                     <div class="template-preview">
                         <div class="hover-overlay"><div class="btn-use">Use This Template</div></div>
                         <div class="tpl-mock" style="padding:20px; text-align:center; background:#f8fafc; border:4px solid #fff; box-shadow:inset 0 0 0 1px #e2e8f0;">
@@ -504,7 +533,9 @@
                 <div class="step-link" onclick="jumpTo(2)" data-idx="2"><span>3</span> Education</div>
                 <div class="step-link" onclick="jumpTo(3)" data-idx="3"><span>4</span> Projects</div>
                 <div class="step-link" onclick="jumpTo(4)" data-idx="4"><span>5</span> Skills</div>
-                <div class="step-link" onclick="jumpTo(5)" data-idx="5"><span>6</span> Summary</div>
+                <div class="step-link" onclick="jumpTo(5)" data-idx="5"><span>6</span> Certifications</div>
+                <div class="step-link" onclick="jumpTo(6)" data-idx="6"><span>7</span> Languages</div>
+                <div class="step-link" onclick="jumpTo(7)" data-idx="7"><span>8</span> Summary</div>
             </div>
 
             <div class="editor-split">
@@ -559,6 +590,18 @@
                     </div>
 
                     <div id="wiz-5" class="wiz-step hidden">
+                        <div class="form-title">Certifications <button class="btn" onclick="addItem('certifications')">+ Add</button></div>
+                        <p class="form-sub">AWS, PMP, Google, Microsoft — add professional certifications.</p>
+                        <div id="certifications-form-list"></div>
+                    </div>
+
+                    <div id="wiz-6" class="wiz-step hidden">
+                        <div class="form-title">Languages</div>
+                        <p class="form-sub">List languages you speak and your proficiency level.</p>
+                        <div class="input-group"><label>Languages (comma separated)</label><textarea class="form-input sync" data-key="languages" placeholder="English (Fluent), Hindi (Native), Spanish (Intermediate)" style="height:80px;"></textarea><span class="input-icon">✓</span></div>
+                    </div>
+
+                    <div id="wiz-7" class="wiz-step hidden">
                         <div class="form-title">Professional Summary</div>
                         <div class="input-group" style="position:relative;">
                             <textarea class="form-input sync" data-key="summary" style="height:180px;"></textarea>
@@ -580,6 +623,7 @@
                          <div class="score-pill"><span id="score-pct">0%</span> Your resume score 🔥</div>
                         <div style="font-size: 11px; color:#666; font-weight:700;">LIVE PREVIEW</div>
                     </div>
+                    <div class="score-tips" id="scoreTips"></div>
                     <div id="resume-canvas" class="tpl-modern">
                         <!-- Dynamic HTML Injected by updatePreview() -->
                     </div>
@@ -649,8 +693,32 @@
         // To secure it: Go to Google AI Studio -> API Keys -> Restrict Key -> Add "quickdopdf.com"
         const QD_GEMINI_KEY = 'AIzaSyB32zdDoG2AL51coo6BrizX6YLu2B7u-Mo';
 
-        let resumeData = { fname:'', lname:'', title:'', email:'', phone:'', address:'', linkedin:'', photo:'', summary:'', skills:'', template:'tpl-modern', experience:[], education:[], projects:[] };
+        let resumeData = { fname:'', lname:'', title:'', email:'', phone:'', address:'', linkedin:'', photo:'', summary:'', skills:'', languages:'', template:'tpl-modern', experience:[], education:[], projects:[], certifications:[] };
         let currentStep = 0;
+        const TOTAL_STEPS = 8;
+
+        function filterTemplates(cat) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.template-card').forEach(card => {
+                if(cat === 'all') { card.style.display = ''; return; }
+                const cats = (card.dataset.cat || '').split(' ');
+                card.style.display = cats.includes(cat) ? '' : 'none';
+            });
+        }
+
+        function flashSave() {
+            let ind = document.getElementById('save-indicator');
+            if(!ind) {
+                ind = document.createElement('div');
+                ind.id = 'save-indicator';
+                ind.className = 'auto-save-indicator';
+                ind.textContent = '✓ Auto-saved';
+                document.body.appendChild(ind);
+            }
+            ind.classList.add('show');
+            setTimeout(() => ind.classList.remove('show'), 1500);
+        }
 
         function switchView(vid) {
             document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
@@ -810,18 +878,20 @@ ${text.slice(0, 6000)}`;
             document.getElementById(`wiz-${idx}`).classList.remove('hidden');
             document.querySelectorAll('.step-link')[idx].classList.add('active');
             currentStep = idx;
-            document.getElementById('btn-next').classList.toggle('hidden', idx === 5);
-            document.getElementById('btn-final-dl').classList.toggle('hidden', idx !== 5);
+            const lastStep = TOTAL_STEPS - 1;
+            document.getElementById('btn-next').classList.toggle('hidden', idx === lastStep);
+            document.getElementById('btn-final-dl').classList.toggle('hidden', idx !== lastStep);
         }
 
         function moveStep(dir) {
             const next = currentStep + dir;
-            if(next >= 0 && next <= 5) jumpTo(next);
+            if(next >= 0 && next <= TOTAL_STEPS - 1) jumpTo(next);
         }
 
         function addItem(type) {
             const item = (type === 'education') ? {id:Date.now(), school:'', degree:'', year:''} : 
                         (type === 'projects') ? {id:Date.now(), name:'', link:'', desc:''} :
+                        (type === 'certifications') ? {id:Date.now(), name:'', issuer:'', year:''} :
                         {id:Date.now(), company:'', title:'', duration:'', location:'', desc:''};
             resumeData[type].push(item);
             renderForms(type); updatePreview(); save();
@@ -857,6 +927,14 @@ ${text.slice(0, 6000)}`;
                             <input type="text" class="form-input" placeholder="Year" value="${item.year}" oninput="updateItem('${type}', ${item.id}, 'year', this.value)">
                         </div>
                         <input type="text" class="form-input" placeholder="Degree" value="${item.degree}" oninput="updateItem('${type}', ${item.id}, 'degree', this.value)" style="margin-top:10px;">
+                    `;
+                } else if(type === 'certifications') {
+                    fields = `
+                        <div class="input-grid">
+                            <input type="text" class="form-input" placeholder="Certification Name" value="${item.name}" oninput="updateItem('${type}', ${item.id}, 'name', this.value)">
+                            <input type="text" class="form-input" placeholder="Issuing Organization" value="${item.issuer}" oninput="updateItem('${type}', ${item.id}, 'issuer', this.value)">
+                        </div>
+                        <input type="text" class="form-input" placeholder="Year" value="${item.year}" oninput="updateItem('${type}', ${item.id}, 'year', this.value)" style="margin-top:10px;">
                     `;
                 } else {
                     fields = `
@@ -961,6 +1039,8 @@ ${text.slice(0, 6000)}`;
             const eduArray = resumeData.education && resumeData.education.length ? resumeData.education : [{school:'University', year:'2020', degree:'Degree Name'}];
             
             let skillsArray = resumeData.skills ? resumeData.skills.split(',').map(s=>s.trim()).filter(Boolean) : ['Python', 'JavaScript', 'React', 'Team Leadership'];
+            const certArray = resumeData.certifications && resumeData.certifications.length ? resumeData.certifications : [];
+            let langArray = resumeData.languages ? resumeData.languages.split(',').map(s=>s.trim()).filter(Boolean) : [];
 
             if (layoutType === 'modern') {
                 canvas.innerHTML = `
@@ -977,6 +1057,11 @@ ${text.slice(0, 6000)}`;
                         <div style="display:flex; flex-wrap:wrap;">
                             ${skillsArray.map(s => `<div class="m-skill-pill">${s}</div>`).join('')}
                         </div>
+                        
+                        ${langArray.length ? `
+                        <div class="m-section-title">Languages</div>
+                        ${langArray.map(l => `<div class="m-contact-item" style="gap:6px;"><span>${l}</span></div>`).join('')}
+                        ` : ''}
                     </div>
                     <div class="m-main">
                         <div class="m-name">${name}</div>
@@ -1009,6 +1094,19 @@ ${text.slice(0, 6000)}`;
                                 </div>
                             </div>
                         `).join('')}
+                        
+                        ${certArray.length ? `
+                        <div class="m-section-title">Certifications</div>
+                        ${certArray.map(c => `
+                            <div class="m-exp-grid">
+                                <div class="m-exp-date">${c.year || ''}</div>
+                                <div>
+                                    <div class="m-exp-role">${c.name || 'Certification'}</div>
+                                    <div class="m-exp-company">${c.issuer || ''}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                        ` : ''}
                     </div>
                 `;
             } else if (layoutType === 'exec') {
@@ -1048,6 +1146,16 @@ ${text.slice(0, 6000)}`;
                                     <div class="x-meta">${edu.school || 'School'} &nbsp;|&nbsp; <span>${edu.year || ''}</span></div>
                                 </div>
                             `).join('')}
+                            
+                            ${certArray.length ? `
+                            <div class="x-section-title">Certifications</div>
+                            ${certArray.map(c => `
+                                <div class="x-item">
+                                    <div class="x-role">${c.name || 'Certification'}</div>
+                                    <div class="x-meta">${c.issuer || ''} &nbsp;|&nbsp; <span>${c.year || ''}</span></div>
+                                </div>
+                            `).join('')}
+                            ` : ''}
                         </div>
                         <div>
                             <div class="x-section-title" style="margin-left: 10px;">Expertise</div>
@@ -1057,6 +1165,11 @@ ${text.slice(0, 6000)}`;
                                     <div class="x-bar"><div class="x-bar-fill" style="width: ${s.length > 6 ? '90%' : '75%'}"></div></div>
                                 </div>
                             `).join('')}
+                            
+                            ${langArray.length ? `
+                            <div class="x-section-title" style="margin-left:10px; margin-top:30px;">Languages</div>
+                            ${langArray.map(l => `<div class="x-skill"><span>${l}</span></div>`).join('')}
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -1088,6 +1201,19 @@ ${text.slice(0, 6000)}`;
                     
                     <div class="a-section-title">Core Competencies</div>
                     <div class="a-skills">${skillsArray.join(' &bull; ')}</div>
+                    
+                    ${certArray.length ? `
+                    <div class="a-section-title">Certifications</div>
+                    ${certArray.map(c => `
+                        <div class="a-item-head"><span>${c.name || 'Certification'}</span> <span>${c.year || ''}</span></div>
+                        <div class="a-item-sub"><span>${c.issuer || ''}</span></div>
+                    `).join('')}
+                    ` : ''}
+                    
+                    ${langArray.length ? `
+                    <div class="a-section-title">Languages</div>
+                    <div class="a-skills">${langArray.join(' &bull; ')}</div>
+                    ` : ''}
                 `;
             }
 
@@ -1095,8 +1221,25 @@ ${text.slice(0, 6000)}`;
         }
 
         function updateScore() {
-            let s = 0; if(resumeData.fname) s+=20; if(resumeData.summary) s+=30; if(resumeData.experience.length) s+=50;
-            document.getElementById('score-pct').innerText = s + "%";
+            let s = 0;
+            const tips = [];
+            if(resumeData.fname) { s+=10; tips.push({done:true, text:'Name added'}); } else { tips.push({done:false, text:'Add your full name'}); }
+            if(resumeData.email) { s+=10; tips.push({done:true, text:'Email added'}); } else { tips.push({done:false, text:'Add your email address'}); }
+            if(resumeData.summary && resumeData.summary.length > 30) { s+=15; tips.push({done:true, text:'Professional summary written'}); } else { tips.push({done:false, text:'Write a professional summary (30+ chars)'}); }
+            if(resumeData.experience.length >= 1) { s+=20; tips.push({done:true, text:'Work experience added'}); } else { tips.push({done:false, text:'Add at least 1 work experience'}); }
+            if(resumeData.experience.length >= 2) { s+=10; } else { tips.push({done:false, text:'Add 2+ experiences for stronger profile'}); }
+            if(resumeData.education.length >= 1) { s+=10; tips.push({done:true, text:'Education added'}); } else { tips.push({done:false, text:'Add your education'}); }
+            if(resumeData.skills && resumeData.skills.split(',').filter(Boolean).length >= 3) { s+=10; tips.push({done:true, text:'3+ skills listed'}); } else { tips.push({done:false, text:'Add at least 3 skills'}); }
+            if(resumeData.certifications && resumeData.certifications.length >= 1) { s+=5; tips.push({done:true, text:'Certification added'}); } else { tips.push({done:false, text:'Add certifications (bonus)'}); }
+            if(resumeData.languages) { s+=5; tips.push({done:true, text:'Languages added'}); } else { tips.push({done:false, text:'Add languages (bonus)'}); }
+            if(resumeData.phone) { s+=5; }
+            s = Math.min(100, s);
+            document.getElementById('score-pct').innerText = s + '%';
+            const el = document.getElementById('scoreTips');
+            if(el) {
+                el.innerHTML = tips.filter(t => !t.done).slice(0, 4).map(t => `<div class="score-tip pending">⚠ ${t.text}</div>`).join('') 
+                             + tips.filter(t => t.done).slice(0, 3).map(t => `<div class="score-tip done">✓ ${t.text}</div>`).join('');
+            }
         }
 
         function changeTemplate(tpl) {
@@ -1117,7 +1260,7 @@ ${text.slice(0, 6000)}`;
             updatePreview();
         }
 
-        function save() { localStorage.setItem('qd-res-v6', JSON.stringify(resumeData)); }
+        function save() { localStorage.setItem('qd-res-v6', JSON.stringify(resumeData)); flashSave(); }
         
         function openAIModal() { 
             document.getElementById('ai-modal').classList.remove('hidden'); 
@@ -1203,7 +1346,7 @@ ${text.slice(0, 6000)}`;
                 } catch(e) { console.warn('Could not restore saved data'); }
             }
             bindSync(); renderAll();
-            ['experience', 'education', 'projects'].forEach(t => renderForms(t));
+            ['experience', 'education', 'projects', 'certifications'].forEach(t => renderForms(t));
         };
     </script>
 </body>
