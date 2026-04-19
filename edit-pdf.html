@@ -1021,6 +1021,7 @@
             item.appendChild(ta);
             // Select it immediately
             selectItem(item);
+            pushHistory({type:'ADD', node: item});
             setTimeout(() => ta.focus(), 50); // focus for instant binding
         }
 
@@ -1052,6 +1053,7 @@
 
             item.appendChild(shapeDiv);
             selectItem(item);
+            pushHistory({type:'ADD', node: item});
         }
 
         function addLinkElement(layer, x, y, url) {
@@ -1083,6 +1085,7 @@
 
             item.appendChild(linkDiv);
             selectItem(item);
+            pushHistory({type:'ADD', node: item});
         }
 
         function addStickyNoteElement(layer, x, y, text) {
@@ -1105,6 +1108,7 @@
 
             item.appendChild(noteDiv);
             selectItem(item);
+            pushHistory({type:'ADD', node: item});
         }
 
         function handleAddImageFile(e) {
@@ -1135,6 +1139,7 @@
                         item.appendChild(itemImg);
                         setTool('cursor');
                         selectItem(item);
+                        pushHistory({type:'ADD', node: item});
                     }
                     img.src = dataUrl;
                 }
@@ -1154,7 +1159,7 @@
             const delBtn = document.createElement('div');
             delBtn.className = 'delete-btn';
             delBtn.innerHTML = '✕';
-            delBtn.onclick = (e) => { e.stopPropagation(); item.remove(); }
+            delBtn.onclick = (e) => { e.stopPropagation(); item.style.display = 'none'; pushHistory({type:'DELETE', node: item}); }
             item.appendChild(delBtn);
 
             const resizeHandle = document.createElement('div');
