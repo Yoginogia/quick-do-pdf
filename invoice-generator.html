@@ -103,13 +103,31 @@
     <main>
         <div class="editor-side">
             <div class="section-title"><span>1</span> Business Details</div>
+            
+            <div class="input-group">
+                <label>Upload Logo</label>
+                <input type="file" id="logoUpload" accept="image/*" class="input-field" style="padding: 8px;">
+            </div>
+
             <div class="form-grid">
                 <div class="input-group"><label>Your Company Name</label><input type="text" class="input-field" placeholder="My Business" oninput="upd('bizName', this.value)"></div>
                 <div class="input-group"><label>Invoice Number</label><input type="text" class="input-field" placeholder="INV-001" oninput="upd('invNum', this.value)"></div>
             </div>
+            <div class="form-grid">
+                <div class="input-group"><label>Your GSTIN / Tax No (Optional)</label><input type="text" class="input-field" placeholder="e.g. 27ABCDE1234F1Z5" oninput="updDisplay('bizGst', this.value, 'GSTIN: ')"></div>
+                <div class="input-group">
+                    <label>Currency</label>
+                    <select class="input-field" id="currency-select" onchange="updateCurrency(this.value)">
+                        <option value="₹">₹ (INR)</option>
+                        <option value="$">$ (USD)</option>
+                        <option value="€">€ (EUR)</option>
+                        <option value="£">£ (GBP)</option>
+                    </select>
+                </div>
+            </div>
             <div class="input-group">
                 <label>Your Address & Contact</label>
-                <textarea class="input-field" style="height: 100px;" oninput="upd('bizAddr', this.value)"></textarea>
+                <textarea class="input-field" style="height: 80px;" oninput="upd('bizAddr', this.value)"></textarea>
             </div>
 
             <div class="section-title"><span>2</span> Client Details</div>
@@ -117,9 +135,13 @@
                 <div class="input-group"><label>Client Name</label><input type="text" class="input-field" placeholder="Client Co." oninput="upd('cliName', this.value)"></div>
                 <div class="input-group"><label>Date</label><input type="date" class="input-field" id="inv-date"></div>
             </div>
+             <div class="input-group">
+                <label>Client GSTIN / Tax No (Optional)</label>
+                <input type="text" class="input-field" placeholder="e.g. 29ABCDE1234G1Z5" oninput="updDisplay('cliGst', this.value, 'GSTIN: ')">
+            </div>
             <div class="input-group">
                 <label>Client Address</label>
-                <textarea class="input-field" style="height: 100px;" oninput="upd('cliAddr', this.value)"></textarea>
+                <textarea class="input-field" style="height: 80px;" oninput="upd('cliAddr', this.value)"></textarea>
             </div>
 
             <div class="section-title"><span>3</span> Items & Billing</div>
@@ -132,12 +154,27 @@
                 </tbody>
             </table>
             <button class="btn btn-ghost" onclick="addRow()">+ Add New Item</button>
+
+            <div class="form-grid" style="margin-top: 30px;">
+                <div class="input-group">
+                    <label>Tax Rate (%)</label>
+                    <input type="number" class="input-field" value="18" id="tax-input" oninput="updateTax(this.value)">
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 20px;">
+                <label>Terms & Notes (Bank Details, UPI, etc.)</label>
+                <textarea class="input-field" style="height: 100px;" oninput="upd('notes', this.value)">Thank you for your business. Please make payment within 30 days.</textarea>
+            </div>
         </div>
 
         <div class="preview-side">
             <div id="invoice-canvas">
                 <div class="inv-header">
-                    <div class="inv-title">INVOICE</div>
+                    <div>
+                        <div class="inv-title">INVOICE</div>
+                        <img id="preview-logo" src="" style="max-height: 80px; max-width: 200px; display: none; margin-top: 15px;">
+                    </div>
                     <div class="inv-meta">
                         <p style="font-weight: 900; font-size: 18px;" id="p-bizName">MY BUSINESS</p>
                         <p id="p-invNum">#INV-0001</p>
@@ -149,10 +186,12 @@
                     <div class="inv-box">
                         <h4>Billed To</h4>
                         <p style="font-weight: 700;" id="p-cliName">Client Name</p>
+                        <p id="p-cliGst" style="display: none; font-size: 13px; color: var(--muted); margin-top: 4px;"></p>
                         <p id="p-cliAddr">Client Address Here</p>
                     </div>
                     <div class="inv-box">
                         <h4>From</h4>
+                        <p id="p-bizGst" style="display: none; font-size: 13px; color: var(--muted); margin-bottom: 4px;"></p>
                         <p id="p-bizAddr">Your Business Address Information Here</p>
                     </div>
                 </div>
@@ -166,13 +205,13 @@
 
                 <div class="inv-summary">
                     <div class="sum-row"><span style="color:#64748b;">Subtotal</span><span id="p-subtotal">₹0.00</span></div>
-                    <div class="sum-row"><span style="color:#64748b;">Tax (18%)</span><span id="p-tax">₹0.00</span></div>
+                    <div class="sum-row"><span style="color:#64748b;" id="lbl-tax">Tax (18%)</span><span id="p-tax">₹0.00</span></div>
                     <div class="sum-row total"><span>Total Amount</span><span id="p-total">₹0.00</span></div>
                 </div>
 
                 <div style="margin-top: 80px; padding-top: 30px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8;">
-                    <p style="margin-bottom: 5px; font-weight: 800; color: #64748b;">NOTES:</p>
-                    <p>Thank you for your business. Please make payment within 30 days.</p>
+                    <p style="margin-bottom: 5px; font-weight: 800; color: #64748b;">NOTES / TERMS:</p>
+                    <p id="p-notes" style="white-space: pre-wrap;">Thank you for your business. Please make payment within 30 days.</p>
                 </div>
             </div>
         </div>
@@ -180,13 +219,55 @@
 
     <script>
         let items = [{id: 1, desc: 'Professional Services', qty: 1, price: 1000}];
+        let currency = '₹';
+        let taxRate = 18;
         
-        function upd(id, val) { document.getElementById('p-'+id).innerText = val || (id === 'bizName' ? 'MY BUSINESS' : '...'); }
+        function upd(id, val) { 
+            document.getElementById('p-'+id).innerText = val || (id === 'bizName' ? 'MY BUSINESS' : '...'); 
+        }
+
+        // Specifically for optional elements like GST where empty means hide
+        function updDisplay(id, val, prefix) {
+            const el = document.getElementById('p-'+id);
+            if(val && val.trim() !== '') {
+                el.innerText = prefix + val;
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        }
         
         document.getElementById('inv-date').onchange = (e) => { 
+            if(!e.target.value) return;
             const d = new Date(e.target.value);
             document.getElementById('p-date').innerText = d.toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'});
         };
+
+        // Logo Upload Handler
+        document.getElementById('logoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.getElementById('preview-logo');
+                    img.src = event.target.result;
+                    img.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function updateCurrency(c) {
+            currency = c;
+            renderEditor();
+            renderPreview();
+        }
+
+        function updateTax(t) {
+            taxRate = parseFloat(t) || 0;
+            document.getElementById('lbl-tax').innerText = `Tax (${taxRate}%)`;
+            renderPreview();
+        }
 
         function addRow() {
             items.push({id: Date.now(), desc: '', qty: 1, price: 0});
@@ -200,16 +281,19 @@
             renderPreview();
         }
 
+        function formatCurrency(amount) {
+            return currency + amount.toLocaleString('en-IN', {minimumFractionDigits: 2});
+        }
+
         function editItem(id, k, v) {
             const idx = items.findIndex(i => i.id === id);
             items[idx][k] = (k === 'qty' || k === 'price') ? (v === '' ? 0 : parseFloat(v) || 0) : v;
             
-            // Only update the individual row total in the editor immediately
+            // Update editor row total silently without recreating inputs
             const rowTotal = items[idx].qty * items[idx].price;
             const editorTotalEl = document.getElementById(`editor-total-${id}`);
-            if (editorTotalEl) editorTotalEl.innerText = `₹${rowTotal.toFixed(2)}`;
+            if (editorTotalEl) editorTotalEl.innerText = formatCurrency(rowTotal);
             
-            // Re-render only the live preview to prevent input focus loss
             renderPreview();
         }
 
@@ -224,7 +308,7 @@
                         <td><input type="text" class="input-field" value="${item.desc}" oninput="editItem(${item.id}, 'desc', this.value)"></td>
                         <td><input type="number" class="input-field" value="${item.qty}" oninput="editItem(${item.id}, 'qty', this.value)"></td>
                         <td><input type="number" class="input-field" value="${item.price}" oninput="editItem(${item.id}, 'price', this.value)"></td>
-                        <td style="font-weight: 700; width: 80px;" id="editor-total-${item.id}">₹${rowTotal.toFixed(2)}</td>
+                        <td style="font-weight: 700; width: 80px;" id="editor-total-${item.id}">${formatCurrency(rowTotal)}</td>
                         <td class="row-del" onclick="delRow(${item.id})">✕</td>
                     </tr>
                 `);
@@ -244,21 +328,27 @@
                     <tr>
                         <td>${item.desc || '...'}</td>
                         <td class="txt-right">${item.qty}</td>
-                        <td class="txt-right">₹${item.price.toFixed(2)}</td>
-                        <td class="txt-right" style="font-weight: 700;">₹${rowTotal.toFixed(2)}</td>
+                        <td class="txt-right">${formatCurrency(item.price)}</td>
+                        <td class="txt-right" style="font-weight: 700;">${formatCurrency(rowTotal)}</td>
                     </tr>
                 `);
             });
 
-            const tax = subtotal * 0.18; // Default generic 18% tax calculation
+            const tax = subtotal * (taxRate / 100);
             const total = subtotal + tax;
-            document.getElementById('p-subtotal').innerText = '₹' + subtotal.toLocaleString('en-IN', {minimumFractionDigits: 2});
-            document.getElementById('p-tax').innerText = '₹' + tax.toLocaleString('en-IN', {minimumFractionDigits: 2});
-            document.getElementById('p-total').innerText = '₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('p-subtotal').innerText = formatCurrency(subtotal);
+            document.getElementById('p-tax').innerText = formatCurrency(tax);
+            document.getElementById('p-total').innerText = formatCurrency(total);
         }
 
         function downloadInvoice() {
-            const opt = { margin: 0, filename: 'Invoice.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 3 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            const opt = { 
+                margin: 0, 
+                filename: 'Invoice.pdf', 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 3, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            };
             html2pdf().set(opt).from(document.getElementById('invoice-canvas')).save();
         }
 
