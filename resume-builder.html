@@ -812,100 +812,219 @@
 
         // ==========================================
         // LOCAL RESUME PARSER (No API Required)
+        // Smart parser handles sidebar layouts, Indian resumes, multi-column PDFs
         // ==========================================
         function localParseResume(text) {
-            const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+            const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+            const fullText = text;
             const result = { fname:'', lname:'', title:'', email:'', phone:'', address:'', linkedin:'', summary:'', skills:'', languages:'', experience:[], education:[], projects:[], certifications:[] };
 
-            // Extract email
-            const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/i);
+            // 1. EXTRACT CONTACT INFO (works regardless of layout)
+            const emailMatch = fullText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
             if(emailMatch) result.email = emailMatch[0];
 
-            // Extract phone
-            const phoneMatch = text.match(/(\+?\d[\d\s\-().]{7,15}\d)/i);
-            if(phoneMatch) result.phone = phoneMatch[0].trim();
+            const phoneMatches = fullText.match(/(\+?\d[\d\s\-().]{7,15}\d)/g);
+            if(phoneMatches) result.phone = phoneMatches[0].trim();
 
-            // Extract LinkedIn
-            const linkedinMatch = text.match(/linkedin\.com\/in\/[\w-]+/i);
+            const linkedinMatch = fullText.match(/linkedin\.com\/in\/[\w-]+/i);
             if(linkedinMatch) result.linkedin = linkedinMatch[0];
 
-            // Name: usually first non-empty line (heuristic)
-            if(lines.length > 0) {
-                const nameLine = lines[0];
-                // Skip if it looks like an email or URL
-                if(!nameLine.includes('@') && !nameLine.includes('http') && nameLine.length < 60) {
-                    const parts = nameLine.split(/\s+/);
-                    result.fname = parts[0] || '';
-                    result.lname = parts.slice(1).join(' ') || '';
+            // 2. DETECT NAME (look for ALL CAPS name pattern or first short line)
+            for(let i = 0; i < Math.min(lines.length, 8); i++) {
+                const line = lines[i];
+                if(line.includes('@') || line.includes('http') || line.includes('+91') || line.match(/^\d{5,}/) || line.length > 60) continue;
+                // ALL CAPS name (common in professional resumes)
+                if(line.match(/^[A-Z][A-Z\s.]{2,40}$/) && line.split(/\s+/).length <= 4) {
+                    const parts = line.split(/\s+/);
+                    result.fname = parts[0]; 
+                    result.lname = parts.slice(1).join(' ');
+                    break;
+                }
+                // Title-case name
+                if(line.match(/^[A-Z][a-z]+\s+[A-Z]/) && line.split(/\s+/).length <= 4 && line.length < 40) {
+                    const parts = line.split(/\s+/);
+                    result.fname = parts[0];
+                    result.lname = parts.slice(1).join(' ');
+                    break;
                 }
             }
 
-            // Title: usually second line
-            if(lines.length > 1) {
-                const titleLine = lines[1];
-                if(!titleLine.includes('@') && !titleLine.includes('http') && titleLine.length < 80) {
-                    result.title = titleLine;
+            // 3. DETECT PROFESSIONAL TITLE (line after name or common titles)
+            const titleKeywords = /^(sr\.?\s*manager|manager|developer|engineer|designer|analyst|consultant|director|lead|executive|associate|coordinator|specialist|intern|architect|administrator|accountant|teacher|professor|officer|supervisor)/i;
+            for(let i = 0; i < Math.min(lines.length, 10); i++) {
+                const line = lines[i];
+                if(line === result.fname + ' ' + result.lname) continue;
+                if(line.match(titleKeywords) && line.length < 80) {
+                    result.title = line;
+                    break;
                 }
             }
 
-            // Extract sections by headings
-            const sectionRegex = /^(experience|work\s*experience|employment|professional\s*experience|education|academic|projects|skills|technical\s*skills|core\s*competencies|summary|profile|objective|certifications?|languages?|address|location)/i;
+            // 4. SECTION-BASED PARSING
+            // Expanded regex to catch more headings including Indian resume sections
+            const sectionRegex = /^(contact|contact\s*info(?:rmation)?|personal\s*info|experience|work\s*experience|employment\s*history|employment|professional\s*experience|education|academic|qualification|projects|skills|technical\s*skills|key\s*skills|core\s*competencies|summary|professional\s*summary|profile|career\s*objective|objective|certifications?|licenses?\s*(?:&|and)\s*certifications?|languages?|address|location|hobbies?\s*(?:&|and)?\s*interests?|strengths?|achievements?|awards?|declaration|references?|interests?|extra\s*curricular)/i;
+            
             let currentSection = '';
             let currentBlock = [];
+            const sections = []; // collect all {name, lines} pairs
 
             for(let i = 0; i < lines.length; i++) {
                 const line = lines[i];
-                const headingMatch = line.match(sectionRegex);
-                if(headingMatch) {
-                    // Process previous section
-                    processSection(currentSection, currentBlock, result);
+                // Check if this line IS a section heading (short line matching section regex)
+                const cleaned = line.replace(/[:\-–—|]/g, '').trim();
+                const headingMatch = cleaned.match(sectionRegex);
+                
+                if(headingMatch && cleaned.length < 50) {
+                    if(currentSection) sections.push({name: currentSection, lines: [...currentBlock]});
                     currentSection = headingMatch[1].toLowerCase().replace(/\s+/g, '');
                     currentBlock = [];
                 } else if(currentSection) {
                     currentBlock.push(line);
                 }
             }
-            processSection(currentSection, currentBlock, result);
+            if(currentSection) sections.push({name: currentSection, lines: [...currentBlock]});
+
+            // 5. PROCESS EACH SECTION
+            for(const sec of sections) {
+                const name = sec.name;
+                const sLines = sec.lines;
+                const block = sLines.join('\n');
+
+                // --- SKIP IRRELEVANT SECTIONS ---
+                if(name.includes('declaration') || name.includes('reference') || name.includes('hobbies') || name.includes('interests') || name.includes('extracurricular')) continue;
+
+                // --- CONTACT ---
+                if(name.includes('contact') || name === 'personalinfo') {
+                    // Already extracted via regex above, but grab address if present
+                    for(const l of sLines) {
+                        if(!l.includes('@') && !l.match(/\d{10}/) && !l.includes('linkedin') && l.length > 5 && l.length < 80) {
+                            if(!result.address) result.address = l;
+                        }
+                    }
+                    continue;
+                }
+
+                // --- EXPERIENCE ---
+                if(name.includes('experience') || name === 'employment' || name === 'employmenthistory') {
+                    // Try to detect multiple jobs by date patterns
+                    let currentJob = null;
+                    const datePattern = /(\d{4})\s*[-–—]\s*(\d{4}|present|current|till\s*date|ongoing)/i;
+                    
+                    for(const l of sLines) {
+                        const dateMatch = l.match(datePattern);
+                        if(dateMatch || (l.match(/^[A-Z]/) && l.length < 60 && !l.match(/^[•\-\*]/) && !currentJob)) {
+                            // Start of a new job entry
+                            if(currentJob && (currentJob.company || currentJob.title)) {
+                                result.experience.push(currentJob);
+                            }
+                            currentJob = { company: '', title: '', duration: '', desc: '' };
+                            if(dateMatch) {
+                                currentJob.duration = dateMatch[0];
+                                const remaining = l.replace(datePattern, '').trim();
+                                if(remaining) currentJob.company = remaining;
+                            } else {
+                                currentJob.company = l;
+                            }
+                        } else if(currentJob) {
+                            if(!currentJob.title && l.length < 60 && !l.match(/^[•\-\*]/)) {
+                                currentJob.title = l;
+                            } else {
+                                currentJob.desc += (currentJob.desc ? '\n' : '') + l;
+                            }
+                        } else {
+                            // No current job yet, might be a company name
+                            currentJob = { company: l, title: '', duration: '', desc: '' };
+                        }
+                    }
+                    if(currentJob && (currentJob.company || currentJob.title)) {
+                        result.experience.push(currentJob);
+                    }
+                    continue;
+                }
+
+                // --- EDUCATION ---
+                if(name.includes('education') || name === 'academic' || name.includes('qualification')) {
+                    let currentEdu = null;
+                    for(const l of sLines) {
+                        const yearMatch = l.match(/(\d{4})/);
+                        if(l.length > 5 && (l.match(/^[A-Z]/) || l.match(/university|college|school|institute|diploma|degree|bachelor|master|b\.?tech|m\.?tech|b\.?sc|m\.?sc|b\.?com|m\.?com|b\.?a|m\.?a|mba|bba|ph\.?d/i))) {
+                            if(currentEdu) result.education.push(currentEdu);
+                            currentEdu = { school: l, degree: '', year: yearMatch ? yearMatch[0] : '' };
+                        } else if(currentEdu) {
+                            if(!currentEdu.degree) currentEdu.degree = l;
+                            if(!currentEdu.year && yearMatch) currentEdu.year = yearMatch[0];
+                        }
+                    }
+                    if(currentEdu) result.education.push(currentEdu);
+                    continue;
+                }
+
+                // --- SKILLS ---
+                if(name === 'skills' || name === 'technicalskills' || name === 'keyskills' || name === 'corecompetencies') {
+                    // Merge all lines, split by common delimiters
+                    const allSkills = sLines.join(', ').replace(/[•\-\*|]/g, ',').split(',').map(s => s.trim()).filter(s => s.length > 1 && s.length < 40);
+                    result.skills = allSkills.join(', ');
+                    continue;
+                }
+
+                // --- SUMMARY / PROFILE ---
+                if(name.includes('summary') || name === 'profile' || name.includes('objective')) {
+                    result.summary = block;
+                    continue;
+                }
+
+                // --- CERTIFICATIONS ---
+                if(name.includes('certification') || name.includes('license')) {
+                    sLines.forEach(l => {
+                        if(l.length > 3) result.certifications.push({ name: l, issuer: '', year: (l.match(/(\d{4})/) || [''])[0] });
+                    });
+                    continue;
+                }
+
+                // --- LANGUAGES ---
+                if(name.includes('language')) {
+                    result.languages = sLines.join(', ');
+                    continue;
+                }
+
+                // --- STRENGTHS (map to skills supplement) ---
+                if(name.includes('strength')) {
+                    if(result.skills) result.skills += ', ';
+                    result.skills += sLines.join(', ');
+                    continue;
+                }
+
+                // --- ACHIEVEMENTS ---
+                if(name.includes('achievement') || name.includes('award')) {
+                    sLines.forEach(l => {
+                        if(l.length > 3) result.certifications.push({ name: l, issuer: 'Achievement', year: (l.match(/(\d{4})/) || [''])[0] });
+                    });
+                    continue;
+                }
+
+                // --- PROJECTS ---
+                if(name === 'projects') {
+                    let currentProj = null;
+                    for(const l of sLines) {
+                        if(l.length < 60 && l.match(/^[A-Z]/) && !l.match(/^[•\-\*]/)) {
+                            if(currentProj) result.projects.push(currentProj);
+                            currentProj = { name: l, desc: '' };
+                        } else if(currentProj) {
+                            currentProj.desc += (currentProj.desc ? '\n' : '') + l;
+                        }
+                    }
+                    if(currentProj) result.projects.push(currentProj);
+                    continue;
+                }
+            }
+
+            // 6. FALLBACK: If no title found from keywords, check "Currently working as..." pattern
+            if(!result.title) {
+                const workingAs = fullText.match(/(?:currently\s+)?working\s+as\s+([^.]+)/i);
+                if(workingAs) result.title = workingAs[1].trim().substring(0, 60);
+            }
 
             return result;
-        }
-
-        function processSection(section, lines, result) {
-            if(!section || !lines.length) return;
-            const block = lines.join('\n');
-
-            if(section.includes('experience') || section === 'employment') {
-                // Try to split into individual jobs
-                const dateRegex = /(\d{4})\s*[-–]\s*(\d{4}|present|current)/gi;
-                let jobTexts = block.split(dateRegex);
-                // Simple: treat entire block as one experience
-                result.experience.push({
-                    company: lines[0] || 'Company',
-                    title: lines.length > 1 ? lines[1] : '',
-                    duration: (block.match(/(\d{4}\s*[-–]\s*(?:\d{4}|present|current))/i) || [''])[0],
-                    desc: lines.slice(2).join('\n')
-                });
-            } else if(section.includes('education') || section === 'academic') {
-                result.education.push({
-                    school: lines[0] || 'University',
-                    degree: lines.length > 1 ? lines[1] : '',
-                    year: (block.match(/(\d{4})/i) || [''])[0]
-                });
-            } else if(section === 'skills' || section === 'technicalskills' || section === 'corecompetencies') {
-                result.skills = lines.join(', ');
-            } else if(section.includes('summary') || section === 'profile' || section === 'objective') {
-                result.summary = block;
-            } else if(section.includes('certification')) {
-                lines.forEach(l => {
-                    if(l.length > 3) result.certifications.push({ name: l, issuer: '', year: (l.match(/(\d{4})/) || [''])[0] });
-                });
-            } else if(section.includes('language')) {
-                result.languages = lines.join(', ');
-            } else if(section === 'address' || section === 'location') {
-                result.address = block;
-            } else if(section === 'projects') {
-                result.projects.push({ name: lines[0] || 'Project', desc: lines.slice(1).join('\n') });
-            }
         }
 
         async function callAI(text, key) {
