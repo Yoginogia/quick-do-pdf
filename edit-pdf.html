@@ -116,7 +116,104 @@
             font-family: 'DM Sans', sans-serif;
         }
 
+        
+        .editor-body {
+            display: flex;
+            flex: 1;
+            height: calc(100% - 60px);
+            position: relative;
+            overflow: hidden;
+        }
+        .pdf-sidebar {
+            width: 220px;
+            background: color-mix(in srgb, var(--surface) 50%, var(--bg) 50%);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 5;
+        }
+        .thumb-wrap {
+            position: relative;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            overflow: hidden;
+            transition: 0.2s;
+            background: #fff;
+        }
+        .thumb-wrap:hover, .thumb-wrap.active {
+            border-color: var(--a1);
+        }
+        .thumb-label {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .thumb-wrap canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .zoom-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .z-btn {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .z-btn:hover { color: var(--a1); }
+        .z-label { font-size: 14px; font-weight: 600; min-width: 45px; text-align: center; }
+        
+        .font-selector {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+        }
+        .workspace-scroll-area {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+            background: color-mix(in srgb, var(--bg) 95%, var(--text));
+        }
         .editor-workspace {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+            transform-origin: top center;
+            transition: transform 0.2s;
+        }
+.editor-workspace_old {
             flex: 1;
             overflow-y: auto;
             padding: 30px;
@@ -437,7 +534,11 @@
                 <button class="tool-btn" id="btnSticky" onclick="setTool('sticky')">💬 Note</button>
 
                 <div class="tool-sep"></div>
-
+                <select id="fontPicker" class="font-selector" onchange="updateSelectedProperties()">
+                    <option value="Helvetica, Arial, sans-serif">Helvetica (Standard)</option>
+                    <option value="'Times New Roman', Times, serif">Times Roman</option>
+                    <option value="'Courier New', Courier, monospace">Courier</option>
+                </select>
                 <input type="color" id="colorPicker" class="color-picker" value="#cd5b1f" title="Color"
                     onchange="updateSelectedProperties()">
                 <input type="number" id="sizePicker" class="size-input" value="18" min="1" max="120" title="Size (px)"
@@ -445,7 +546,17 @@
             </div>
 
             <!-- Workspace -->
-            <div class="editor-workspace" id="workspace"></div>
+            <div class="editor-body">
+                <div class="pdf-sidebar" id="pdfSidebar"></div>
+                <div class="workspace-scroll-area" id="scrollArea">
+                    <div class="editor-workspace" id="workspace"></div>
+                </div>
+                <div class="zoom-panel">
+                    <button class="z-btn" onclick="zoomChange(-0.25)">-</button>
+                    <span class="z-label" id="zoomLabel">100%</span>
+                    <button class="z-btn" onclick="zoomChange(0.25)">+</button>
+                </div>
+            </div>
         </div>
 
         <button class="action-btn hidden" id="saveBtn" style="margin-top:20px" onclick="exportEditedPDF()">
@@ -485,7 +596,56 @@
   </main>
 
     <script>
-        /* =========================================
+        
+        window.currentZoomLevel = 1.0;
+        function zoomChange(delta) {
+            window.currentZoomLevel += delta;
+            if(window.currentZoomLevel < 0.25) window.currentZoomLevel = 0.25;
+            if(window.currentZoomLevel > 3.0) window.currentZoomLevel = 3.0;
+            document.getElementById('zoomLabel').innerText = Math.round(window.currentZoomLevel * 100) + '%';
+            document.getElementById('workspace').style.transform = 'scale(' + window.currentZoomLevel + ')';
+        }
+
+        let editHistory = [];
+        let historyIndex = -1;
+
+        function pushHistory(action) {
+            // Drop any forward history if we diverge
+            if (historyIndex < editHistory.length - 1) {
+                editHistory = editHistory.slice(0, historyIndex + 1);
+            }
+            editHistory.push(action);
+            if(editHistory.length > 50) editHistory.shift(); // Limit bounds
+            else historyIndex++;
+        }
+
+        function undo() {
+            if(historyIndex < 0) return;
+            const action = editHistory[historyIndex];
+            historyIndex--;
+            if(action.type === 'ADD') {
+                action.node.style.display = 'none';
+            } else if (action.type === 'DELETE') {
+                action.node.style.display = 'flex';
+            }
+        }
+
+        function redo() {
+            if(historyIndex >= editHistory.length - 1) return;
+            historyIndex++;
+            const action = editHistory[historyIndex];
+            if(action.type === 'ADD') {
+                action.node.style.display = 'flex';
+            } else if (action.type === 'DELETE') {
+                action.node.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+            if(e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
+        });
+// END INJ\n/* =========================================
            1. GLOBALS & INIT
            ========================================= */
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -599,7 +759,29 @@
             wrapper.appendChild(bgCanvas);
             wrapper.appendChild(textLayerDiv);
             wrapper.appendChild(drawCanvas);
-            wrapper.appendChild(interLayer);
+            
+            // THUMBNAIL
+            const thumbWrap = document.createElement('div');
+            thumbWrap.className = 'thumb-wrap';
+            thumbWrap.onclick = () => {
+                document.getElementById('scrollArea').scrollTop = wrapper.offsetTop - 30;
+                document.querySelectorAll('.thumb-wrap').forEach(t=>t.classList.remove('active'));
+                thumbWrap.classList.add('active');
+            };
+            const thumbCanvas = document.createElement('canvas');
+            const thumbViewport = page.getViewport({ scale: 0.2 });
+            thumbCanvas.width = thumbViewport.width;
+            thumbCanvas.height = thumbViewport.height;
+            await page.render({ canvasContext: thumbCanvas.getContext('2d'), viewport: thumbViewport }).promise;
+            
+            const thumbLabel = document.createElement('div');
+            thumbLabel.className = 'thumb-label';
+            thumbLabel.innerText = pageNum;
+            
+            thumbWrap.appendChild(thumbCanvas);
+            thumbWrap.appendChild(thumbLabel);
+            document.getElementById('pdfSidebar').appendChild(thumbWrap);
+\nwrapper.appendChild(interLayer);
             workspace.appendChild(wrapper);
         }
 
@@ -1447,11 +1629,55 @@
                 item.dataset.imgSrc = dataUrl;
                 item.appendChild(itemImg);
                 setTool('cursor');
-                selectItem(item);
+                const scrollArea = document.getElementById('scrollArea');
+        scrollArea.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+        scrollArea.addEventListener('drop', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            if(e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if(file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        // find which page it dropped over
+                        const pages = document.querySelectorAll('.page-wrapper');
+                        let targetPage = pages[0];
+                        for(let p of pages) {
+                            const rect = p.getBoundingClientRect();
+                            if(e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                                targetPage = p;
+                                break;
+                            }
+                        }
+                        const rect = targetPage.getBoundingClientRect();
+                        const scale = window.currentZoomLevel || 1;
+                        let x = (e.clientX - rect.left) / scale;
+                        let y = (e.clientY - rect.top) / scale;
+                        
+                        const interLayer = targetPage.querySelector('.interaction-layer');
+                        if(interLayer) {
+                            const i = new Image();
+                            i.onload = () => {
+                                let w=i.width, h=i.height;
+                                if(w>200){ h=h*(200/w); w=200; }
+                                const item = createEditItemWrapper(interLayer, x, y, w, h);
+                                const imgEl = document.createElement('img');
+                                imgEl.className = 'edit-image';
+                                imgEl.src = evt.target.result;
+                                item.appendChild(imgEl);
+                                selectItem(item);
+                                pushHistory({type:'ADD', node: item});
+                            }
+                            i.src = evt.target.result;
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
             }
-        }
-
+        });
     </script>
-</body>
+</body>               }
+            }
+        });
+\n</body>
 
 </html>
