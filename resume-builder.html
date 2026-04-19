@@ -748,22 +748,9 @@
 
         async function handleFileUpload(e) {
             const file = e.target.files[0];
-            // Reset input so same file can be re-selected
             e.target.value = '';
             if(!file) return;
 
-            // Option A: Bypass the modal and use hardcoded restricted key directly.
-            // Fallback to localStorage ONLY for people testing locally without modifying code yet.
-            const key = QD_GEMINI_KEY !== 'ENTER_YOUR_RESTRICTED_API_KEY_HERE' ? QD_GEMINI_KEY : localStorage.getItem('gemini_api_key');
-            
-            if(!key) { 
-                alert('Developer Notice: Please replace "ENTER_YOUR_RESTRICTED_API_KEY_HERE" in the resume-builder.html code with your Gemini Key to enable completely frictionless uploads like BetterCV, or use the "AI Setup" button to set it temporarily in your browser.');
-                openAIModal(); 
-                // Store file for retry after key is saved
-                window._pendingFile = file;
-                return; 
-            }
-            
             document.getElementById('parsing-overlay').classList.remove('hidden');
             
             try {
@@ -771,7 +758,6 @@
                 let fullText = '';
                 if(ext === 'pdf') {
                     const arrayBuffer = await file.arrayBuffer();
-                    // Set worker for pdf.js
                     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
                     const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
                     for(let i=1; i<=pdf.numPages; i++){
@@ -786,25 +772,139 @@
                     fullText = await file.text(); 
                 }
 
-                if (!fullText.trim()) throw new Error('No text could be extracted from the file. Please try a different format.');
+                if (!fullText.trim()) throw new Error('No text could be extracted from the file.');
 
-                const parsed = await callAI(fullText, key);
+                // Try AI first (if key exists), fallback to local parser
+                let parsed = null;
+                const key = localStorage.getItem('gemini_api_key') || QD_GEMINI_KEY;
+                if(key && key !== 'ENTER_YOUR_RESTRICTED_API_KEY_HERE') {
+                    try {
+                        parsed = await callAI(fullText, key);
+                    } catch(aiErr) {
+                        console.warn('AI parsing failed, using local parser:', aiErr.message);
+                    }
+                }
+                
+                // Fallback: Smart local parser (no API needed)
+                if(!parsed) {
+                    parsed = localParseResume(fullText);
+                }
+
                 if(parsed) {
                     resumeData = {...resumeData, ...parsed};
                     resumeData.experience = Array.isArray(parsed.experience) ? parsed.experience.map(exp => ({id: Date.now() + Math.random(), ...exp})) : [];
                     resumeData.education = Array.isArray(parsed.education) ? parsed.education.map(edu => ({id: Date.now() + Math.random(), ...edu})) : [];
                     resumeData.projects = Array.isArray(parsed.projects) ? parsed.projects.map(p => ({id: Date.now() + Math.random(), ...p})) : [];
+                    resumeData.certifications = Array.isArray(parsed.certifications) ? parsed.certifications.map(c => ({id: Date.now() + Math.random(), ...c})) : [];
                     save();
                     renderAll();
-                    ['experience', 'education', 'projects'].forEach(t => renderForms(t));
+                    ['experience', 'education', 'projects', 'certifications'].forEach(t => renderForms(t));
                     switchView('editor');
                     updatePreview();
                 }
             } catch(err) { 
                 console.error('Upload error:', err);
-                setTimeout(() => alert('Error parsing resume: ' + err.message + '\n\nTip: Make sure your API key is valid and the file contains text.'), 100);
+                setTimeout(() => alert('Error parsing resume: ' + err.message), 100);
             } finally { 
                 document.getElementById('parsing-overlay').classList.add('hidden'); 
+            }
+        }
+
+        // ==========================================
+        // LOCAL RESUME PARSER (No API Required)
+        // ==========================================
+        function localParseResume(text) {
+            const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+            const result = { fname:'', lname:'', title:'', email:'', phone:'', address:'', linkedin:'', summary:'', skills:'', languages:'', experience:[], education:[], projects:[], certifications:[] };
+
+            // Extract email
+            const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/i);
+            if(emailMatch) result.email = emailMatch[0];
+
+            // Extract phone
+            const phoneMatch = text.match(/(\+?\d[\d\s\-().]{7,15}\d)/i);
+            if(phoneMatch) result.phone = phoneMatch[0].trim();
+
+            // Extract LinkedIn
+            const linkedinMatch = text.match(/linkedin\.com\/in\/[\w-]+/i);
+            if(linkedinMatch) result.linkedin = linkedinMatch[0];
+
+            // Name: usually first non-empty line (heuristic)
+            if(lines.length > 0) {
+                const nameLine = lines[0];
+                // Skip if it looks like an email or URL
+                if(!nameLine.includes('@') && !nameLine.includes('http') && nameLine.length < 60) {
+                    const parts = nameLine.split(/\s+/);
+                    result.fname = parts[0] || '';
+                    result.lname = parts.slice(1).join(' ') || '';
+                }
+            }
+
+            // Title: usually second line
+            if(lines.length > 1) {
+                const titleLine = lines[1];
+                if(!titleLine.includes('@') && !titleLine.includes('http') && titleLine.length < 80) {
+                    result.title = titleLine;
+                }
+            }
+
+            // Extract sections by headings
+            const sectionRegex = /^(experience|work\s*experience|employment|professional\s*experience|education|academic|projects|skills|technical\s*skills|core\s*competencies|summary|profile|objective|certifications?|languages?|address|location)/i;
+            let currentSection = '';
+            let currentBlock = [];
+
+            for(let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const headingMatch = line.match(sectionRegex);
+                if(headingMatch) {
+                    // Process previous section
+                    processSection(currentSection, currentBlock, result);
+                    currentSection = headingMatch[1].toLowerCase().replace(/\s+/g, '');
+                    currentBlock = [];
+                } else if(currentSection) {
+                    currentBlock.push(line);
+                }
+            }
+            processSection(currentSection, currentBlock, result);
+
+            return result;
+        }
+
+        function processSection(section, lines, result) {
+            if(!section || !lines.length) return;
+            const block = lines.join('\n');
+
+            if(section.includes('experience') || section === 'employment') {
+                // Try to split into individual jobs
+                const dateRegex = /(\d{4})\s*[-–]\s*(\d{4}|present|current)/gi;
+                let jobTexts = block.split(dateRegex);
+                // Simple: treat entire block as one experience
+                result.experience.push({
+                    company: lines[0] || 'Company',
+                    title: lines.length > 1 ? lines[1] : '',
+                    duration: (block.match(/(\d{4}\s*[-–]\s*(?:\d{4}|present|current))/i) || [''])[0],
+                    desc: lines.slice(2).join('\n')
+                });
+            } else if(section.includes('education') || section === 'academic') {
+                result.education.push({
+                    school: lines[0] || 'University',
+                    degree: lines.length > 1 ? lines[1] : '',
+                    year: (block.match(/(\d{4})/i) || [''])[0]
+                });
+            } else if(section === 'skills' || section === 'technicalskills' || section === 'corecompetencies') {
+                result.skills = lines.join(', ');
+            } else if(section.includes('summary') || section === 'profile' || section === 'objective') {
+                result.summary = block;
+            } else if(section.includes('certification')) {
+                lines.forEach(l => {
+                    if(l.length > 3) result.certifications.push({ name: l, issuer: '', year: (l.match(/(\d{4})/) || [''])[0] });
+                });
+            } else if(section.includes('language')) {
+                result.languages = lines.join(', ');
+            } else if(section === 'address' || section === 'location') {
+                result.address = block;
+            } else if(section === 'projects') {
+                result.projects.push({ name: lines[0] || 'Project', desc: lines.slice(1).join('\n') });
             }
         }
 
@@ -831,7 +931,7 @@ ${text.slice(0, 6000)}`;
                 return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
             }
 
-            const models = ['gemini-3.1-flash-live-preview', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+            const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash'];
             let lastError = null;
 
             for (const model of models) {
@@ -1296,7 +1396,7 @@ ${text.slice(0, 6000)}`;
             resultEl.textContent = '⏳ Testing key...';
             
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: 'Say hello in 3 words.' }] }] })
