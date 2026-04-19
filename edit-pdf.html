@@ -693,14 +693,25 @@
             origPdfBuf = await file.arrayBuffer();
 
             try {
+                editor.classList.add('show'); // Display early to allow width computation
+                
                 const pdf = await pdfjsLib.getDocument({ data: origPdfBuf.slice(0) }).promise;
                 const total = pdf.numPages;
+
+                // Dynamically fit the PDF canvas to the screen width
+                const firstPage = await pdf.getPage(1);
+                const unscaled = firstPage.getViewport({ scale: 1 });
+                const scrollW = document.getElementById('scrollArea').clientWidth || window.innerWidth * 0.7;
+                scaleMultiplier = (scrollW - 80) / unscaled.width; 
+                
+                // Keep scale within sensible limits for rendering clarity
+                if(scaleMultiplier < 1) scaleMultiplier = 1.2;
+                if(scaleMultiplier > 3.0) scaleMultiplier = 3.0; 
 
                 for (let i = 1; i <= total; i++) {
                     await renderPage(pdf, i);
                 }
 
-                editor.classList.add('show');
                 btnSave.classList.remove('hidden');
             } catch (e) {
                 alert("Error loading PDF: " + e.message);
