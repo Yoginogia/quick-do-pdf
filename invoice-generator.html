@@ -190,39 +190,55 @@
 
         function addRow() {
             items.push({id: Date.now(), desc: '', qty: 1, price: 0});
-            render();
+            renderEditor();
+            renderPreview();
         }
 
         function delRow(id) {
             items = items.filter(i => i.id !== id);
-            render();
+            renderEditor();
+            renderPreview();
         }
 
         function editItem(id, k, v) {
             const idx = items.findIndex(i => i.id === id);
-            items[idx][k] = (k === 'qty' || k === 'price') ? parseFloat(v) || 0 : v;
-            render();
+            items[idx][k] = (k === 'qty' || k === 'price') ? (v === '' ? 0 : parseFloat(v) || 0) : v;
+            
+            // Only update the individual row total in the editor immediately
+            const rowTotal = items[idx].qty * items[idx].price;
+            const editorTotalEl = document.getElementById(`editor-total-${id}`);
+            if (editorTotalEl) editorTotalEl.innerText = `₹${rowTotal.toFixed(2)}`;
+            
+            // Re-render only the live preview to prevent input focus loss
+            renderPreview();
         }
 
-        function render() {
+        function renderEditor() {
             const tbody = document.getElementById('items-body');
-            const ptbody = document.getElementById('p-table-body');
-            tbody.innerHTML = ''; ptbody.innerHTML = '';
+            tbody.innerHTML = '';
             
-            let subtotal = 0;
             items.forEach(item => {
                 const rowTotal = item.qty * item.price;
-                subtotal += rowTotal;
-
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td><input type="text" class="input-field" value="${item.desc}" oninput="editItem(${item.id}, 'desc', this.value)"></td>
                         <td><input type="number" class="input-field" value="${item.qty}" oninput="editItem(${item.id}, 'qty', this.value)"></td>
                         <td><input type="number" class="input-field" value="${item.price}" oninput="editItem(${item.id}, 'price', this.value)"></td>
-                        <td style="font-weight: 700; width: 80px;">₹${rowTotal.toFixed(2)}</td>
+                        <td style="font-weight: 700; width: 80px;" id="editor-total-${item.id}">₹${rowTotal.toFixed(2)}</td>
                         <td class="row-del" onclick="delRow(${item.id})">✕</td>
                     </tr>
                 `);
+            });
+        }
+
+        function renderPreview() {
+            const ptbody = document.getElementById('p-table-body');
+            ptbody.innerHTML = '';
+            
+            let subtotal = 0;
+            items.forEach(item => {
+                const rowTotal = item.qty * item.price;
+                subtotal += rowTotal;
 
                 ptbody.insertAdjacentHTML('beforeend', `
                     <tr>
@@ -234,11 +250,11 @@
                 `);
             });
 
-            const tax = subtotal * 0.18;
+            const tax = subtotal * 0.18; // Default generic 18% tax calculation
             const total = subtotal + tax;
-            document.getElementById('p-subtotal').innerText = '₹' + subtotal.toLocaleString();
-            document.getElementById('p-tax').innerText = '₹' + tax.toLocaleString();
-            document.getElementById('p-total').innerText = '₹' + total.toLocaleString();
+            document.getElementById('p-subtotal').innerText = '₹' + subtotal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('p-tax').innerText = '₹' + tax.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('p-total').innerText = '₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2});
         }
 
         function downloadInvoice() {
@@ -246,7 +262,8 @@
             html2pdf().set(opt).from(document.getElementById('invoice-canvas')).save();
         }
 
-        render();
+        renderEditor();
+        renderPreview();
     </script>
 </body>
 </html>
