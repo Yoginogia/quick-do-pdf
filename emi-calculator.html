@@ -21,16 +21,17 @@
     <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg: #03040b;
-            --surface: rgba(18, 19, 28, 0.6);
-            --border: rgba(255, 255, 255, 0.08);
-            --text: #f8f9fc;
-            --muted: #8b92a5;
-            --glass-blur: blur(24px);
+            --surface: rgba(18, 19, 28, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --muted: #94a3b8;
+            --glass-blur: blur(32px);
             --c1: #ff2a5f;
             --c2: #ff6b3d;
             --accent: #2a8bff;
@@ -44,7 +45,18 @@
             --muted: #64748b;
         }
 
-        body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        body { 
+            background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; 
+            min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; position: relative;
+        }
+
+        /* AMBIENT ORBS FOR ATTRACTIVE LOOK */
+        .ambient-orb {
+            position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.15; z-index: -1; pointer-events: none;
+        }
+        body.theme-light .ambient-orb { opacity: 0.4; }
+        .orb-1 { width: 500px; height: 500px; background: var(--accent); top: -100px; left: -100px; }
+        .orb-2 { width: 600px; height: 600px; background: var(--c1); bottom: -150px; right: -150px; }
 
         header {
             display: flex; align-items: center; justify-content: space-between;
@@ -69,7 +81,7 @@
             background: var(--surface); color: var(--text); backdrop-filter: var(--glass-blur);
         }
         .btn.primary { background: linear-gradient(135deg, var(--c1), var(--c2)); border: none; color: #fff; }
-        .btn.primary:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255, 42, 95, 0.3); }
+        .btn.primary:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(255, 42, 95, 0.4); }
 
         .theme-toggle-btn {
             width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -80,55 +92,93 @@
         main { flex: 1; padding: 40px 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
 
         .title-sec { text-align: center; margin-bottom: 50px; }
-        .title-sec h1 { font-size: 36px; font-weight: 900; margin-bottom: 10px; background: linear-gradient(135deg, var(--text), var(--muted)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .title-sec p { color: var(--muted); font-size: 16px; }
+        .title-sec h1 { font-size: 42px; font-weight: 900; margin-bottom: 10px; background: linear-gradient(135deg, var(--text), var(--muted)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .title-sec p { color: var(--muted); font-size: 18px; font-weight: 400; }
 
-        .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+        .calc-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: start; }
 
-        .input-card { background: var(--surface); padding: 30px; border-radius: 24px; border: 1px solid var(--border); backdrop-filter: var(--glass-blur); }
+        .input-card { 
+            background: var(--surface); padding: 40px; border-radius: 24px; 
+            border: 1px solid var(--border); backdrop-filter: var(--glass-blur);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+        }
 
-        .input-group { margin-bottom: 30px; }
+        .input-group { margin-bottom: 35px; }
         .input-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .input-label span:first-child { font-weight: 700; color: var(--muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        .input-val { font-size: 20px; font-weight: 800; color: var(--accent); }
 
-        /* Custom Slider */
+        /* Stylish Input */
+        .manual-input {
+            width: 140px;
+            background: rgba(0,0,0,0.2);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 8px 12px;
+            color: var(--accent);
+            font-size: 18px;
+            font-weight: 800;
+            text-align: right;
+            outline: none;
+            transition: 0.3s;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        body.theme-light .manual-input { background: rgba(0,0,0,0.04); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .manual-input:focus { border-color: var(--accent); background: rgba(0,0,0,0.3); }
+        body.theme-light .manual-input:focus { background: #fff; }
+
+        /* Interactive Slider */
         input[type="range"] {
-            width: 100%; height: 6px; border-radius: 10px; background: var(--border);
+            width: 100%; height: 8px; border-radius: 10px; background: var(--border);
             appearance: none; outline: none; cursor: pointer;
+            background-image: linear-gradient(var(--accent), var(--accent));
+            background-repeat: no-repeat;
         }
         input[type="range"]::-webkit-slider-thumb {
-            appearance: none; width: 22px; height: 22px; border-radius: 50%;
-            background: var(--accent); cursor: pointer; transition: 0.2s;
-            box-shadow: 0 0 15px rgba(42, 139, 255, 0.4); border: 3px solid #fff;
+            appearance: none; width: 24px; height: 24px; border-radius: 50%;
+            background: #fff; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 0 0 5px rgba(42, 139, 255, 0.2);
+            border: 2px solid var(--accent);
         }
-        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 0 0 8px rgba(42, 139, 255, 0.3); }
+
+        /* Toggle Switch */
+        .toggle-group { display: flex; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
+        body.theme-light .toggle-group { background: rgba(0,0,0,0.05); }
+        .toggle-btn { 
+            padding: 6px 12px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; 
+            border-radius: 8px; transition: 0.3s; 
+        }
+        .toggle-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .toggle-wrap { display: flex; align-items: center; gap: 15px; }
 
         .result-card {
-            background: var(--surface); padding: 30px; border-radius: 24px; border: 1px solid var(--border);
+            background: var(--surface); padding: 40px; border-radius: 24px; border: 1px solid var(--border);
             backdrop-filter: var(--glass-blur); display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.1);
         }
 
         .chart-container { position: relative; width: 100%; max-width: 320px; margin: 20px 0; }
         .chart-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-        .chart-label .label-top { color: var(--muted); font-size: 13px; font-weight: 600; }
-        .chart-label .label-val { font-size: 28px; font-weight: 900; color: var(--text); }
+        .chart-label .label-top { color: var(--muted); font-size: 14px; font-weight: 600; letter-spacing: 1px; }
+        .chart-label .label-val { font-size: 32px; font-weight: 900; color: var(--text); margin-top: 5px; }
 
         .stats-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
-        .stat-box { padding: 20px; background: rgba(0,0,0,0.1); border-radius: 16px; border: 1px solid var(--border); text-align: center; }
+        .stat-box { padding: 25px 20px; background: rgba(0,0,0,0.15); border-radius: 16px; border: 1px solid var(--border); text-align: center; transition: 0.3s; }
         body.theme-light .stat-box { background: rgba(0,0,0,0.03); }
+        .stat-box:hover { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.2); }
+        body.theme-light .stat-box:hover { background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
         .stat-box span { display: block; }
-        .stat-title { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
-        .stat-val { font-size: 20px; font-weight: 800; color: var(--text); }
+        .stat-title { color: var(--muted); font-size: 13px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; }
+        .stat-val { font-size: 24px; font-weight: 800; color: var(--text); }
 
         /* Amortization Table */
-        .table-section { margin-top: 60px; overflow-x: auto; }
-        .table-section h2 { margin-bottom: 25px; font-size: 24px; font-weight: 800; }
-        table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 20px; overflow: hidden; }
-        th { background: rgba(255,255,255,0.05); color: var(--muted); text-align: left; padding: 16px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; }
-        td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text); }
+        .table-section { margin-top: 80px; overflow-x: auto; background: var(--surface); padding: 40px; border-radius: 24px; border: 1px solid var(--border); backdrop-filter: var(--glass-blur); }
+        .table-section h2 { margin-bottom: 30px; font-size: 28px; font-weight: 900; }
+        table { width: 100%; border-collapse: collapse; overflow: hidden; }
+        th { background: rgba(0,0,0,0.2); color: var(--muted); text-align: left; padding: 18px 20px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 16px; color: var(--text); font-weight: 500; }
         tr:last-child td { border: none; }
-        body.theme-light th { background: rgba(0,0,0,0.03); }
+        body.theme-light th { background: rgba(0,0,0,0.05); }
 
         /* Report View (for PDF) */
         #report-export { display: none; padding: 40px; background: #fff; color: #000; font-family: 'Outfit', sans-serif; }
@@ -138,34 +188,21 @@
         .report-item label { font-size: 12px; color: #666; font-weight: 700; text-transform: uppercase; }
         .report-item div { font-size: 22px; font-weight: 800; }
 
-        .manual-input {
-            width: 120px;
-            background: rgba(0,0,0,0.1);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 4px 10px;
-            color: var(--accent);
-            font-size: 18px;
-            font-weight: 800;
-            text-align: right;
-            outline: none;
-            transition: 0.3s;
-        }
-        body.theme-light .manual-input { background: rgba(0,0,0,0.03); }
-        .manual-input:focus { border-color: var(--accent); background: rgba(0,0,0,0.2); }
-        body.theme-light .manual-input:focus { background: #fff; }
-
         @media (max-width: 900px) {
             .calc-grid { grid-template-columns: 1fr; }
             header { padding: 12px 20px; }
-            .title-sec h1 { font-size: 28px; }
+            .title-sec h1 { font-size: 32px; }
+            .input-card, .result-card, .table-section { padding: 25px; }
         }
     </style>
     <script src="theme.js"></script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021" crossorigin="anonymous"></script>
 </head>
 
 <body>
+    <!-- Ambient glowing orbs -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+
     <header>
         <a href="index.html" class="logo">Quick Do EMI</a>
         <div class="header-actions">
@@ -177,7 +214,7 @@
     <main id="main-content">
         <section class="title-sec">
             <h1>Premium Loan Calculator</h1>
-            <p>Calculate EMIs for Home, Car, or Personal Loans with real-time breakdowns.</p>
+            <p>Calculate EMIs for Home, Car, or Personal Loans with real-time dynamic breakdowns.</p>
         </section>
 
         <div class="calc-grid">
@@ -193,15 +230,21 @@
 
                 <div class="input-group">
                     <div class="input-label">
-                        <span>Interest Rate (%)</span>
+                        <span>Interest Rate (%) Yearly</span>
                         <input type="number" id="rate-manual" class="manual-input" step="0.1" value="8.5">
                     </div>
-                    <input type="range" id="interestRate" min="5" max="25" step="0.1" value="8.5">
+                    <input type="range" id="interestRate" min="1" max="30" step="0.1" value="8.5">
                 </div>
 
                 <div class="input-group">
                     <div class="input-label">
-                        <span>Loan Tenure (Years)</span>
+                        <div class="toggle-wrap">
+                            <span>Loan Tenure</span>
+                            <div class="toggle-group">
+                                <div class="toggle-btn active" id="btn-yr" onclick="setTenureMode('yr')">Yr</div>
+                                <div class="toggle-btn" id="btn-mo" onclick="setTenureMode('mo')">Mo</div>
+                            </div>
+                        </div>
                         <input type="number" id="tenure-manual" class="manual-input" value="15">
                     </div>
                     <input type="range" id="loanTenure" min="1" max="40" step="1" value="15">
@@ -214,22 +257,22 @@
                     <canvas id="emiChart"></canvas>
                     <div class="chart-label">
                         <div class="label-top">MONTHLY EMI</div>
-                        <div class="label-val" id="res-emi">₹ 9,847</div>
+                        <div class="label-val" id="res-emi">₹ 0</div>
                     </div>
                 </div>
 
                 <div class="stats-grid">
                     <div class="stat-box">
                         <span class="stat-title">Principal Amount</span>
-                        <span class="stat-val" id="res-principal">₹ 10,00,000</span>
+                        <span class="stat-val" id="res-principal">₹ 0</span>
                     </div>
                     <div class="stat-box">
                         <span class="stat-title">Total Interest</span>
-                        <span class="stat-val" id="res-interest" style="color: var(--c1);">₹ 7,72,533</span>
+                        <span class="stat-val" id="res-interest" style="color: var(--c1);">₹ 0</span>
                     </div>
                     <div class="stat-box" style="grid-column: span 2;">
                         <span class="stat-title">Total Amount Payable</span>
-                        <span class="stat-val" id="res-total">₹ 17,72,533</span>
+                        <span class="stat-val" id="res-total">₹ 0</span>
                     </div>
                 </div>
             </div>
@@ -264,7 +307,7 @@
         <div class="report-summary-grid">
             <div class="report-item"><label>Loan Amount</label><div id="r-amt">₹ 0</div></div>
             <div class="report-item"><label>Interest Rate</label><div id="r-rate">0%</div></div>
-            <div class="report-item"><label>Loan Tenure</label><div id="r-tenure">0 Years</div></div>
+            <div class="report-item"><label>Loan Tenure</label><div id="r-tenure">0</div></div>
             <div class="report-item"><label>Monthly EMI</label><div id="r-emi">₹ 0</div></div>
             <div class="report-item"><label>Total Interest</label><div id="r-interest">₹ 0</div></div>
             <div class="report-item"><label>Total Payment</label><div id="r-total">₹ 0</div></div>
@@ -274,7 +317,7 @@
             <table style="width: 100%; border: 1px solid #eee; margin-top: 20px;">
                 <thead>
                     <tr>
-                        <th style="border: 1px solid #eee; padding: 8px;">Month</th>
+                        <th style="border: 1px solid #eee; padding: 8px;">Mnt</th>
                         <th style="border: 1px solid #eee; padding: 8px;">Opening Balance</th>
                         <th style="border: 1px solid #eee; padding: 8px;">EMI</th>
                         <th style="border: 1px solid #eee; padding: 8px;">Interest</th>
@@ -290,29 +333,69 @@
     </div>
 
     <script>
-        const amtInput = document.getElementById('loanAmount');
-        const rateInput = document.getElementById('interestRate');
-        const tenureInput = document.getElementById('loanTenure');
+        const sliderAmt = document.getElementById('loanAmount');
+        const sliderRate = document.getElementById('interestRate');
+        const sliderTenure = document.getElementById('loanTenure');
+        
+        const manualAmt = document.getElementById('amt-manual');
+        const manualRate = document.getElementById('rate-manual');
+        const manualTenure = document.getElementById('tenure-manual');
 
         let emiChart;
+        let tenureMode = 'yr'; // 'yr' or 'mo'
+
+        // Set Slider Background Gradient Fill
+        function updateSliderFill(target) {
+            const min = target.min || 0;
+            const max = target.max || 100;
+            const val = target.value;
+            const percentage = ((val - min) / (max - min)) * 100;
+            target.style.backgroundSize = percentage + '% 100%';
+        }
 
         function formatCurrency(num) {
-            return '₹ ' + num.toLocaleString('en-IN');
+            return '₹ ' + (num || 0).toLocaleString('en-IN', {maximumFractionDigits: 0});
+        }
+
+        function setTenureMode(mode) {
+            tenureMode = mode;
+            if(mode === 'yr') {
+                document.getElementById('btn-yr').classList.add('active');
+                document.getElementById('btn-mo').classList.remove('active');
+                sliderTenure.max = 40;
+                manualTenure.value = Math.max(1, Math.round(manualTenure.value / 12));
+                sliderTenure.value = manualTenure.value;
+            } else {
+                document.getElementById('btn-mo').classList.add('active');
+                document.getElementById('btn-yr').classList.remove('active');
+                sliderTenure.max = 480;
+                manualTenure.value = manualTenure.value * 12;
+                sliderTenure.value = manualTenure.value;
+            }
+            calculateEMI();
         }
 
         function calculateEMI() {
-            const P = parseFloat(amtInput.value);
-            const R = parseFloat(rateInput.value) / 12 / 100;
-            const N = parseFloat(tenureInput.value) * 12;
+            // Read strictly from Manual Inputs so 0 or out-of-bounds numbers work
+            let P = parseFloat(manualAmt.value) || 0;
+            let R = parseFloat(manualRate.value) / 12 / 100 || 0;
+            let rawTenure = parseFloat(manualTenure.value) || 0;
+            let N = tenureMode === 'yr' ? rawTenure * 12 : rawTenure;
 
-            const emi = P * R * Math.pow(1 + R, N) / (Math.pow(1 + R, N) - 1);
-            const totalRepayment = emi * N;
-            const totalInterest = totalRepayment - P;
+            let emi = 0;
+            let totalRepayment = 0;
+            let totalInterest = 0;
 
-            // Update Manual Inputs
-            document.getElementById('amt-manual').value = P;
-            document.getElementById('rate-manual').value = rateInput.value;
-            document.getElementById('tenure-manual').value = tenureInput.value;
+            if (P > 0 && R > 0 && N > 0) {
+                emi = P * R * Math.pow(1 + R, N) / (Math.pow(1 + R, N) - 1);
+                totalRepayment = emi * N;
+                totalInterest = totalRepayment - P;
+            } else if (P > 0 && N > 0) {
+                // 0% Interest Case
+                emi = P / N;
+                totalRepayment = P;
+                totalInterest = 0;
+            }
 
             document.getElementById('res-emi').innerText = formatCurrency(Math.round(emi));
             document.getElementById('res-principal').innerText = formatCurrency(P);
@@ -321,15 +404,16 @@
 
             updateChart(P, totalInterest);
             updateTable(P, R, N, emi);
+            
+            // Sync slider fills
+            updateSliderFill(sliderAmt);
+            updateSliderFill(sliderRate);
+            updateSliderFill(sliderTenure);
         }
 
         function updateChart(principal, interest) {
             const ctx = document.getElementById('emiChart').getContext('2d');
-            
             if (emiChart) emiChart.destroy();
-
-            const isDark = document.body.classList.contains('theme-light') ? false : true;
-
             emiChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -338,15 +422,10 @@
                         data: [principal, interest],
                         backgroundColor: ['#2a8bff', '#ff2a5f'],
                         borderWidth: 0,
-                        hoverOffset: 10
+                        hoverOffset: 15
                     }]
                 },
-                options: {
-                    cutout: '80%',
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
+                options: { cutout: '75%', plugins: { legend: { display: false } } }
             });
         }
 
@@ -355,21 +434,22 @@
             tableBody.innerHTML = '';
             
             let balance = P;
+            if(N <= 0 || P <= 0) return;
+
             for (let i = 1; i <= N; i++) {
                 const interestPayable = balance * R;
                 const principalPayable = emi - interestPayable;
                 const closingBalance = Math.max(0, balance - principalPayable);
 
-                if (isFull || i <= 24 || i === N) {
-                    const row = `<tr>
+                if (isFull || i <= 24 || i === Math.floor(N)) {
+                    tableBody.insertAdjacentHTML('beforeend', `<tr>
                         <td>${i}</td>
                         <td>${formatCurrency(Math.round(balance))}</td>
                         <td>${formatCurrency(Math.round(emi))}</td>
                         <td>${formatCurrency(Math.round(interestPayable))}</td>
                         <td>${formatCurrency(Math.round(principalPayable))}</td>
                         <td>${formatCurrency(Math.round(closingBalance))}</td>
-                    </tr>`;
-                    tableBody.insertAdjacentHTML('beforeend', row);
+                    </tr>`);
                     
                     if (!isFull && i === 24 && N > 25) {
                         tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan="6" style="text-align:center; color:var(--muted)">... showing first 2 years ...</td></tr>`);
@@ -380,65 +460,56 @@
         }
 
         function downloadReport() {
-            // Fill report data
             document.getElementById('report-date').innerText = new Date().toLocaleDateString();
-            document.getElementById('r-amt').innerText = formatCurrency(parseFloat(amtInput.value));
-            document.getElementById('r-rate').innerText = rateInput.value + '%';
-            document.getElementById('r-tenure').innerText = tenureInput.value + ' Years';
+            document.getElementById('r-amt').innerText = formatCurrency(parseFloat(manualAmt.value));
+            document.getElementById('r-rate').innerText = manualRate.value + '%';
+            document.getElementById('r-tenure').innerText = manualTenure.value + (tenureMode === 'yr' ? ' Years' : ' Months');
             document.getElementById('r-emi').innerText = document.getElementById('res-emi').innerText;
             document.getElementById('r-interest').innerText = document.getElementById('res-interest').innerText;
             document.getElementById('r-total').innerText = document.getElementById('res-total').innerText;
             
-            const P = parseFloat(amtInput.value);
-            const R = parseFloat(rateInput.value) / 12 / 100;
-            const N = parseFloat(tenureInput.value) * 12;
-            const emi = P * R * Math.pow(1 + R, N) / (Math.pow(1 + R, N) - 1);
-            
-            updateTable(P, R, N, emi, true); // Generate full table for report
+            let P = parseFloat(manualAmt.value) || 0;
+            let R = parseFloat(manualRate.value) / 12 / 100 || 0;
+            let N = tenureMode === 'yr' ? (parseFloat(manualTenure.value) || 0) * 12 : (parseFloat(manualTenure.value) || 0);
+
+            if(P > 0 && N > 0) {
+                let emi = (R > 0) ? (P * R * Math.pow(1 + R, N) / (Math.pow(1 + R, N) - 1)) : (P / N);
+                updateTable(P, R, N, emi, true); 
+            }
 
             const element = document.getElementById('report-export');
             element.style.display = 'block';
             
-            const opt = {
-                margin: 10,
-                filename: 'EMI_Report_QuickDo.pdf',
+            html2pdf().set({
+                margin: 10, filename: 'EMI_Report_QuickDo.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.style.display = 'none';
-            });
+                html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(element).save().then(() => { element.style.display = 'none'; });
         }
 
-        [amtInput, rateInput, tenureInput].forEach(inp => {
-            inp.addEventListener('input', calculateEMI);
+        // Bind Sliders mapping to Manual inputs
+        sliderAmt.addEventListener('input', (e) => { manualAmt.value = e.target.value; calculateEMI(); });
+        sliderRate.addEventListener('input', (e) => { manualRate.value = e.target.value; calculateEMI(); });
+        sliderTenure.addEventListener('input', (e) => { manualTenure.value = e.target.value; calculateEMI(); });
+
+        // Bind Manual Inputs decoupled from strict slider limits
+        manualAmt.addEventListener('input', () => { 
+            if(manualAmt.value >= sliderAmt.min && manualAmt.value <= sliderAmt.max) sliderAmt.value = manualAmt.value;
+            calculateEMI(); 
+        });
+        manualRate.addEventListener('input', () => { 
+            if(manualRate.value >= sliderRate.min && manualRate.value <= sliderRate.max) sliderRate.value = manualRate.value;
+            calculateEMI(); 
+        });
+        manualTenure.addEventListener('input', () => { 
+            if(manualTenure.value >= sliderTenure.min && manualTenure.value <= sliderTenure.max) sliderTenure.value = manualTenure.value;
+            calculateEMI(); 
         });
 
-        // Sync manual inputs back to sliders
-        document.getElementById('amt-manual').addEventListener('input', (e) => {
-            amtInput.value = e.target.value;
-            calculateEMI();
-        });
-        document.getElementById('rate-manual').addEventListener('input', (e) => {
-            rateInput.value = e.target.value;
-            calculateEMI();
-        });
-        document.getElementById('tenure-manual').addEventListener('input', (e) => {
-            tenureInput.value = e.target.value;
-            calculateEMI();
-        });
-
-        // Toggle observer for chart theme
-        const observer = new MutationObserver(() => {
-            calculateEMI(); // Redraw chart
-        });
+        const observer = new MutationObserver(calculateEMI);
         observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
         window.onload = calculateEMI;
     </script>
 </body>
-
 </html>
