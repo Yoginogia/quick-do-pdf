@@ -1,3 +1,18 @@
 User-agent: *
 Allow: /
+
+# Disallow utility/build scripts
+Disallow: /*.py$
+Disallow: /*.js$
+Disallow: /test_*
+Disallow: /dump.*
+Disallow: /clean.*
+Disallow: /googlef021eb962c566964.html
+
+# Allow important JS
+Allow: /theme.js
+
+# Crawl-delay for polite crawling
+Crawl-delay: 2
+
 Sitemap: https://quickdopdf.com/sitemap.xml
