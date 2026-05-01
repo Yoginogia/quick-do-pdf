@@ -300,13 +300,14 @@
                 <label for="message">Message</label>
                 <textarea id="message" placeholder="Write your message here..." required></textarea>
             </div>
-            <button class="submit-btn" onclick="sendMessage()">Send Message →</button>
+            <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px; text-align: center;">📧 Clicking "Send" will open your default email app (Gmail, Outlook, etc.) with the message pre-filled.</p>
+            <button class="submit-btn" onclick="sendMessage()">Open Email App to Send →</button>
         </div>
 
         <div class="success-message" id="successMsg">
-            <div class="icon">✅</div>
-            <h3>Message Sent!</h3>
-            <p>Thank you for reaching out. We'll get back to you as soon as possible via email.</p>
+            <div class="icon">📧</div>
+            <h3>Email App Opened!</h3>
+            <p>Your email app should have opened with the message pre-filled. Please click "Send" in your email app to deliver the message to us. If your email app didn't open, please email us directly at <a href="mailto:quickdopdf@gmail.com" style="color:var(--a1)">quickdopdf@gmail.com</a>.</p>
         </div>
 
         
