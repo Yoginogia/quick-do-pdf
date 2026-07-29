@@ -1440,34 +1440,43 @@
                     for (let edit of pageEdits) {
                         const pdfX = edit.pdfLeft;
                         const fontSize = edit.fontSizePdf;
+                        const pdfPageWidth = pdfPage.getWidth();
 
-                        // Measure actual PDF width of new text
-                        let textWidthPdf = edit.pdfWidth;
+                        // Measure actual PDF width of new text using the embedded font
+                        let newTextWidthPdf = 0;
                         try {
                             if (edit.newText && edit.newText.trim() !== '') {
-                                textWidthPdf = helveticaFont.widthOfTextAtSize(edit.newText, fontSize);
+                                newTextWidthPdf = helveticaFont.widthOfTextAtSize(edit.newText, fontSize);
                             }
                         } catch (err) {}
 
-                        // Ensure whiteout box covers BOTH original text and new text
-                        const pdfWipeW = Math.max(edit.pdfWidth, textWidthPdf) + 4;
-                        const pdfWipeH = Math.max(edit.pdfHeight, fontSize * 1.15) + 2;
+                        // PDF text often extends beyond HTML span boundaries due to
+                        // CSS scaleX transforms applied by PDF.js text layer rendering.
+                        // Use generous padding: original width + 50%, or new text width + 20pt, whichever is larger
+                        const origWidthPadded = edit.pdfWidth * 1.5 + 10;
+                        const newWidthPadded = newTextWidthPdf + 20;
+                        const pdfWipeW = Math.max(origWidthPadded, newWidthPadded);
+                        
+                        // Height: use at least 1.4x font size to cover ascenders/descenders
+                        const pdfWipeH = Math.max(edit.pdfHeight * 1.3, fontSize * 1.4) + 4;
 
-                        // Y coordinate in PDF space (bottom-left origin)
-                        const pdfRectY = pdfHeight - (edit.pdfTop + edit.pdfHeight) - 1;
+                        // Y coordinate in PDF space (bottom-left origin) with vertical padding
+                        const pdfRectY = pdfHeight - (edit.pdfTop + edit.pdfHeight) - 3;
 
-                        // A) Draw Whiteout Box (covers original text area + extra new text space)
+                        // Clamp width so we don't exceed page boundary
+                        const clampedW = Math.min(pdfWipeW, pdfPageWidth - pdfX + 5);
+
+                        // A) Draw Whiteout Box — generously covers original text area
                         pdfPage.drawRectangle({
-                            x: pdfX - 2,
+                            x: pdfX - 3,
                             y: pdfRectY,
-                            width: pdfWipeW,
+                            width: clampedW,
                             height: pdfWipeH,
                             color: rgb(1, 1, 1) // Pure white
                         });
 
-                        // B) Draw New Text (at baseline position)
+                        // B) Draw New Text at baseline position
                         if (edit.newText && edit.newText.trim() !== '') {
-                            // Baseline is top of bounding box minus ~82% of font size
                             const baselinePdfY = (pdfHeight - edit.pdfTop) - (fontSize * 0.82);
 
                             let rgbTuple = [0, 0, 0];
