@@ -699,6 +699,9 @@
         // State object tracking modifications to original text
         let nativeTextEdits = {};
 
+        // Store PDF text content items per page for exact coordinate lookup
+        let pageTextItems = {};
+
         const workspace = document.getElementById('workspace');
         workspace.classList.add('tool-mode-cursor'); // default class
 
@@ -780,13 +783,22 @@
             textLayerDiv.style.height = viewport.height + 'px';
 
             const textContent = await page.getTextContent();
+            const textDivs = [];
 
             await pdfjsLib.renderTextLayer({
                 textContentSource: textContent,
                 container: textLayerDiv,
                 viewport: viewport,
-                textDivs: []
+                textDivs: textDivs
             }).promise;
+
+            // Store text items for exact PDF coordinate lookup during export
+            pageTextItems[pageNum] = textContent.items;
+
+            // Tag each rendered span with its text item index
+            textDivs.forEach((div, idx) => {
+                if (div && div.dataset) div.dataset.itemIndex = idx;
+            });
 
             // Initialize native edits memory for this page
             nativeTextEdits[pageNum] = [];
@@ -983,16 +995,59 @@
                     const newText = editor.value;
                     const finalColor = editor.style.color;
 
+                    // Look up exact PDF coordinates from textContent.items
+                    const items = pageTextItems[pageNum] || [];
+                    const spanIndices = spansToEdit
+                        .map(s => parseInt(s.dataset.itemIndex))
+                        .filter(i => !isNaN(i) && i < items.length);
+
+                    let pdfLeft, pdfBaselineY, pdfWidth, pdfFontSize;
+
+                    if (spanIndices.length > 0) {
+                        // Use EXACT PDF coordinates from text content items
+                        let minX = Infinity, maxRight = -Infinity;
+                        let baselineY = null;
+                        let maxFontSz = 0;
+
+                        for (const idx of spanIndices) {
+                            const item = items[idx];
+                            if (!item || !item.transform) continue;
+                            const x = item.transform[4];       // PDF x position
+                            const y = item.transform[5];       // PDF baseline y (from bottom)
+                            const w = item.width;              // width in PDF points
+                            const fSize = Math.abs(item.transform[0]) || Math.abs(item.transform[3]) || 12;
+
+                            if (x < minX) minX = x;
+                            if (x + w > maxRight) maxRight = x + w;
+                            if (baselineY === null || y < baselineY) baselineY = y;
+                            if (fSize > maxFontSz) maxFontSz = fSize;
+                        }
+
+                        pdfLeft = minX;
+                        pdfBaselineY = baselineY;
+                        pdfWidth = maxRight - minX;
+                        pdfFontSize = maxFontSz;
+                    } else {
+                        // Fallback to CSS-based calculation
+                        const cssToPdf = 1 / scaleMultiplier;
+                        pdfLeft = cssLeft * cssToPdf;
+                        pdfBaselineY = null;
+                        pdfWidth = cssWidth * cssToPdf;
+                        pdfFontSize = parseFloat(computedStyle.fontSize) * cssToPdf;
+                    }
+
                     const cssToPdf = 1 / scaleMultiplier;
                     nativeTextEdits[pageNum].push({
                         id: editId,
                         originalText: originalText,
                         newText: newText,
-                        pdfLeft: cssLeft * cssToPdf,
+                        pdfLeft: pdfLeft,
+                        pdfBaselineY: pdfBaselineY,  // exact PDF baseline y (from bottom)
+                        pdfWidth: pdfWidth,
+                        fontSizePdf: pdfFontSize,
+                        // CSS-based fallbacks
                         pdfTop: cssTop * cssToPdf,
-                        pdfWidth: cssWidth * cssToPdf,
                         pdfHeight: cssHeight * cssToPdf,
-                        fontSizePdf: parseFloat(computedStyle.fontSize) * cssToPdf,
                         fontFamily: fontFamily,
                         color: finalColor
                     });
@@ -1450,35 +1505,36 @@
                             }
                         } catch (err) {}
 
-                        // PDF text often extends beyond HTML span boundaries due to
-                        // CSS scaleX transforms applied by PDF.js text layer rendering.
-                        // Use generous padding: original width + 50%, or new text width + 20pt, whichever is larger
-                        const origWidthPadded = edit.pdfWidth * 1.5 + 10;
-                        const newWidthPadded = newTextWidthPdf + 20;
-                        const pdfWipeW = Math.max(origWidthPadded, newWidthPadded);
-                        
-                        // Height: use at least 1.4x font size to cover ascenders/descenders
-                        const pdfWipeH = Math.max(edit.pdfHeight * 1.3, fontSize * 1.4) + 4;
+                        // Whiteout width: cover original text AND new text, with generous padding
+                        const pdfWipeW = Math.max(edit.pdfWidth + 15, newTextWidthPdf + 10);
+                        const pdfWipeH = fontSize * 1.5;
 
-                        // Y coordinate in PDF space (bottom-left origin) with vertical padding
-                        const pdfRectY = pdfHeight - (edit.pdfTop + edit.pdfHeight) - 3;
+                        let whiteoutY, baselineY;
+
+                        if (edit.pdfBaselineY != null) {
+                            // EXACT coordinates from PDF textContent.items
+                            baselineY = edit.pdfBaselineY;
+                            whiteoutY = baselineY - fontSize * 0.35;  // below baseline for descenders
+                        } else {
+                            // Fallback to CSS-based calculation
+                            whiteoutY = pdfHeight - (edit.pdfTop + edit.pdfHeight) - 3;
+                            baselineY = (pdfHeight - edit.pdfTop) - (fontSize * 0.82);
+                        }
 
                         // Clamp width so we don't exceed page boundary
                         const clampedW = Math.min(pdfWipeW, pdfPageWidth - pdfX + 5);
 
-                        // A) Draw Whiteout Box — generously covers original text area
+                        // A) Draw Whiteout Box using exact PDF coordinates
                         pdfPage.drawRectangle({
-                            x: pdfX - 3,
-                            y: pdfRectY,
+                            x: pdfX - 2,
+                            y: whiteoutY,
                             width: clampedW,
                             height: pdfWipeH,
                             color: rgb(1, 1, 1) // Pure white
                         });
 
-                        // B) Draw New Text at baseline position
+                        // B) Draw New Text at exact baseline
                         if (edit.newText && edit.newText.trim() !== '') {
-                            const baselinePdfY = (pdfHeight - edit.pdfTop) - (fontSize * 0.82);
-
                             let rgbTuple = [0, 0, 0];
                             if (edit.color && edit.color.startsWith('rgb')) {
                                 rgbTuple = hexToRgbTuple(rgbToHex(edit.color));
@@ -1489,7 +1545,7 @@
                                 if (lines[lineNum].trim() === '' && lines.length > 1) continue;
                                 pdfPage.drawText(lines[lineNum], {
                                     x: pdfX,
-                                    y: baselinePdfY - (lineNum * fontSize * 1.2),
+                                    y: baselineY - (lineNum * fontSize * 1.2),
                                     size: fontSize,
                                     font: helveticaFont,
                                     color: rgb(...rgbTuple)
