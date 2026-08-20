@@ -43,32 +43,40 @@
     }
 
     :root {
-      --bg: #060713;
-      --surface: rgba(255, 255, 255, 0.03);
-      --surface-hover: rgba(255, 255, 255, 0.06);
-      --border: rgba(255, 255, 255, 0.06);
-      --border-glow: rgba(255, 255, 255, 0.15);
-      --text: #f3f4f6;
-      --muted: #9ca3af;
-      --glass-blur: blur(24px);
+      --bg: #070913;
+      --surface: rgba(18, 22, 38, 0.65);
+      --surface-hover: rgba(28, 34, 58, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(255, 255, 255, 0.18);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --glass-blur: blur(20px);
       --a1: #ff2a5f;
       --a2: #ff7e40;
       --font-display: 'Plus Jakarta Sans', 'Outfit', sans-serif;
       --font-sans: 'Outfit', sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
     }
 
     body.theme-light {
       --bg: #f8fafc;
-      --surface: rgba(255, 255, 255, 0.7);
-      --surface-hover: rgba(255, 255, 255, 0.9);
+      --surface: rgba(255, 255, 255, 0.85);
+      --surface-hover: #ffffff;
       --border: rgba(15, 23, 42, 0.08);
-      --border-glow: rgba(15, 23, 42, 0.16);
+      --border-glow: rgba(15, 23, 42, 0.18);
       --text: #0f172a;
       --muted: #64748b;
     }
 
     body {
       background: var(--bg);
+      background-image: 
+        radial-gradient(circle at 50% -10%, rgba(255, 42, 95, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 90% 40%, rgba(255, 126, 64, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 10% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 50%);
       color: var(--text);
       font-family: var(--font-sans);
       min-height: 100vh;
@@ -105,9 +113,9 @@
     }
 
     .orb3 {
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(255, 42, 95, 0.07) 0%, transparent 70%);
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(255, 42, 95, 0.08) 0%, transparent 70%);
       position: fixed;
       top: 0;
       left: 0;
@@ -139,6 +147,16 @@
       }
     }
 
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.05); }
+    }
+
+    @keyframes textShimmer {
+      to { background-position: 200% center; }
+    }
+
+    /* HEADER */
     header {
       position: fixed;
       top: 0;
@@ -149,10 +167,11 @@
       align-items: center;
       justify-content: space-between;
       padding: 14px 40px;
-      background: color-mix(in srgb, var(--bg) 60%, transparent);
+      background: color-mix(in srgb, var(--bg) 75%, transparent);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       border-bottom: 1px solid var(--border);
+      transition: background 0.3s ease, border-color 0.3s ease;
     }
 
     .logo {
@@ -165,19 +184,23 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
       text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .header-tag {
       padding: 6px 14px;
       border-radius: 100px;
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      background: rgba(16, 185, 129, 0.08);
       font-size: 12px;
       font-weight: 600;
       color: #10b981;
       display: flex;
       align-items: center;
       gap: 6px;
+      backdrop-filter: var(--glass-blur);
     }
 
     .header-tag::before {
@@ -188,11 +211,18 @@
       background: #10b981;
       border-radius: 50%;
       animation: pulseGreen 1.5s infinite;
+      box-shadow: 0 0 8px #10b981;
     }
 
     @keyframes pulseGreen {
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.3); opacity: 0.4; }
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .theme-toggle-btn {
@@ -220,14 +250,14 @@
       position: relative;
       z-index: 10;
       text-align: center;
-      padding: 150px 24px 44px;
+      padding: 140px 24px 36px;
     }
 
     .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 16px;
+      padding: 7px 18px;
       border-radius: 100px;
       border: 1px solid var(--border);
       background: var(--surface);
@@ -235,56 +265,52 @@
       font-size: 13px;
       font-weight: 600;
       color: var(--text);
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       animation: slideDown .6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
       opacity: 0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
 
     .hero-badge span {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--a1);
       display: inline-block;
       animation: pulseAccent 1.5s infinite;
-      box-shadow: 0 0 8px var(--a1);
+      box-shadow: 0 0 10px var(--a1);
     }
 
     @keyframes pulseAccent {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: .5; transform: scale(.8); }
+      50% { opacity: .4; transform: scale(.75); }
     }
 
     .hero h1 {
       font-family: var(--font-display);
-      font-size: clamp(44px, 7vw, 76px);
+      font-size: clamp(38px, 6.5vw, 68px);
       font-weight: 800;
-      line-height: 1.05;
+      line-height: 1.1;
       letter-spacing: -2px;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
       animation: slideDown .6s .1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
       opacity: 0;
     }
 
-    .g1 {
-      background: linear-gradient(135deg, #fff, #9ca3af);
+    .g-shimmer {
+      background: linear-gradient(135deg, #ff2a5f 0%, #ff8e4f 35%, #ff2a5f 70%, #ff8e4f 100%);
+      background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      animation: textShimmer 5s linear infinite;
     }
 
-    body.theme-light .g1 {
-      background: linear-gradient(135deg, #0f172a, #475569);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero p {
+    .hero-subtitle {
       color: var(--muted);
-      font-size: 16px;
-      max-width: 580px;
-      margin: 0 auto 36px;
+      font-size: 1.15rem;
+      max-width: 620px;
+      margin: 0 auto 28px;
       line-height: 1.6;
       font-weight: 400;
       animation: slideDown .6s .2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
@@ -296,13 +322,13 @@
       justify-content: center;
       flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
       animation: slideDown .6s .3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
       opacity: 0;
     }
 
     .pill {
-      padding: 8px 16px;
+      padding: 8px 18px;
       border-radius: 100px;
       border: 1px solid var(--border);
       background: var(--surface);
@@ -310,6 +336,16 @@
       font-size: 13px;
       font-weight: 600;
       color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.25s ease;
+    }
+
+    .pill:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
     }
 
     /* Search Bar Wrapper */
@@ -318,20 +354,23 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 1.5rem auto 0;
-      max-width: 600px;
-      width: 90%;
+      margin: 0 auto;
+      max-width: 620px;
+      width: 92%;
       border-radius: 50px;
-      padding: 1px;
+      padding: 2px;
       overflow: hidden;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border);
       background: var(--border);
-      transition: all 0.3s ease;
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      animation: slideDown .6s .35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
     }
 
     .search-wrap:focus-within {
-      box-shadow: 0 0 30px color-mix(in srgb, var(--a1) 20%, transparent);
+      box-shadow: 0 0 35px color-mix(in srgb, var(--a1) 25%, transparent), 0 12px 40px rgba(0, 0, 0, 0.4);
       background: linear-gradient(135deg, var(--a1), var(--a2));
+      transform: translateY(-2px);
     }
 
     .search-box {
@@ -341,19 +380,20 @@
       align-items: center;
       background: var(--bg);
       border-radius: 48px;
-      padding: 0.75rem 1.5rem;
+      padding: 0.85rem 1.6rem;
       z-index: 1;
     }
 
     .search-box svg {
       color: var(--muted);
-      margin-right: 12px;
+      margin-right: 14px;
       flex-shrink: 0;
-      transition: color 0.3s ease;
+      transition: color 0.3s ease, transform 0.3s ease;
     }
 
     .search-box:focus-within svg {
       color: var(--a1);
+      transform: scale(1.1);
     }
 
     .search-box input {
@@ -361,24 +401,26 @@
       background: transparent;
       border: none;
       color: var(--text);
-      font-size: 1rem;
-      padding: 0.45rem 0;
+      font-size: 1.05rem;
+      padding: 0.25rem 0;
       outline: none;
       font-family: inherit;
     }
 
     .search-box input::placeholder {
       color: var(--muted);
+      opacity: 0.8;
+      transition: opacity 0.2s ease;
     }
 
     /* Trust Strip */
     .trust-strip {
       display: flex;
-      gap: 24px;
+      gap: 28px;
       justify-content: center;
       flex-wrap: wrap;
-      margin: 16px auto 32px;
-      max-width: 800px;
+      margin: 24px auto 36px;
+      max-width: 850px;
       position: relative;
       z-index: 10;
     }
@@ -387,10 +429,14 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--muted);
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
     }
     
     .trust-item svg {
@@ -406,24 +452,30 @@
       z-index: 10;
       display: flex;
       justify-content: center;
-      gap: 80px;
+      gap: 60px;
       flex-wrap: wrap;
-      padding: 32px 24px;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.01), transparent);
-      margin-bottom: 40px;
+      padding: 28px 32px;
+      max-width: 950px;
+      margin: 0 auto 48px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
     }
 
     .stat {
       text-align: center;
+      flex: 1;
+      min-width: 140px;
     }
 
     .stat-val {
       font-family: var(--font-display);
       font-size: 38px;
       font-weight: 800;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       letter-spacing: -1px;
     }
 
@@ -451,7 +503,7 @@
     .stat-label {
       color: var(--muted);
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1.5px;
     }
@@ -460,17 +512,17 @@
     .tabs-container {
       display: flex;
       justify-content: center;
-      margin: 24px auto 36px;
+      margin: 0 auto 36px;
       max-width: 1000px;
-      width: 90%;
+      width: 92%;
       position: relative;
       z-index: 10;
     }
 
     .tabs-slider {
       display: flex;
-      gap: 6px;
-      padding: 6px;
+      gap: 8px;
+      padding: 8px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 100px;
@@ -478,6 +530,7 @@
       -webkit-backdrop-filter: var(--glass-blur);
       overflow-x: auto;
       scrollbar-width: none;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
     .tabs-slider::-webkit-scrollbar {
@@ -485,12 +538,12 @@
     }
 
     .tab-btn {
-      padding: 8px 18px;
+      padding: 10px 20px;
       border-radius: 100px;
       border: 1px solid transparent;
       background: transparent;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -502,34 +555,34 @@
 
     .tab-btn:hover {
       color: var(--text);
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.05);
     }
 
     body.theme-light .tab-btn:hover {
-      background: rgba(0, 0, 0, 0.03);
+      background: rgba(0, 0, 0, 0.04);
     }
 
     .tab-btn.active {
       background: linear-gradient(135deg, var(--a1), var(--a2));
       color: #fff;
-      border-color: rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 20px color-mix(in srgb, var(--a1) 20%, transparent);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 22px color-mix(in srgb, var(--a1) 25%, transparent);
     }
 
     /* Dividers & Sections */
     .section {
       position: relative;
       z-index: 10;
-      padding: 0 24px 48px;
-      max-width: 1200px;
+      padding: 0 24px 44px;
+      max-width: 1240px;
       margin: 0 auto;
     }
 
     .divider {
       position: relative;
       z-index: 10;
-      max-width: 1200px;
-      margin: 0 auto 28px;
+      max-width: 1240px;
+      margin: 0 auto 24px;
       padding: 0 24px;
     }
 
@@ -542,7 +595,8 @@
     .divider hr {
       flex: 1;
       border: none;
-      border-top: 1px solid var(--border);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
     }
 
     .divider-label {
@@ -552,31 +606,33 @@
       color: var(--text);
       text-transform: uppercase;
       letter-spacing: 2px;
-      padding: 6px 14px;
+      padding: 7px 18px;
       border-radius: 100px;
       background: var(--surface);
       border: 1px solid var(--border);
       backdrop-filter: var(--glass-blur);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     /* Tools Grid & Premium Cards */
     .tools-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 20px;
+      gap: 22px;
     }
 
     .tool-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 28px;
+      border-radius: var(--radius-lg);
+      padding: 28px 24px 22px;
       text-decoration: none;
       color: var(--text);
-      transition: all .35s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
       position: relative;
       overflow: hidden;
       backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       display: flex;
       flex-direction: column;
@@ -587,11 +643,31 @@
       display: none !important;
     }
 
+    /* Top Accent Line on Card */
+    .tool-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--c1), var(--c2));
+      opacity: 0.6;
+      transition: opacity 0.3s ease, height 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .tool-card:hover::after {
+      opacity: 1;
+      height: 4px;
+      box-shadow: 0 0 15px var(--c1);
+    }
+
+    /* Subtle Hover Glow */
     .tool-card::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, var(--c1), var(--c2));
+      background: radial-gradient(circle at top left, color-mix(in srgb, var(--c1) 12%, transparent) 0%, transparent 70%);
       opacity: 0;
       transition: opacity .35s ease;
       pointer-events: none;
@@ -599,18 +675,18 @@
     }
 
     .card-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 14px;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
       background: linear-gradient(135deg, var(--c1), var(--c2));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      margin-bottom: 20px;
+      font-size: 26px;
+      margin-bottom: 18px;
       position: relative;
       z-index: 2;
-      box-shadow: 0 8px 16px color-mix(in srgb, var(--c1) 20%, transparent);
+      box-shadow: 0 8px 20px color-mix(in srgb, var(--c1) 25%, transparent);
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -618,7 +694,7 @@
       font-family: var(--font-display);
       font-size: 18px;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       position: relative;
       z-index: 2;
       letter-spacing: -0.3px;
@@ -627,10 +703,10 @@
     .card-desc {
       color: var(--muted);
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.55;
       position: relative;
       z-index: 2;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
       flex-grow: 1;
     }
 
@@ -646,8 +722,8 @@
       transition: all .3s ease;
       padding: 6px 14px;
       border-radius: 100px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
       align-self: flex-start;
       margin-top: auto;
     }
@@ -657,16 +733,16 @@
       .tool-card:hover {
         border-color: var(--c1);
         transform: translateY(-6px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 0 25px color-mix(in srgb, var(--c1) 18%, transparent);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25), 0 0 25px color-mix(in srgb, var(--c1) 18%, transparent);
       }
 
       .tool-card:hover::before {
-        opacity: .05;
+        opacity: 1;
       }
 
       .tool-card:hover .card-icon {
         transform: scale(1.08) rotate(3deg);
-        box-shadow: 0 10px 20px color-mix(in srgb, var(--c1) 35%, transparent);
+        box-shadow: 0 10px 25px color-mix(in srgb, var(--c1) 40%, transparent);
       }
 
       .tool-card:hover .card-arrow {
@@ -674,15 +750,15 @@
         color: #fff;
         border-color: var(--c1);
         gap: 10px;
-        box-shadow: 0 5px 12px color-mix(in srgb, var(--c1) 30%, transparent);
+        box-shadow: 0 5px 15px color-mix(in srgb, var(--c1) 35%, transparent);
       }
     }
 
     /* Light Mode Overrides for Tool Cards */
     body.theme-light .tool-card {
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(15, 23, 42, 0.06);
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
       color: #0f172a;
     }
 
@@ -703,7 +779,7 @@
     @media (hover: hover) {
       body.theme-light .tool-card:hover {
         border-color: var(--c1);
-        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08), 0 0 15px color-mix(in srgb, var(--c1) 15%, transparent);
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.1), 0 0 20px color-mix(in srgb, var(--c1) 20%, transparent);
       }
 
       body.theme-light .tool-card:hover .card-arrow {
@@ -733,40 +809,135 @@
     .c-orange { --c1: #f97316; --c2: #ea580c; }
     .c-slate { --c1: #64748b; --c2: #334155; }
 
+    /* Modern Footer */
     footer {
       position: relative;
       z-index: 10;
-      text-align: center;
-      padding: 28px;
+      padding: 48px 24px 32px;
       border-top: 1px solid var(--border);
       color: var(--muted);
-      font-size: 13px;
-      margin-top: 40px;
-      background: color-mix(in srgb, var(--bg) 80%, transparent);
+      font-size: 14px;
+      margin-top: 50px;
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
       backdrop-filter: var(--glass-blur);
     }
 
-    footer span {
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 36px;
+      margin-bottom: 36px;
+      text-align: left;
+    }
+
+    .footer-brand .logo {
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .footer-brand p {
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.6;
+      max-width: 320px;
+    }
+
+    .footer-col h4 {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-col a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      transition: color 0.2s ease, transform 0.2s ease;
+      display: inline-block;
+    }
+
+    .footer-col a:hover {
+      color: var(--a1);
+      transform: translateX(3px);
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
+    }
+
+    .footer-bottom span {
       color: var(--text);
       font-weight: 700;
     }
 
-    @media(max-width:768px) {
+    /* SEO Content Accordion / Clean Box */
+    .tool-seo-content {
+      max-width: 950px;
+      margin: 40px auto;
+      padding: 36px 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: var(--glass-blur);
+      line-height: 1.8;
+      color: var(--text);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    @media(max-width: 900px) {
+      .footer-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media(max-width: 600px) {
       header {
-        padding: 12px 20px;
+        padding: 12px 16px;
       }
 
       .hero {
-        padding: 110px 20px 32px;
+        padding: 105px 16px 24px;
       }
 
       .stats-bar {
-        gap: 32px;
-        padding: 24px 20px;
+        gap: 20px;
+        padding: 20px 16px;
       }
 
       .stat-val {
-        font-size: 30px;
+        font-size: 28px;
+      }
+
+      .footer-container {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        text-align: center;
       }
     }
   </style>
@@ -884,47 +1055,49 @@
 
   <main>
     <section class="hero">
-      <div class="hero-badge"><span></span> 40+ Free PDF Tools — No signup needed</div>
-      <h1>Free Online <span class="g1">PDF Tools</span></h1>
-      <h2
-        style="font-size: 1.1rem; font-weight: 400; color: var(--text); opacity: 0.9; max-width: 600px; margin: 0 auto;">
-        Merge, split, compress, and convert PDF files entirely within your browser. Powerful, fast, and 100% secure.
-      </h2>
+      <div class="hero-badge">
+        <span></span> 40+ Free Online PDF Utilities • Client-Side & Private
+      </div>
+      <h1>Every PDF Tool You Need. <br><span class="g-shimmer">Fast, Free & Private.</span></h1>
+      <p class="hero-subtitle">
+        Merge, split, compress, edit, convert, and sign PDF documents entirely in your browser. No software install, no uploads, 100% free forever.
+      </p>
       <div class="hero-pills">
         <div class="pill">⚡ Instant Processing</div>
-        <div class="pill">🔒 Files Processed Locally</div>
-        <div class="pill">🆓 100% Free Forever</div>
+        <div class="pill">🔒 100% Client-Side Privacy</div>
+        <div class="pill">♾️ Unlimited Free Usage</div>
       </div>
 
-      <!-- SEARCH BAR (Now prominently in Hero Section) -->
+      <!-- SEARCH BAR -->
       <div class="search-wrap">
         <div class="search-box">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="toolSearch" placeholder="Search for tools (e.g. Merge, Excel, Protect)...">
+          <input type="text" id="toolSearch" placeholder="Search 40+ tools (e.g. Merge, Reduce JPG, Compress, Edit)...">
         </div>
       </div>
     </section>
 
+    <!-- STATS BAR -->
     <div class="stats-bar">
       <div class="stat">
-        <div class="stat-val v1">40+</div>
-        <div class="stat-label">Free Tools</div>
+        <div class="stat-val v1" data-target="40">40+</div>
+        <div class="stat-label">Online Tools</div>
       </div>
       <div class="stat">
         <div class="stat-val v2">0 MB</div>
-        <div class="stat-label">Data Uploaded</div>
+        <div class="stat-label">Server Uploads</div>
       </div>
       <div class="stat">
-        <div class="stat-val v3">Unlimited</div>
-        <div class="stat-label">Usage Free</div>
+        <div class="stat-val v3">100%</div>
+        <div class="stat-label">Free Forever</div>
       </div>
     </div>
 
-        <!-- CATEGORY TABS -->
+    <!-- CATEGORY TABS -->
     <div class="tabs-container">
       <div class="tabs-slider">
         <button class="tab-btn active" data-filter="all">📦 All Tools</button>
@@ -937,11 +1110,12 @@
       </div>
     </div>
 
+    <!-- TRUST STRIP -->
     <div class="trust-strip">
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg> Runs in Browser</div>
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg> No Signup</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg> Runs In Your Browser</div>
       <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg> No Watermark</div>
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg> Works on Mobile</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg> No Account Needed</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg> Works on Mobile & PC</div>
     </div>
 
     <!-- AI TOOLS -->
@@ -1313,45 +1487,74 @@
       </div>
     </section>
 
-    <footer>Built with ❤️ by <span>Yogesh</span> · Quick Do PDF · <a href="about.html"
-        style="color:var(--accent1,#2a8bff);">About</a> · <a href="privacy-policy.html"
-        style="color:var(--accent1,#2a8bff);">Privacy Policy</a> · <a href="terms.html"
-        style="color:var(--accent1,#2a8bff);">Terms</a> · <a href="disclaimer.html"
-        style="color:var(--accent1,#2a8bff);">Disclaimer</a> · <a href="contact.html"
-        style="color:var(--accent1,#2a8bff);">Contact</a> · <a href="blog/"
-        style="color:var(--accent1,#2a8bff);">Blog</a></footer>
-
-    
-
-    <section class="tool-seo-content" style="max-width: 900px; margin: 40px auto; line-height: 1.8; color: var(--text);">
-        <h2 style="font-size: 2.5rem; margin-bottom: 20px; text-align: center; color: var(--primary);">Welcome to Quick Do PDF: Your Ultimate Document Command Center</h2>
-        <p style="font-size: 1.1rem; margin-bottom: 20px;">In an era where digital paperwork dictates our daily operations, managing PDF files shouldn't require expensive software subscriptions or compromise your data privacy. <strong>Quick Do PDF</strong> is designed as a powerful, 100% free, and completely secure suite of tools tailored for students, professionals, and small businesses alike.</p>
+    <section class="tool-seo-content">
+        <h2 style="font-size: 2rem; margin-bottom: 16px; text-align: center; color: var(--text);">Welcome to Quick Do PDF: Your Ultimate Document Command Center</h2>
+        <p style="font-size: 1.05rem; margin-bottom: 18px; color: var(--muted);">Managing PDF files shouldn't require expensive software subscriptions or compromise your data privacy. <strong>Quick Do PDF</strong> is designed as a powerful, 100% free, and completely secure suite of tools tailored for students, professionals, and businesses alike.</p>
         
-        <h3 style="font-size: 1.8rem; margin-top: 30px; margin-bottom: 15px;">Why Client-Side Processing is the Future</h3>
-        <p style="font-size: 1.1rem; margin-bottom: 20px;">Most online PDF utilities operate on a cloud-based architecture. When you compress a file or merge an invoice, your sensitive data is uploaded to a remote server, processed, and then downloaded back to your device. This creates a massive vulnerability for data interception and unauthorized retention.</p>
-        <p style="font-size: 1.1rem; margin-bottom: 20px;">At <strong>Quick Do PDF</strong>, we utilize advanced WebAssembly (Wasm) and HTML5 technologies to process your documents directly inside your browser's local memory (RAM). For most tools, your PDF files stay on your device and are never uploaded. This means:
-        <ul style="font-size: 1.1rem; margin-left: 20px; list-style-type: disc; margin-bottom: 20px;">
-            <li>Fast processing with zero upload wait times.</li>
-            <li>Strong privacy for your documents — no server-side storage.</li>
-            <li>No artificial file size limits imposed by server bandwidth constraints.</li>
+        <h3 style="font-size: 1.4rem; margin-top: 24px; margin-bottom: 12px; color: var(--text);">Why Client-Side Processing is the Future</h3>
+        <p style="font-size: 1rem; margin-bottom: 16px; color: var(--muted);">Most online PDF utilities operate on a cloud-based architecture where your sensitive data is uploaded to a remote server, processed, and then downloaded back. At <strong>Quick Do PDF</strong>, we utilize advanced WebAssembly and HTML5 technologies to process your documents directly inside your browser's local memory (RAM).</p>
+        <ul style="font-size: 1rem; margin-left: 20px; list-style-type: disc; margin-bottom: 16px; color: var(--muted);">
+            <li><strong>Zero upload wait times:</strong> Files are processed instantly on your hardware.</li>
+            <li><strong>Strict privacy:</strong> Your documents are never stored or seen by anyone.</li>
+            <li><strong>No artificial restrictions:</strong> Unlimited usage with zero hidden paywalls.</li>
         </ul>
-        <small style="color: var(--muted);">Note: AI-powered features (Chat with PDF, AI Summarizer, Resume AI) send extracted text to an AI provider for processing. Your original PDF file remains on your device.</small></p>
-
-        <h3 style="font-size: 1.8rem; margin-top: 30px; margin-bottom: 15px;">A Comprehensive Suite for Every Need</h3>
-        <p style="font-size: 1.1rem; margin-bottom: 20px;">Whether you need to quickly <strong>merge multiple PDF files</strong> into a single cohesive report, <strong>compress heavy documents</strong> to bypass strict email attachment limits, or <strong>convert PDFs to editable Word/Excel formats</strong>, our platform has a dedicated utility for it.</p>
-        <p style="font-size: 1.1rem; margin-bottom: 20px;">We've also integrated AI-powered tools such as our revolutionary Resume Builder and AI PDF Summarizer to help you extract insights and build professional profiles in seconds.</p>
-
-        <h3 style="font-size: 1.8rem; margin-top: 30px; margin-bottom: 15px;">Commitment to Quality</h3>
-        <p style="font-size: 1.1rem; margin-bottom: 20px;">Our mission is to democratize document management. We continuously update our algorithms to ensure that compressing a PDF preserves text readability and image clarity, and converting to Word provides the best-effort extraction of text and layout from the original document. Explore our 40+ tools above and experience the difference of local, frictionless processing.</p>
+        <small style="color: var(--muted); opacity: 0.8;">Note: AI-powered features (Chat with PDF, AI Summarizer) send extracted text to Google Gemini API for natural language analysis. Your original PDF files remain on your device.</small>
     </section>
-    
-  <script>
+
+    <!-- MODERN 4-COLUMN FOOTER -->
+    <footer>
+      <div class="footer-container">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">Quick Do PDF</a>
+          <p>The privacy-first PDF utility suite. 40+ client-side tools to convert, compress, merge, split, and edit documents directly in your browser.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Popular Tools</h4>
+          <ul>
+            <li><a href="merge.html">Merge PDF</a></li>
+            <li><a href="compress.html">Compress PDF</a></li>
+            <li><a href="reduce-jpg.html">Reduce JPG Size</a></li>
+            <li><a href="edit-pdf.html">Edit PDF</a></li>
+            <li><a href="pdf-to-word.html">PDF to Word</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>AI & Pro Tools</h4>
+          <ul>
+            <li><a href="chat-with-pdf.html">Chat with PDF</a></li>
+            <li><a href="ai-pdf-summarizer.html">AI Summarizer</a></li>
+            <li><a href="pdf-ocr.html">PDF OCR Scanner</a></li>
+            <li><a href="emi-calculator.html">EMI Calculator</a></li>
+            <li><a href="invoice-generator.html">Invoice Generator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company & Legal</h4>
+          <ul>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="disclaimer.html">Disclaimer</a></li>
+            <li><a href="contact.html">Contact Support</a></li>
+            <li><a href="blog/">Blog & Guides</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 <span>Quick Do PDF</span>. Built with ❤️ by <span>Yogesh</span>. All rights reserved.</div>
+        <div style="color: var(--muted);">100% Free • Client-Side Processing • No Watermarks</div>
+      </div>
+    </footer>
+
+    <script>
       document.addEventListener("DOMContentLoaded", () => {
         const searchInput = document.getElementById("toolSearch");
         const toolCards = document.querySelectorAll(".tool-card");
         const tabButtons = document.querySelectorAll(".tab-btn");
         let activeFilter = "all";
 
+        // Filtering
         function filterTools() {
           const term = searchInput ? searchInput.value.toLowerCase().trim() : "";
           
@@ -1390,6 +1593,46 @@
 
         if (searchInput) {
           searchInput.addEventListener("input", filterTools);
+
+          // Typewriter search placeholder effect
+          const placeholders = [
+            "Search 40+ tools (e.g. Merge, Compress, Reduce JPG)...",
+            "Try typing 'PDF to Word' or 'Excel'...",
+            "Search 'Sign PDF', 'Protect' or 'Unlock'...",
+            "Search 'AI Summarizer' or 'Chat with PDF'...",
+            "Search 'Reduce JPG' or 'Image Converter'..."
+          ];
+          let pIndex = 0;
+          let charIndex = 0;
+          let isDeleting = false;
+          let isFocused = false;
+
+          searchInput.addEventListener("focus", () => { isFocused = true; searchInput.placeholder = "Type tool name..."; });
+          searchInput.addEventListener("blur", () => { isFocused = false; if (!searchInput.value) typeEffect(); });
+
+          function typeEffect() {
+            if (isFocused || searchInput.value) return;
+            const currentStr = placeholders[pIndex];
+            if (isDeleting) {
+              searchInput.placeholder = currentStr.substring(0, charIndex - 1);
+              charIndex--;
+            } else {
+              searchInput.placeholder = currentStr.substring(0, charIndex + 1);
+              charIndex++;
+            }
+
+            let delay = isDeleting ? 30 : 60;
+            if (!isDeleting && charIndex === currentStr.length) {
+              delay = 2500;
+              isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+              isDeleting = false;
+              pIndex = (pIndex + 1) % placeholders.length;
+              delay = 400;
+            }
+            setTimeout(typeEffect, delay);
+          }
+          setTimeout(typeEffect, 1500);
         }
 
         tabButtons.forEach(button => {
@@ -1412,7 +1655,8 @@
             });
           }
         }
-      });</script>
+      });
+    </script>
 </body>
 
 </html>
