@@ -62,6 +62,33 @@
             z-index: 10;
         }
 
+        .toolbar-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            background: color-mix(in srgb, var(--surface) 70%, transparent);
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .tool-hint {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .page-chip {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
         .tool-btn {
             padding: 8px 14px;
             border-radius: 8px;
@@ -260,6 +287,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 2;
+            touch-action: none;
             /* cursor: crosshair; */
         }
 
@@ -346,6 +374,7 @@
             flex-direction: column;
             cursor: move;
             transform-origin: top left;
+            touch-action: none;
         }
 
         .edit-item.selected {
@@ -433,8 +462,43 @@
             padding: 0;
             margin: 0;
             white-space: pre;
-            overflow: hidden;
-            resize: none;
+            overflow: auto;
+            resize: both;
+        }
+
+        @media (max-width: 900px) {
+            .editor-container {
+                height: auto;
+                min-height: 78vh;
+            }
+
+            .editor-body {
+                flex-direction: column;
+            }
+
+            .pdf-sidebar {
+                width: 100%;
+                max-height: 150px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            .thumb-wrap {
+                min-width: 92px;
+            }
+
+            .toolbar-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .zoom-panel {
+                right: 12px;
+                bottom: 12px;
+            }
         }
 
         .modal-overlay {
@@ -503,12 +567,12 @@
         </div>
     </header>
 
-    <main style="max-width: 100%; padding: 10px 20px;">
+    <main style="max-width: 100%; padding: 92px 20px 24px;">
         <h1 class="page-title">Edit <span>PDF Free</span></h1>
-        <p class="page-subtitle">Add text, images, and freehand annotations directly to your PDF pages.</p>
+        <p class="page-subtitle">Add text, images, signatures, redactions, and freehand annotations directly to your PDF pages.</p>
 
         <div class="upload-zone" id="dropArea">
-            <div class="upload-icon">✏️</div>
+            <div class="upload-icon">PDF</div>
             <h3>Drop your PDF file here</h3>
             <p>Edit PDF right in your browser</p>
             <label class="select-btn">
@@ -518,32 +582,33 @@
                 Select PDF File
                 <input type="file" id="pdfInput" accept="application/pdf">
             </label>
+            <button type="button" class="select-btn" id="samplePdfBtn" onclick="loadSamplePDF()" style="margin-left: 10px; background: var(--surface); color: var(--text); border: 1px solid var(--border);">Try Sample PDF</button>
         </div>
 
         <div class="editor-container" id="editorContainer">
             <!-- Toolbar -->
             <div class="editor-toolbar">
-                <button class="tool-btn" id="btnUndo" onclick="undo()" title="Undo (Ctrl+Z)">↩️ Undo</button>
-                <button class="tool-btn" id="btnRedo" onclick="redo()" title="Redo (Ctrl+Y)">↪️ Redo</button>
+                <button class="tool-btn" id="btnUndo" onclick="undo()" title="Undo (Ctrl/Cmd+Z)">Undo</button>
+                <button class="tool-btn" id="btnRedo" onclick="redo()" title="Redo (Ctrl/Cmd+Y or Shift+Cmd+Z)">Redo</button>
                 <div class="tool-sep"></div>
-                <button class="tool-btn active" id="btnCursor" onclick="setTool('cursor')">👆 Select / Move</button>
-                <button class="tool-btn" id="btnEditText" onclick="setTool('edit-text')">📝 Edit Text</button>
-                <button class="tool-btn" id="btnText" onclick="setTool('text')">🔤 Add Text</button>
+                <button class="tool-btn active" id="btnCursor" onclick="setTool('cursor')">Select</button>
+                <button class="tool-btn" id="btnEditText" onclick="setTool('edit-text')">Edit Text</button>
+                <button class="tool-btn" id="btnText" onclick="setTool('text')">Add Text</button>
                 <input type="file" id="imgInput" accept="image/png, image/jpeg, image/jpg" style="display:none"
                     onchange="handleAddImageFile(event)">
-                <button class="tool-btn" id="btnImage" onclick="document.getElementById('imgInput').click()">🖼️ Image</button>
-                <button class="tool-btn" id="btnDraw" onclick="setTool('draw')">✏️ Draw</button>
-                <button class="tool-btn" id="btnHighlight" onclick="setTool('highlight')">🖍️ Highlight</button>
+                <button class="tool-btn" id="btnImage" onclick="document.getElementById('imgInput').click()">Image</button>
+                <button class="tool-btn" id="btnDraw" onclick="setTool('draw')">Draw</button>
+                <button class="tool-btn" id="btnHighlight" onclick="setTool('highlight')">Highlight</button>
 
                 <div class="tool-sep"></div>
-                <button class="tool-btn" id="btnShapeRect" onclick="setTool('shape-rect')">🔲 Box</button>
-                <button class="tool-btn" id="btnShapeCircle" onclick="setTool('shape-circle')">⭕ Circle</button>
-                <button class="tool-btn" id="btnRedact" onclick="setTool('redact')">⬛ Redact</button>
+                <button class="tool-btn" id="btnShapeRect" onclick="setTool('shape-rect')">Box</button>
+                <button class="tool-btn" id="btnShapeCircle" onclick="setTool('shape-circle')">Circle</button>
+                <button class="tool-btn" id="btnRedact" onclick="setTool('redact')">Redact</button>
 
                 <div class="tool-sep"></div>
-                <button class="tool-btn" id="btnSignature" onclick="openSignature()">✍️ Signature</button>
-                <button class="tool-btn" id="btnLink" onclick="setTool('link')">🔗 Link</button>
-                <button class="tool-btn" id="btnSticky" onclick="setTool('sticky')">💬 Note</button>
+                <button class="tool-btn" id="btnSignature" onclick="openSignature()">Signature</button>
+                <button class="tool-btn" id="btnLink" onclick="setTool('link')">Link</button>
+                <button class="tool-btn" id="btnSticky" onclick="setTool('sticky')">Note</button>
 
                 <div class="tool-sep"></div>
                 <select id="fontPicker" class="font-selector" onchange="updateSelectedProperties()">
@@ -557,19 +622,23 @@
                     <option value="'Trebuchet MS', sans-serif">Trebuchet</option>
                 </select>
                 <div class="color-swatches">
-                    <span class="swatch" style="background:#000000" onclick="setColor('#000000')"></span>
-                    <span class="swatch" style="background:#e53e3e" onclick="setColor('#e53e3e')"></span>
-                    <span class="swatch" style="background:#3182ce" onclick="setColor('#3182ce')"></span>
-                    <span class="swatch" style="background:#38a169" onclick="setColor('#38a169')"></span>
-                    <span class="swatch" style="background:#d69e2e" onclick="setColor('#d69e2e')"></span>
-                    <span class="swatch" style="background:#805ad5" onclick="setColor('#805ad5')"></span>
-                    <span class="swatch" style="background:#dd6b20" onclick="setColor('#dd6b20')"></span>
-                    <span class="swatch" style="background:#ffffff; border: 1px solid #ccc" onclick="setColor('#ffffff')"></span>
+                    <span class="swatch" style="background:#000000" onclick="setColor('#000000', this)"></span>
+                    <span class="swatch" style="background:#e53e3e" onclick="setColor('#e53e3e', this)"></span>
+                    <span class="swatch" style="background:#3182ce" onclick="setColor('#3182ce', this)"></span>
+                    <span class="swatch" style="background:#38a169" onclick="setColor('#38a169', this)"></span>
+                    <span class="swatch" style="background:#d69e2e" onclick="setColor('#d69e2e', this)"></span>
+                    <span class="swatch" style="background:#805ad5" onclick="setColor('#805ad5', this)"></span>
+                    <span class="swatch" style="background:#dd6b20" onclick="setColor('#dd6b20', this)"></span>
+                    <span class="swatch" style="background:#ffffff; border: 1px solid #ccc" onclick="setColor('#ffffff', this)"></span>
                 </div>
                 <input type="color" id="colorPicker" class="color-picker" value="#000000" title="Custom Color"
                     onchange="updateSelectedProperties()">
                 <input type="number" id="sizePicker" class="size-input" value="18" min="1" max="120" title="Size (px)"
                     onchange="updateSelectedProperties()">
+            </div>
+            <div class="toolbar-meta">
+                <div class="tool-hint" id="toolHint">Select items to move or resize them. Use Delete to remove selected overlays.</div>
+                <div class="page-chip" id="pageStatus">Page 1</div>
             </div>
 
             <!-- Workspace -->
@@ -594,7 +663,7 @@
             Export & Download PDF
         </button>
         <div id="successMsg" class="success-msg hidden">
-            <div class="s-icon">✅</div>
+            <div class="s-icon">OK</div>
             <h3>Done!</h3>
             <p>Your edited PDF has been saved.</p>
         </div>
@@ -669,16 +738,24 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if(e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
-            if(e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
+            const modifier = e.ctrlKey || e.metaKey;
+            const key = e.key.toLowerCase();
+            if(modifier && !e.shiftKey && key === 'z') { e.preventDefault(); undo(); }
+            if((modifier && key === 'y') || (modifier && e.shiftKey && key === 'z')) { e.preventDefault(); redo(); }
+            if((key === 'delete' || key === 'backspace') && activeItem && !['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName)) {
+                e.preventDefault();
+                removeActiveItem();
+            }
+            if(key === 'escape') {
+                deselectAll();
+                setTool('cursor');
+            }
         });
-// END INJ
-
         // Quick Color Swatch Helper
-        function setColor(hex) {
+        function setColor(hex, swatchEl) {
             document.getElementById('colorPicker').value = hex;
             document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
-            event.target.classList.add('active');
+            if (swatchEl) swatchEl.classList.add('active');
             updateSelectedProperties();
         }
 
@@ -691,6 +768,7 @@
         let fileName = '';
         let currentTool = 'cursor'; // cursor, edit-text, text, image, draw, highlight
         let activeItem = null; // currently selected edit-item
+        let activePageWrapper = null;
         let scaleMultiplier = 1.5; // Render scale for crispness
 
         // State object strictly tracking freehand draw paths
@@ -704,6 +782,59 @@
 
         const workspace = document.getElementById('workspace');
         workspace.classList.add('tool-mode-cursor'); // default class
+        const scrollArea = document.getElementById('scrollArea');
+        const pageStatus = document.getElementById('pageStatus');
+        const toolHint = document.getElementById('toolHint');
+
+        const toolHelpText = {
+            cursor: 'Select items to move or resize them. Use Delete to remove selected overlays.',
+            'edit-text': 'Tap existing PDF text to edit it in place. Resize the text box if you need more cover area.',
+            text: 'Tap anywhere on the page to place a new text box.',
+            draw: 'Draw freehand annotations with mouse, pen, or touch.',
+            highlight: 'Drag over content to create a translucent marker stroke.',
+            'shape-rect': 'Tap a page to place a rectangle callout.',
+            'shape-circle': 'Tap a page to place a circular callout.',
+            redact: 'Tap a page to place a black redaction box.',
+            link: 'Tap a page and paste the destination URL.',
+            sticky: 'Tap a page to add a note annotation.'
+        };
+
+        function updateToolHint() {
+            toolHint.textContent = toolHelpText[currentTool] || toolHelpText.cursor;
+        }
+
+        function setActivePage(wrapper) {
+            if (!wrapper) return;
+            activePageWrapper = wrapper;
+            document.querySelectorAll('.page-wrapper').forEach(page => page.classList.toggle('active-page', page === wrapper));
+            document.querySelectorAll('.thumb-wrap').forEach(thumb => thumb.classList.toggle('active', thumb.dataset.page === wrapper.dataset.page));
+            pageStatus.textContent = `Page ${wrapper.dataset.page}`;
+        }
+
+        function getTargetWrapper(preferredWrapper) {
+            return preferredWrapper || activePageWrapper || document.querySelector('.page-wrapper') || workspace.firstChild;
+        }
+
+        function removeActiveItem() {
+            if (!activeItem) return;
+            activeItem.style.display = 'none';
+            pushHistory({ type: 'DELETE', node: activeItem });
+            deselectAll();
+        }
+
+        function syncActivePageFromScroll() {
+            const pages = [...document.querySelectorAll('.page-wrapper')];
+            if (!pages.length) return;
+            const scrollTop = scrollArea.scrollTop;
+            const target = pages.reduce((closest, page) => {
+                const distance = Math.abs(page.offsetTop - scrollTop);
+                if (!closest || distance < closest.distance) {
+                    return { page, distance };
+                }
+                return closest;
+            }, null);
+            if (target) setActivePage(target.page);
+        }
 
         /* =========================================
            2. FILE LOADING & PDFJS RENDERING
@@ -721,14 +852,16 @@
             const f = [...e.dataTransfer.files].find(f => f.type === 'application/pdf');
             if (f) { const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; loadPDF(f); }
         });
+        scrollArea.addEventListener('scroll', syncActivePageFromScroll);
 
         async function loadPDF(file) {
             document.getElementById('loader').classList.add('active');
             drop.classList.add('hidden');
             workspace.innerHTML = '';
+            document.getElementById('pdfSidebar').innerHTML = '';
             fileName = file.name;
             pageStrokes = {}; // reset
-            nativeTextEdits = {}; // reset
+            activePageWrapper = null;
             origPdfBuf = await file.arrayBuffer();
 
             try {
@@ -747,11 +880,22 @@
                 if(scaleMultiplier < 1) scaleMultiplier = 1.2;
                 if(scaleMultiplier > 3.0) scaleMultiplier = 3.0; 
 
-                for (let i = 1; i <= total; i++) {
+                const initialPages = Math.min(total, 3);
+                for (let i = 1; i <= initialPages; i++) {
                     await renderPage(pdf, i);
                 }
 
+                syncActivePageFromScroll();
+                updateToolHint();
                 btnSave.classList.remove('hidden');
+
+                if (total > initialPages) {
+                    (async () => {
+                        for (let i = initialPages + 1; i <= total; i++) {
+                            await renderPage(pdf, i);
+                        }
+                    })();
+                }
             } catch (e) {
                 alert("Error loading PDF: " + e.message);
             }
@@ -768,6 +912,7 @@
             wrapper.dataset.page = pageNum;
             wrapper.style.width = viewport.width + 'px';
             wrapper.style.height = viewport.height + 'px';
+            wrapper.addEventListener('pointerdown', () => setActivePage(wrapper));
 
             // 1. Background PDF Render
             const bgCanvas = document.createElement('canvas');
@@ -823,10 +968,10 @@
             // THUMBNAIL
             const thumbWrap = document.createElement('div');
             thumbWrap.className = 'thumb-wrap';
+            thumbWrap.dataset.page = String(pageNum);
             thumbWrap.onclick = () => {
                 document.getElementById('scrollArea').scrollTop = wrapper.offsetTop - 30;
-                document.querySelectorAll('.thumb-wrap').forEach(t=>t.classList.remove('active'));
-                thumbWrap.classList.add('active');
+                setActivePage(wrapper);
             };
             const thumbCanvas = document.createElement('canvas');
             const thumbViewport = page.getViewport({ scale: 0.2 });
@@ -843,6 +988,8 @@
             document.getElementById('pdfSidebar').appendChild(thumbWrap);
             wrapper.appendChild(interLayer);
             workspace.appendChild(wrapper);
+
+            if (!activePageWrapper) setActivePage(wrapper);
         }
 
         /* =========================================
@@ -869,6 +1016,7 @@
             // Toggle workspace classes to change pointer-events and cursors
             workspace.className = `editor-workspace tool-mode-${mode}`;
             deselectAll();
+            updateToolHint();
         }
 
         /* =========================================
@@ -926,9 +1074,11 @@
         }
 
         function setupNativeTextEditing(textLayerDiv, pageNum, viewport) {
-            textLayerDiv.addEventListener('mousedown', (e) => {
+            textLayerDiv.addEventListener('pointerdown', (e) => {
                 if (currentTool !== 'edit-text') return;
                 if (e.target.tagName !== 'SPAN') return;
+                e.preventDefault();
+                e.stopPropagation();
 
                 const clickedSpan = e.target;
                 if (clickedSpan.dataset.editing === "true") return;
@@ -984,8 +1134,14 @@
                 const fontFamily = computedStyle.fontFamily;
                 editor.style.fontFamily = fontFamily;
                 editor.style.color = "#000000";
+                editor.addEventListener('input', () => {
+                    editor.style.height = 'auto';
+                    editor.style.height = Math.max(24, editor.scrollHeight + 4) + 'px';
+                });
 
                 textLayerDiv.appendChild(editor);
+                setActivePage(textLayerDiv.closest('.page-wrapper'));
+                setTool('cursor');
                 setTimeout(() => {
                     editor.focus();
                     editor.select();
@@ -1082,8 +1238,9 @@
            ========================================= */
         function setupInteractionLayer(layer, wrapper, pageNum) {
             // Click on empty space in interaction layer -> creates text if in TEXT mode
-            layer.addEventListener('mousedown', (e) => {
+            layer.addEventListener('pointerdown', (e) => {
                 if (e.target !== layer) return; // ignore clicks on children
+                setActivePage(wrapper);
 
                 const rect = layer.getBoundingClientRect();
                 const zoom = window.currentZoomLevel || 1.0;
@@ -1113,6 +1270,7 @@
         function addTextElement(layer, x, y, initialText = "Type here") {
             const color = document.getElementById('colorPicker').value;
             const size = document.getElementById('sizePicker').value;
+            const fontFamily = document.getElementById('fontPicker').value;
 
             const item = createEditItemWrapper(layer, x, y, 120, size * 1.5 + 4);
 
@@ -1121,6 +1279,7 @@
             ta.value = initialText;
             ta.style.color = color;
             ta.style.fontSize = size + 'px';
+            ta.style.fontFamily = fontFamily;
 
             // Auto-resize height based on content
             ta.addEventListener('input', () => {
@@ -1214,7 +1373,7 @@
             noteDiv.style.display = 'flex';
             noteDiv.style.alignItems = 'center';
             noteDiv.style.justifyContent = 'center';
-            noteDiv.innerHTML = '💬';
+            noteDiv.textContent = 'Note';
             noteDiv.title = text;
 
             item.appendChild(noteDiv);
@@ -1228,8 +1387,7 @@
             const reader = new FileReader();
             reader.onload = (evt) => {
                 const dataUrl = evt.target.result;
-                // Find visible page to drop image on (first one currently visible)
-                const wrapper = document.querySelector('.page-wrapper') || workspace.firstChild;
+                const wrapper = getTargetWrapper();
                 if (wrapper) {
                     const layer = wrapper.querySelector('.interaction-layer');
                     const img = new Image();
@@ -1248,6 +1406,7 @@
                         itemImg.src = dataUrl;
                         item.dataset.imgSrc = dataUrl; // Save for export
                         item.appendChild(itemImg);
+                        setActivePage(wrapper);
                         setTool('cursor');
                         selectItem(item);
                         pushHistory({type:'ADD', node: item});
@@ -1269,8 +1428,8 @@
 
             const delBtn = document.createElement('div');
             delBtn.className = 'delete-btn';
-            delBtn.innerHTML = '✕';
-            delBtn.onclick = (e) => { e.stopPropagation(); item.style.display = 'none'; pushHistory({type:'DELETE', node: item}); }
+            delBtn.textContent = 'x';
+            delBtn.onclick = (e) => { e.stopPropagation(); item.style.display = 'none'; pushHistory({type:'DELETE', node: item}); deselectAll(); }
             item.appendChild(delBtn);
 
             const resizeHandle = document.createElement('div');
@@ -1280,11 +1439,12 @@
             layer.appendChild(item);
 
             // Mousedown logic
-            item.addEventListener('mousedown', (e) => {
+            item.addEventListener('pointerdown', (e) => {
                 if (currentTool !== 'cursor') return; // only clickable in cursor mode
                 if (e.target === delBtn || e.target === resizeHandle) return; // avoid conflict
 
                 e.stopPropagation();
+                setActivePage(layer.closest('.page-wrapper'));
                 selectItem(item);
 
                 let startX = e.clientX;
@@ -1292,30 +1452,31 @@
                 let startLeft = parseFloat(item.style.left) || 0;
                 let startTop = parseFloat(item.style.top) || 0;
 
-                const onMouseMove = (moveEvt) => {
+                const onPointerMove = (moveEvt) => {
                     const zoom = window.currentZoomLevel || 1.0;
                     const dx = (moveEvt.clientX - startX) / zoom;
                     const dy = (moveEvt.clientY - startY) / zoom;
                     item.style.left = (startLeft + dx) + 'px';
                     item.style.top = (startTop + dy) + 'px';
                 };
-                const onMouseUp = () => {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
+                const onPointerUp = () => {
+                    document.removeEventListener('pointermove', onPointerMove);
+                    document.removeEventListener('pointerup', onPointerUp);
                 };
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
+                document.addEventListener('pointermove', onPointerMove);
+                document.addEventListener('pointerup', onPointerUp);
             });
 
             // Resize logic
-            resizeHandle.addEventListener('mousedown', (e) => {
+            resizeHandle.addEventListener('pointerdown', (e) => {
                 e.stopPropagation();
+                setActivePage(layer.closest('.page-wrapper'));
                 let startX = e.clientX;
                 let startY = e.clientY;
                 let startWidth = parseFloat(item.style.width) || 0;
                 let startHeight = parseFloat(item.style.height) || 0;
 
-                const onMouseMove = (moveEvt) => {
+                const onPointerMove = (moveEvt) => {
                     const zoom = window.currentZoomLevel || 1.0;
                     const dx = (moveEvt.clientX - startX) / zoom;
                     const dy = (moveEvt.clientY - startY) / zoom;
@@ -1325,12 +1486,12 @@
                         item.style.height = Math.max(20, startHeight + dy) + 'px';
                     }
                 };
-                const onMouseUp = () => {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
+                const onPointerUp = () => {
+                    document.removeEventListener('pointermove', onPointerMove);
+                    document.removeEventListener('pointerup', onPointerUp);
                 };
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
+                document.addEventListener('pointermove', onPointerMove);
+                document.addEventListener('pointerup', onPointerUp);
             });
 
             return item;
@@ -1346,6 +1507,7 @@
             if (ta) {
                 document.getElementById('colorPicker').value = rgbToHex(ta.style.color);
                 document.getElementById('sizePicker').value = parseInt(ta.style.fontSize);
+                document.getElementById('fontPicker').value = ta.style.fontFamily || document.getElementById('fontPicker').value;
             }
             const shape = item.querySelector('.edit-shape');
             if (shape && item.dataset.shapeColor) {
@@ -1363,11 +1525,13 @@
             if (!activeItem) return;
             const color = document.getElementById('colorPicker').value;
             const size = document.getElementById('sizePicker').value;
+            const fontFamily = document.getElementById('fontPicker').value;
 
             const ta = activeItem.querySelector('.edit-text');
             if (ta) {
                 ta.style.color = color;
                 ta.style.fontSize = size + 'px';
+                ta.style.fontFamily = fontFamily;
                 // trigger height adjust
                 ta.style.height = 'auto';
                 ta.style.height = ta.scrollHeight + 'px';
@@ -1405,9 +1569,10 @@
 
             pageStrokes[pageNum] = []; // initialize memory
 
-            canvas.addEventListener('mousedown', (e) => {
+            canvas.addEventListener('pointerdown', (e) => {
                 if (currentTool !== 'draw' && currentTool !== 'highlight') return;
                 isDrawing = true;
+                setActivePage(wrapper);
 
                 const rect = canvas.getBoundingClientRect();
                 const zoom = window.currentZoomLevel || 1.0;
@@ -1433,7 +1598,7 @@
                 ctx.lineWidth = size;
             });
 
-            canvas.addEventListener('mousemove', (e) => {
+            canvas.addEventListener('pointermove', (e) => {
                 if (!isDrawing) return;
                 const rect = canvas.getBoundingClientRect();
                 const zoom = window.currentZoomLevel || 1.0;
@@ -1445,8 +1610,12 @@
                 ctx.stroke();
             });
 
-            canvas.addEventListener('mouseup', () => { isDrawing = false; });
-            canvas.addEventListener('mouseleave', () => { isDrawing = false; });
+            const stopDrawing = () => {
+                isDrawing = false;
+                currentStroke = null;
+            };
+            canvas.addEventListener('pointerup', stopDrawing);
+            canvas.addEventListener('pointerleave', stopDrawing);
         }
 
 
@@ -1472,280 +1641,149 @@
             document.getElementById('successMsg').classList.add('hidden');
 
             try {
-                const { PDFDocument, rgb } = PDFLib;
-                const pdfDoc = await PDFDocument.load(origPdfBuf.slice(0));
+                const { PDFDocument } = PDFLib;
+                const sourcePdf = await PDFDocument.load(origPdfBuf.slice(0));
+                const exportPdf = await PDFDocument.create();
 
-                // For custom fonts (like Helvetica which is standard)
-                const helveticaFont = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+                const loadImage = (src) => new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                    img.src = src;
+                });
 
-                const pages = pdfDoc.getPages();
-
-                // Loop through our wrapped UI pages to gather data mapping
                 const wrappers = document.querySelectorAll('.page-wrapper');
                 for (let w of wrappers) {
-                    const pageNum = parseInt(w.dataset.page);
-                    const pdfPage = pages[pageNum - 1]; // 0-indexed
+                    const pageNum = parseInt(w.dataset.page, 10);
+                    const originalPage = sourcePdf.getPages()[pageNum - 1];
+                    const pdfWidth = originalPage.getWidth();
+                    const pdfHeight = originalPage.getHeight();
+                    const bgCanvas = w.querySelector('.bg-canvas');
+                    const outCanvas = document.createElement('canvas');
+                    outCanvas.width = bgCanvas.width;
+                    outCanvas.height = bgCanvas.height;
+                    const ctx = outCanvas.getContext('2d');
 
-                    // --- MAPPING SCALES --- //
-                    const cssToPdfRatio = 1 / scaleMultiplier;
-                    const pdfHeight = pdfPage.getHeight();
+                    ctx.drawImage(bgCanvas, 0, 0);
 
-                    // 1. BURN NATIVE TEXT EDITS (Whiteout + Replace)
-                    const pageEdits = nativeTextEdits[pageNum] || [];
-                    for (let edit of pageEdits) {
-                        const pdfX = edit.pdfLeft;
-                        const fontSize = edit.fontSizePdf;
-                        const pdfPageWidth = pdfPage.getWidth();
+                    const nativeEditors = w.querySelectorAll('.native-text-editor');
+                    for (let editor of nativeEditors) {
+                        if (editor.style.display === 'none') continue;
+                        const cssX = parseFloat(editor.style.left) || 0;
+                        const cssY = parseFloat(editor.style.top) || 0;
+                        const cssW = editor.offsetWidth || parseFloat(editor.style.width) || 0;
+                        const cssH = editor.offsetHeight || parseFloat(editor.style.height) || 0;
+                        const textVal = editor.value || '';
 
-                        // Measure actual PDF width of new text using the embedded font
-                        let newTextWidthPdf = 0;
-                        try {
-                            if (edit.newText && edit.newText.trim() !== '') {
-                                newTextWidthPdf = helveticaFont.widthOfTextAtSize(edit.newText, fontSize);
-                            }
-                        } catch (err) {}
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(cssX, cssY, cssW, cssH);
 
-                        // Whiteout width: cover original text AND new text, with generous padding
-                        const pdfWipeW = Math.max(edit.pdfWidth + 15, newTextWidthPdf + 10);
-                        const pdfWipeH = fontSize * 1.5;
-
-                        let whiteoutY, baselineY;
-
-                        if (edit.pdfBaselineY != null) {
-                            // EXACT coordinates from PDF textContent.items
-                            baselineY = edit.pdfBaselineY;
-                            whiteoutY = baselineY - fontSize * 0.35;  // below baseline for descenders
-                        } else {
-                            // Fallback to CSS-based calculation
-                            whiteoutY = pdfHeight - (edit.pdfTop + edit.pdfHeight) - 3;
-                            baselineY = (pdfHeight - edit.pdfTop) - (fontSize * 0.82);
-                        }
-
-                        // Clamp width so we don't exceed page boundary
-                        const clampedW = Math.min(pdfWipeW, pdfPageWidth - pdfX + 5);
-
-                        // A) Draw Whiteout Box using exact PDF coordinates
-                        pdfPage.drawRectangle({
-                            x: pdfX - 2,
-                            y: whiteoutY,
-                            width: clampedW,
-                            height: pdfWipeH,
-                            color: rgb(1, 1, 1) // Pure white
-                        });
-
-                        // B) Draw New Text at exact baseline
-                        if (edit.newText && edit.newText.trim() !== '') {
-                            let rgbTuple = [0, 0, 0];
-                            if (edit.color && edit.color.startsWith('rgb')) {
-                                rgbTuple = hexToRgbTuple(rgbToHex(edit.color));
-                            }
-
-                            const lines = edit.newText.split('\n');
-                            for (let lineNum = 0; lineNum < lines.length; lineNum++) {
-                                if (lines[lineNum].trim() === '' && lines.length > 1) continue;
-                                pdfPage.drawText(lines[lineNum], {
-                                    x: pdfX,
-                                    y: baselineY - (lineNum * fontSize * 1.2),
-                                    size: fontSize,
-                                    font: helveticaFont,
-                                    color: rgb(...rgbTuple)
-                                });
-                            }
+                        if (textVal.trim()) {
+                            const fontSize = parseFloat(editor.style.fontSize) || 16;
+                            const lineHeight = parseFloat(editor.style.lineHeight) || (fontSize * 1.15);
+                            ctx.fillStyle = editor.style.color || '#000000';
+                            ctx.font = `${fontSize}px ${editor.style.fontFamily || 'Helvetica, Arial, sans-serif'}`;
+                            ctx.textBaseline = 'top';
+                            textVal.split('\n').forEach((line, index) => {
+                                ctx.fillText(line, cssX, cssY + (index * lineHeight));
+                            });
                         }
                     }
 
-                    // 2. Burn DOM Elements (Text and Images)
                     const layer = w.querySelector('.interaction-layer');
                     const items = layer.querySelectorAll('.edit-item');
-
                     for (let item of items) {
-                        const cssX = parseFloat(item.style.left);
-                        const cssY = parseFloat(item.style.top);
-                        const cssW = parseFloat(item.style.width);
-                        const cssH = parseFloat(item.style.height);
-
-                        // Compute PDF coordinates (bottom-left origin)
-                        const pdfX = cssX * cssToPdfRatio;
-                        let pdfY = pdfHeight - ((cssY + cssH) * cssToPdfRatio);
+                        if (item.style.display === 'none') continue;
+                        const cssX = parseFloat(item.style.left) || 0;
+                        const cssY = parseFloat(item.style.top) || 0;
+                        const cssW = parseFloat(item.style.width) || 0;
+                        const cssH = parseFloat(item.style.height) || 0;
 
                         const ta = item.querySelector('.edit-text');
                         if (ta) {
-                            // IT IS TEXT
+                            if (item.dataset.replaceText === 'true') {
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fillRect(cssX, cssY, cssW, cssH);
+                            }
                             const textVal = ta.value;
-                            if (textVal.trim() === '') continue;
-
-                            const rgbTuple = hexToRgbTuple(rgbToHex(ta.style.color));
-                            const fontSizeInCss = parseFloat(ta.style.fontSize) || 16;
-                            // Map font size back to PDF space
-                            const pdfFontSize = fontSizeInCss * cssToPdfRatio;
-
-                            // pdf-lib draws text from baseline, which is near the bottom of the bounding box.
-                            // We need to adjust pdfY heavily. A rough approximation is to draw from the top bounding box down.
-                            const startPdfY = pdfHeight - (cssY * cssToPdfRatio) - pdfFontSize;
-
-                            // For multiline, we might need simple splitting (basic support)
+                            if (!textVal.trim()) continue;
+                            const fontSize = parseFloat(ta.style.fontSize) || 16;
+                            ctx.fillStyle = ta.style.color || '#000000';
+                            ctx.font = `${fontSize}px ${ta.style.fontFamily || 'Helvetica, Arial, sans-serif'}`;
+                            ctx.textBaseline = 'alphabetic';
                             const lines = textVal.split('\n');
-                            for (let lineNum = 0; lineNum < lines.length; lineNum++) {
-                                pdfPage.drawText(lines[lineNum], {
-                                    x: pdfX,
-                                    y: startPdfY - (lineNum * pdfFontSize * 1.2), // simple line height shift
-                                    size: pdfFontSize,
-                                    font: helveticaFont,
-                                    color: rgb(...rgbTuple),
-                                });
-                            }
-                        } else if (item.dataset.imgSrc) {
-                            // IT IS AN IMAGE
-                            const imgData = item.dataset.imgSrc;
-                            let pdfImage;
-                            if (imgData.includes('image/png')) {
-                                pdfImage = await pdfDoc.embedPng(imgData);
-                            } else {
-                                pdfImage = await pdfDoc.embedJpg(imgData);
-                            }
-
-                            // Burn Image
-                            pdfPage.drawImage(pdfImage, {
-                                x: pdfX,
-                                y: pdfY,
-                                width: cssW * cssToPdfRatio,
-                                height: cssH * cssToPdfRatio
+                            lines.forEach((line, index) => {
+                                ctx.fillText(line, cssX, cssY + fontSize + (index * fontSize * 1.2));
                             });
+                        } else if (item.dataset.imgSrc) {
+                            const img = await loadImage(item.dataset.imgSrc);
+                            ctx.drawImage(img, cssX, cssY, cssW, cssH);
                         } else if (item.dataset.shapeType) {
                             const type = item.dataset.shapeType;
                             const color = item.dataset.shapeColor || '#000000';
-                            const borderW = parseInt(item.dataset.shapeBorder || 2) * cssToPdfRatio;
-                            const rgbT = hexToRgbTuple(color);
-                            
-                            if (type === 'shape-rect') {
-                                pdfPage.drawRectangle({
-                                    x: pdfX,
-                                    y: pdfY,
-                                    width: cssW * cssToPdfRatio,
-                                    height: cssH * cssToPdfRatio,
-                                    borderColor: rgb(...rgbT),
-                                    borderWidth: borderW
-                                });
-                            } else if (type === 'shape-circle') {
-                                pdfPage.drawEllipse({
-                                    x: pdfX + (cssW * cssToPdfRatio)/2,
-                                    y: pdfY + (cssH * cssToPdfRatio)/2,
-                                    xScale: (cssW * cssToPdfRatio)/2,
-                                    yScale: (cssH * cssToPdfRatio)/2,
-                                    borderColor: rgb(...rgbT),
-                                    borderWidth: borderW
-                                });
-                            } else if (type === 'redact') {
-                                pdfPage.drawRectangle({
-                                    x: pdfX,
-                                    y: pdfY,
-                                    width: cssW * cssToPdfRatio,
-                                    height: cssH * cssToPdfRatio,
-                                    color: rgb(0,0,0) // Pure black solid
-                                });
+                            const borderW = parseInt(item.dataset.shapeBorder || 2, 10);
+                            if (type === 'redact') {
+                                ctx.fillStyle = '#000000';
+                                ctx.fillRect(cssX, cssY, cssW, cssH);
+                            } else {
+                                ctx.strokeStyle = color;
+                                ctx.lineWidth = borderW;
+                                if (type === 'shape-rect') {
+                                    ctx.strokeRect(cssX, cssY, cssW, cssH);
+                                } else if (type === 'shape-circle') {
+                                    ctx.beginPath();
+                                    ctx.ellipse(cssX + cssW / 2, cssY + cssH / 2, cssW / 2, cssH / 2, 0, 0, Math.PI * 2);
+                                    ctx.stroke();
+                                }
                             }
                         } else if (item.dataset.linkUrl) {
                             const url = item.dataset.linkUrl;
-                            
-                            // 1. Burn a subtle visual blue highlight so the link is permanently visible
-                            pdfPage.drawRectangle({
-                                x: pdfX,
-                                y: pdfY,
-                                width: cssW * cssToPdfRatio,
-                                height: cssH * cssToPdfRatio,
-                                color: rgb(0.2, 0.5, 1.0),
-                                opacity: 0.15
-                            });
-                            
-                            // Draw the URL text inside the box
-                            let displayUrl = url;
-                            // Calculate approximate characters that fit based on width (very rough approximation)
-                            const maxChars = Math.max(10, Math.floor((cssW * cssToPdfRatio) / (6 * cssToPdfRatio))); 
-                            if (displayUrl.length > maxChars) {
-                                displayUrl = displayUrl.substring(0, maxChars - 3) + "...";
-                            }
-                            
-                            pdfPage.drawText(displayUrl, {
-                                x: pdfX + (4 * cssToPdfRatio),
-                                y: pdfY + (cssH * cssToPdfRatio) / 2 - (4 * cssToPdfRatio),
-                                size: 10 * cssToPdfRatio,
-                                font: helveticaFont,
-                                color: rgb(0, 0, 0.8)
-                            });
-
-                            // 2. Add the actual clickable annotation box over it
-                            const linkAnnotation = pdfDoc.context.obj({
-                                Type: 'Annot',
-                                Subtype: 'Link',
-                                Rect: [pdfX, pdfY, pdfX + (cssW * cssToPdfRatio), pdfY + (cssH * cssToPdfRatio)],
-                                Border: [0, 0, 0],
-                                F: 4, 
-                                P: pdfPage.ref,
-                                A: { Type: 'Action', S: 'URI', URI: PDFLib.PDFString.of(url) }
-                            });
-                            
-                            const linkRef = pdfDoc.context.register(linkAnnotation);
-                            pdfPage.node.addAnnot(linkRef);
-
+                            ctx.fillStyle = 'rgba(51, 119, 255, 0.12)';
+                            ctx.fillRect(cssX, cssY, cssW, cssH);
+                            ctx.strokeStyle = 'rgba(51, 119, 255, 0.5)';
+                            ctx.setLineDash([4, 3]);
+                            ctx.strokeRect(cssX, cssY, cssW, cssH);
+                            ctx.setLineDash([]);
+                            ctx.fillStyle = '#1d4ed8';
+                            ctx.font = `12px Helvetica, Arial, sans-serif`;
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(url, cssX + 4, cssY + (cssH / 2));
                         } else if (item.dataset.stickyText) {
-                            const text = item.dataset.stickyText;
-                            
-                            // 1. Burn the visual Note Emoji and Text to guarantee display (Removed unicode emoji due to WinAnsi encoding crash)
-                            pdfPage.drawText("Note: " + text, {
-                                x: pdfX,
-                                y: pdfY + 10,
-                                size: 14 * cssToPdfRatio,
-                                font: helveticaFont,
-                                color: rgb(0, 0, 0)
-                            });
-
-                            // 2. Add the formal PDF comment structure
-                            const noteAnnotation = pdfDoc.context.obj({
-                                Type: 'Annot',
-                                Subtype: 'Text',
-                                Rect: [pdfX, pdfY, pdfX + (cssW * cssToPdfRatio), pdfY + (cssH * cssToPdfRatio)],
-                                Contents: PDFLib.PDFString.of(text),
-                                Name: PDFLib.PDFName.of('Comment'),
-                                F: 4, 
-                                P: pdfPage.ref,
-                                C: [1, 0.8, 0] 
-                            });
-                            
-                            const noteRef = pdfDoc.context.register(noteAnnotation);
-                            pdfPage.node.addAnnot(noteRef);
+                            ctx.fillStyle = '#111111';
+                            ctx.font = `14px Helvetica, Arial, sans-serif`;
+                            ctx.textBaseline = 'top';
+                            ctx.fillText(`Note: ${item.dataset.stickyText}`, cssX, cssY);
                         }
                     }
 
-                    // 2. Burn Freehand Drawings via Paths
                     const strokes = pageStrokes[pageNum];
                     if (strokes && strokes.length > 0) {
                         for (let stroke of strokes) {
                             if (stroke.points.length < 2) continue;
-
-                            // Build SVG path representing the line
-                            let svgPath = '';
-                            for (let i = 0; i < stroke.points.length; i++) {
-                                const pt = stroke.points[i];
-                                const px = pt.x * cssToPdfRatio;
-                                const py = pdfHeight - (pt.y * cssToPdfRatio);
-                                if (i === 0) svgPath += `M ${px} ${py} `;
-                                else svgPath += `L ${px} ${py} `;
+                            ctx.save();
+                            ctx.globalAlpha = stroke.tool === 'highlight' ? 0.35 : 1;
+                            ctx.globalCompositeOperation = stroke.tool === 'highlight' ? 'multiply' : 'source-over';
+                            ctx.strokeStyle = stroke.color;
+                            ctx.lineWidth = stroke.width;
+                            ctx.lineCap = 'round';
+                            ctx.lineJoin = 'round';
+                            ctx.beginPath();
+                            ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+                            for (let i = 1; i < stroke.points.length; i++) {
+                                ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
                             }
-
-                            const strokeTuple = hexToRgbTuple(stroke.color);
-                            pdfPage.drawSvgPath(svgPath, {
-                                borderColor: rgb(...strokeTuple),
-                                borderWidth: stroke.width * cssToPdfRatio,
-                                borderOpacity: stroke.tool === 'highlight' ? 0.4 : 1.0,
-                                borderLineCap: PDFLib.LineCapStyle.Round,
-                                borderLineJoin: PDFLib.LineJoinStyle.Round
-                            });
+                            ctx.stroke();
+                            ctx.restore();
                         }
                     }
+
+                    const imageDataUrl = outCanvas.toDataURL('image/png');
+                    const pdfImage = await exportPdf.embedPng(imageDataUrl);
+                    const exportPage = exportPdf.addPage([pdfWidth, pdfHeight]);
+                    exportPage.drawImage(pdfImage, { x: 0, y: 0, width: pdfWidth, height: pdfHeight });
                 }
 
-                // Export final bytes natively
-                const pdfBytes = await pdfDoc.save();
+                const pdfBytes = await exportPdf.save();
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1777,24 +1815,24 @@
                 const rect = sigCanvas.getBoundingClientRect();
                 return { x: e.clientX - rect.left, y: e.clientY - rect.top };
             }
-            sigCanvas.addEventListener('mousedown', (e) => {
+            sigCanvas.addEventListener('pointerdown', (e) => {
                 isSigDrawing = true;
                 const pos = getSigPos(e);
                 sigCtx.beginPath();
                 sigCtx.moveTo(pos.x, pos.y);
-                sigCtx.strokeStyle = document.getElementById('themeBody').classList.contains('theme-dark') ? '#000' : '#000'; // always black or user specified
+                sigCtx.strokeStyle = '#000000';
                 sigCtx.lineWidth = 3;
                 sigCtx.lineCap = 'round';
             });
-            sigCanvas.addEventListener('mousemove', (e) => {
+            sigCanvas.addEventListener('pointermove', (e) => {
                 if (isSigDrawing) {
                     const pos = getSigPos(e);
                     sigCtx.lineTo(pos.x, pos.y);
                     sigCtx.stroke();
                 }
             });
-            sigCanvas.addEventListener('mouseup', () => isSigDrawing = false);
-            sigCanvas.addEventListener('mouseleave', () => isSigDrawing = false);
+            sigCanvas.addEventListener('pointerup', () => isSigDrawing = false);
+            sigCanvas.addEventListener('pointerleave', () => isSigDrawing = false);
         }
 
         function openSignature() {
@@ -1814,7 +1852,7 @@
             const dataUrl = sigCanvas.toDataURL('image/png');
             closeSignature();
             
-            const wrapper = document.querySelector('.page-wrapper') || workspace.firstChild;
+            const wrapper = getTargetWrapper();
             if (wrapper) {
                 const layer = wrapper.querySelector('.interaction-layer');
                 const item = createEditItemWrapper(layer, 50, 50, 200, 100);
@@ -1823,6 +1861,7 @@
                 itemImg.src = dataUrl;
                 item.dataset.imgSrc = dataUrl;
                 item.appendChild(itemImg);
+                setActivePage(wrapper);
                 setTool('cursor');
                 selectItem(item);
                 pushHistory({type:'ADD', node: item});
@@ -1830,7 +1869,6 @@
         }
 
         // Setup Drag & Drop directly over workspace
-        const scrollArea = document.getElementById('scrollArea');
         scrollArea.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
         scrollArea.addEventListener('drop', (e) => {
             e.preventDefault(); e.stopPropagation();
@@ -1841,7 +1879,7 @@
                     reader.onload = function(evt) {
                         // find which page it dropped over
                         const pages = document.querySelectorAll('.page-wrapper');
-                        let targetPage = pages[0];
+                        let targetPage = getTargetWrapper(pages[0]);
                         for(let p of pages) {
                             const rect = p.getBoundingClientRect();
                             if(e.clientY >= rect.top && e.clientY <= rect.bottom) {
@@ -1864,7 +1902,9 @@
                                 const imgEl = document.createElement('img');
                                 imgEl.className = 'edit-image';
                                 imgEl.src = evt.target.result;
+                                item.dataset.imgSrc = evt.target.result;
                                 item.appendChild(imgEl);
+                                setActivePage(targetPage);
                                 selectItem(item);
                                 pushHistory({type:'ADD', node: item});
                             }
@@ -1876,6 +1916,60 @@
             }
         });
 
+
+        async function loadSamplePDF() {
+            try {
+                const { PDFDocument, StandardFonts, rgb } = PDFLib;
+                const doc = await PDFDocument.create();
+                const page = doc.addPage([595, 842]);
+                const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+                const fontReg = await doc.embedFont(StandardFonts.Helvetica);
+
+                page.drawText('Quick Do PDF - Sample Document', { x: 50, y: 770, size: 22, font: fontBold, color: rgb(0.06, 0.09, 0.16) });
+                page.drawText('Use Edit Text, Add Text, Draw, Highlight, Shapes, or Sign on this page.', { x: 50, y: 735, size: 12, font: fontReg, color: rgb(0.28, 0.33, 0.41) });
+                page.drawRectangle({ x: 50, y: 610, width: 495, height: 90, borderColor: rgb(0.8, 0.84, 0.9), borderWidth: 1 });
+                page.drawText('Editable Name: Rahul Sharma', { x: 68, y: 670, size: 13, font: fontReg, color: rgb(0.06, 0.09, 0.16) });
+                page.drawText('Date: 25 November 2026', { x: 68, y: 642, size: 13, font: fontReg, color: rgb(0.06, 0.09, 0.16) });
+                page.drawText('Signature Area:', { x: 50, y: 540, size: 12, font: fontBold, color: rgb(0.06, 0.09, 0.16) });
+                page.drawLine({ start: { x: 50, y: 490 }, end: { x: 260, y: 490 }, thickness: 1, color: rgb(0.4, 0.45, 0.53) });
+
+                const bytes = await doc.save();
+                const sampleFile = new File([bytes], 'sample-document.pdf', { type: 'application/pdf' });
+                await loadPDF(sampleFile);
+            } catch (err) {
+                alert('Could not create sample PDF: ' + err.message);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!editor || !editor.classList.contains('show')) return;
+            const tag = document.activeElement ? document.activeElement.tagName : '';
+            const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || (document.activeElement && document.activeElement.isContentEditable);
+
+            if (e.key === 'Escape') {
+                deselectAll();
+                setTool('cursor');
+                return;
+            }
+            if (isTyping) return;
+
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                if (e.shiftKey) redo();
+                else undo();
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+                e.preventDefault();
+                redo();
+            } else if (e.key === 'Delete' || e.key === 'Backspace') {
+                if (document.querySelector('.edit-item.selected')) {
+                    e.preventDefault();
+                    removeActiveItem();
+                }
+            }
+        });
     </script>
+    <footer style="text-align: center; padding: 24px 16px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); margin-top: 24px;">
+        Quick Do PDF · <a href="index.html" style="color: var(--a1);">All Tools</a> · <a href="privacy-policy.html" style="color: var(--a1);">Privacy Policy</a> · <a href="terms.html" style="color: var(--a1);">Terms</a>
+    </footer>
 </body>
 </html>
