@@ -11,18 +11,32 @@
     <title>Free Rent Receipt Generator PDF (HRA Format) | Quick Do PDF</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="theme.js"></script>
     <link rel="icon" type="image/png" href="favicon.png">
 
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
+            --bg: #03040b;
+            --surface: #0f172a;
+            --input-bg: #1e293b;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --primary: #00A3FF;
+            --accent: #2a8bff;
+            --ghost-bg: rgba(255, 255, 255, 0.08);
+            --ghost-hover: rgba(255, 255, 255, 0.14);
+        }
+        body.theme-light {
             --bg: #f1f5f9;
-            --surface: #fff;
+            --surface: #ffffff;
+            --input-bg: #ffffff;
             --border: #e2e8f0;
             --text: #0f172a;
             --muted: #64748b;
-            --primary: #00A3FF;
-            --accent: #2a8bff;
+            --ghost-bg: #f1f5f9;
+            --ghost-hover: #e2e8f0;
         }
 
         body {
@@ -41,7 +55,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 32px;
-            background: #fff;
+            background: var(--surface);
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
@@ -53,7 +67,7 @@
             font-weight: 700;
             padding: 4px 10px;
             border-radius: 999px;
-            background: rgba(0, 163, 255, 0.1);
+            background: rgba(0, 163, 255, 0.12);
             color: var(--primary);
         }
         .header-actions { display: flex; gap: 10px; align-items: center; }
@@ -69,7 +83,7 @@
         .editor-side {
             padding: 32px;
             overflow-y: auto;
-            background: #fff;
+            background: var(--surface);
             border-right: 1px solid var(--border);
         }
         .section-title {
@@ -114,7 +128,7 @@
             font-weight: 600;
             outline: none;
             transition: 0.2s;
-            background: #fff;
+            background: var(--input-bg);
             color: var(--text);
             font-family: inherit;
         }
@@ -155,8 +169,8 @@
         }
         .btn-primary { background: var(--primary); color: #fff; }
         .btn-primary:hover { background: #008ce0; }
-        .btn-ghost { background: #f1f5f9; color: var(--text); }
-        .btn-ghost:hover { background: #e2e8f0; }
+        .btn-ghost { background: var(--ghost-bg); color: var(--text); }
+        .btn-ghost:hover { background: var(--ghost-hover); }
 
         /* PREVIEW SIDE */
         .preview-side {
@@ -310,7 +324,7 @@
         .related-pills { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
         .related-pill {
             padding: 8px 16px;
-            background: #fff;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 100px;
             color: var(--text);
@@ -360,6 +374,7 @@
             <span class="badge">100% Client-Side</span>
         </div>
         <div class="header-actions">
+            <button id="themeToggle" class="btn btn-ghost" title="Toggle Light/Dark Mode" aria-label="Toggle Light/Dark Mode" style="padding: 9px 12px; font-size: 16px;">☀️</button>
             <button class="btn btn-ghost" onclick="window.print()">Print</button>
             <button class="btn btn-primary" onclick="downloadReceipts()">Download PDF</button>
         </div>
