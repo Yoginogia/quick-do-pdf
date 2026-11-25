@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Generate HRA-compliant monthly or yearly Rent Receipts in PDF format for free. Includes Landlord PAN, revenue stamp box, and instant client-side PDF download. No signup.">
+    <meta name="author" content="Quick Do PDF">
+    <link rel="canonical" href="https://quickdopdf.com/rent-receipt-generator.html">
+
+    <title>Free Rent Receipt Generator PDF (HRA Format) | Quick Do PDF</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #f1f5f9;
+            --surface: #fff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --muted: #64748b;
+            --primary: #00A3FF;
+            --accent: #2a8bff;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 64px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+        }
+        .header-left { display: flex; align-items: center; gap: 14px; }
+        .logo { font-weight: 900; font-size: 20px; color: var(--primary); text-decoration: none; }
+        .badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(0, 163, 255, 0.1);
+            color: var(--primary);
+        }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* EDITOR SIDE */
+        .editor-side {
+            padding: 32px;
+            overflow-y: auto;
+            background: #fff;
+            border-right: 1px solid var(--border);
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin: 26px 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title:first-child { margin-top: 0; }
+        .section-title span {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .input-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            transition: 0.2s;
+            background: #fff;
+            color: var(--text);
+            font-family: inherit;
+        }
+        .input-field:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 163, 255, 0.1);
+        }
+        .hint {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 12px 0 18px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .checkbox-row input { width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer; }
+
+        .btn {
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: #008ce0; }
+        .btn-ghost { background: #f1f5f9; color: var(--text); }
+        .btn-ghost:hover { background: #e2e8f0; }
+
+        /* PREVIEW SIDE */
+        .preview-side {
+            padding: 36px 28px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            background: var(--bg);
+        }
+        .preview-bar {
+            width: 100%;
+            max-width: 210mm;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--muted);
+        }
+        #receipts-canvas {
+            width: 210mm;
+            background: #fff;
+            padding: 14mm;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 12mm;
+        }
+
+        /* INDIVIDUAL RECEIPT CARD */
+        .receipt-card {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px 24px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            background: #fff;
+        }
+        .rc-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+        .rc-title {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            color: #0f172a;
+        }
+        .rc-subtitle {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .rc-meta {
+            text-align: right;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #334155;
+        }
+        .rc-meta strong { color: #0f172a; }
+
+        .rc-body {
+            font-size: 13.5px;
+            line-height: 1.7;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+        .rc-highlight {
+            font-weight: 700;
+            color: #0f172a;
+            border-bottom: 1px dashed #94a3b8;
+            padding: 0 2px;
+        }
+
+        .rc-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 16px;
+            align-items: end;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .rc-info p {
+            font-size: 12px;
+            line-height: 1.6;
+            color: #334155;
+        }
+        .rc-info strong { color: #0f172a; }
+
+        .rc-sign-wrap {
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            gap: 14px;
+        }
+        .revenue-stamp {
+            width: 58px;
+            height: 66px;
+            border: 1.5px dashed #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 9px;
+            font-weight: 700;
+            color: #64748b;
+            padding: 4px;
+            line-height: 1.25;
+        }
+        .sign-box {
+            text-align: center;
+            min-width: 140px;
+        }
+        .sign-img {
+            max-height: 44px;
+            max-width: 130px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 4px;
+        }
+        .sign-line {
+            border-top: 1px solid #334155;
+            padding-top: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        /* RELATED TOOLS */
+        .related-tools {
+            max-width: 780px;
+            margin: 36px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .related-tools h3 {
+            font-size: 0.95rem;
+            color: var(--muted);
+            margin-bottom: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .related-pills { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .related-pill {
+            padding: 8px 16px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .related-pill:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+
+        @media (max-width: 1100px) {
+            main { grid-template-columns: 1fr; }
+            .editor-side { border-right: none; border-bottom: 1px solid var(--border); }
+            .preview-side { padding: 20px 12px; }
+            #receipts-canvas { width: 100%; padding: 16px; }
+        }
+        @media (max-width: 600px) {
+            header { padding: 0 16px; }
+            .badge { display: none; }
+            .form-grid, .rc-grid { grid-template-columns: 1fr; }
+            .editor-side { padding: 20px 16px; }
+        }
+        @media print {
+            header, .editor-side, .preview-bar, .related-tools { display: none !important; }
+            main { display: block; }
+            .preview-side { padding: 0; background: #fff; }
+            #receipts-canvas { box-shadow: none; width: 100%; padding: 0; }
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3543763798528021" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="logo">Quick Do PDF</a>
+            <span class="badge">100% Client-Side</span>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-ghost" onclick="window.print()">Print</button>
+            <button class="btn btn-primary" onclick="downloadReceipts()">Download PDF</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="editor-side">
+            <div class="section-title"><span>1</span> Tenant & Rent Details</div>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Tenant Full Name</label>
+                    <input type="text" id="tenantName" class="input-field" value="Rahul Sharma" oninput="renderReceipts()">
+                </div>
+                <div class="input-group">
+                    <label>Monthly Rent Amount</label>
+                    <input type="number" id="rentAmount" class="input-field" value="18000" min="0" oninput="renderReceipts()">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Currency</label>
+                    <select id="currency" class="input-field" onchange="renderReceipts()">
+                        <option value="₹">₹ (INR)</option>
+                        <option value="$">$ (USD)</option>
+                        <option value="€">€ (EUR)</option>
+                        <option value="£">£ (GBP)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Payment Mode</label>
+                    <select id="paymentMode" class="input-field" onchange="renderReceipts()">
+                        <option value="UPI / Online Transfer">UPI / Online Transfer</option>
+                        <option value="Bank Transfer (NEFT/IMPS)">Bank Transfer (NEFT/IMPS)</option>
+                        <option value="Cheque">Cheque</option>
+                        <option value="Cash">Cash</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Rented Property Address</label>
+                <textarea id="propertyAddress" class="input-field" rows="2" oninput="renderReceipts()">Flat 402, Green View Apartments, Sector 18, Gurugram, Haryana - 122015</textarea>
+            </div>
+
+            <div class="section-title"><span>2</span> Receipt Period & Numbering</div>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>From Month</label>
+                    <input type="month" id="fromMonth" class="input-field" onchange="renderReceipts()">
+                </div>
+                <div class="input-group">
+                    <label>To Month</label>
+                    <input type="month" id="toMonth" class="input-field" onchange="renderReceipts()">
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Receipt Number Prefix</label>
+                    <input type="text" id="receiptPrefix" class="input-field" value="RR-" oninput="renderReceipts()">
+                </div>
+                <div class="input-group">
+                    <label>Payment Day of Month</label>
+                    <input type="number" id="paymentDay" class="input-field" value="5" min="1" max="28" oninput="renderReceipts()">
+                </div>
+            </div>
+            <p class="hint" style="margin-top: -8px; margin-bottom: 16px;">Select a multi-month range (up to 12 months) to generate a complete HRA receipt pack in one PDF.</p>
+
+            <div class="section-title"><span>3</span> Landlord Details</div>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Landlord Full Name</label>
+                    <input type="text" id="landlordName" class="input-field" value="Suresh Verma" oninput="renderReceipts()">
+                </div>
+                <div class="input-group">
+                    <label>Landlord PAN (Optional)</label>
+                    <input type="text" id="landlordPan" class="input-field" placeholder="ABCDE1234F" style="text-transform: uppercase;" oninput="renderReceipts()">
+                </div>
+            </div>
+            <p class="hint" style="margin-top: -8px; margin-bottom: 14px;">For HRA claims in India, Landlord PAN is required if total annual rent exceeds ₹1,00,000.</p>
+
+            <div class="input-group">
+                <label>Landlord Signature Image (Optional)</label>
+                <input type="file" id="signUpload" accept="image/*" class="input-field" style="padding: 8px;">
+            </div>
+
+            <label class="checkbox-row">
+                <input type="checkbox" id="showStamp" checked onchange="renderReceipts()">
+                Include ₹1 Revenue Stamp Placeholder Box
+            </label>
+        </div>
+
+        <div class="preview-side">
+            <div class="preview-bar">
+                <span>LIVE PREVIEW (A4)</span>
+                <span id="receipt-count-label">1 Receipt</span>
+            </div>
+            <div id="receipts-canvas"></div>
+        </div>
+    </main>
+
+    <div class="related-tools">
+        <h3>Related Tools</h3>
+        <div class="related-pills">
+            <a href="invoice-generator.html" class="related-pill">📜 Invoice Generator</a>
+            <a href="emi-calculator.html" class="related-pill">🖩 EMI Calculator</a>
+            <a href="gst-calculator.html" class="related-pill">🧾 GST Calculator</a>
+            <a href="sign.html" class="related-pill">✍️ Sign PDF</a>
+            <a href="compress.html" class="related-pill">🗜️ Compress PDF</a>
+        </div>
+    </div>
+
+    <script>
+        let signatureDataUrl = '';
+
+        // Default to current month and 3-month sample range
+        (function initDefaults() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('fromMonth').value = `${year}-${month}`;
+            document.getElementById('toMonth').value = `${year}-${month}`;
+        })();
+
+        document.getElementById('signUpload').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                signatureDataUrl = ev.target.result;
+                renderReceipts();
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function formatMoney(amount, currency) {
+            const num = Number(amount) || 0;
+            const locale = currency === '₹' ? 'en-IN' : 'en-US';
+            return currency + num.toLocaleString(locale, { maximumFractionDigits: 2 });
+        }
+
+        function numberToWordsIndian(num) {
+            num = Math.floor(Number(num) || 0);
+            if (num === 0) return 'Zero';
+            const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+                'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+            function twoDigits(n) {
+                if (n < 20) return ones[n];
+                return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+            }
+            function threeDigits(n) {
+                if (n < 100) return twoDigits(n);
+                return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + twoDigits(n % 100) : '');
+            }
+
+            let res = '';
+            const crore = Math.floor(num / 10000000);
+            num %= 10000000;
+            const lakh = Math.floor(num / 100000);
+            num %= 100000;
+            const thousand = Math.floor(num / 1000);
+            num %= 1000;
+
+            if (crore) res += threeDigits(crore) + ' Crore ';
+            if (lakh) res += twoDigits(lakh) + ' Lakh ';
+            if (thousand) res += twoDigits(thousand) + ' Thousand ';
+            if (num) res += threeDigits(num);
+            return res.trim();
+        }
+
+        function getMonthsList(fromVal, toVal) {
+            if (!fromVal) return [new Date()];
+            const [fy, fm] = fromVal.split('-').map(Number);
+            const [ty, tm] = (toVal || fromVal).split('-').map(Number);
+            const start = new Date(fy, fm - 1, 1);
+            const end = new Date(ty, tm - 1, 1);
+
+            if (end < start) return [start];
+
+            const months = [];
+            const cur = new Date(start);
+            while (cur <= end && months.length < 12) {
+                months.push(new Date(cur));
+                cur.setMonth(cur.getMonth() + 1);
+            }
+            return months;
+        }
+
+        function renderReceipts() {
+            const tenant = document.getElementById('tenantName').value.trim() || 'Tenant Name';
+            const amount = parseFloat(document.getElementById('rentAmount').value) || 0;
+            const currency = document.getElementById('currency').value;
+            const paymentMode = document.getElementById('paymentMode').value;
+            const address = document.getElementById('propertyAddress').value.trim() || 'Property Address';
+            const landlord = document.getElementById('landlordName').value.trim() || 'Landlord Name';
+            const pan = document.getElementById('landlordPan').value.trim().toUpperCase();
+            const prefix = document.getElementById('receiptPrefix').value.trim() || 'RR-';
+            const payDay = Math.min(28, Math.max(1, parseInt(document.getElementById('paymentDay').value, 10) || 1));
+            const showStamp = document.getElementById('showStamp').checked;
+            const fromVal = document.getElementById('fromMonth').value;
+            const toVal = document.getElementById('toMonth').value;
+
+            const months = getMonthsList(fromVal, toVal);
+            const canvas = document.getElementById('receipts-canvas');
+            const formattedAmt = formatMoney(amount, currency);
+            const wordsAmt = numberToWordsIndian(amount) + (currency === '₹' ? ' Rupees Only' : ' Only');
+
+            document.getElementById('receipt-count-label').innerText =
+                months.length === 1 ? '1 Receipt' : `${months.length} Receipts`;
+
+            canvas.innerHTML = months.map((dateObj, index) => {
+                const monthLabel = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                const receiptDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), payDay)
+                    .toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                const receiptNo = `${escapeHtml(prefix)}${String(index + 1).padStart(3, '0')}`;
+
+                const stampHtml = showStamp
+                    ? `<div class="revenue-stamp">AFFIX ₹1<br>REVENUE<br>STAMP</div>`
+                    : '';
+
+                const sigHtml = signatureDataUrl
+                    ? `<img src="${signatureDataUrl}" alt="Landlord Signature" class="sign-img">`
+                    : `<div style="height: 36px;"></div>`;
+
+                return `
+                    <div class="receipt-card">
+                        <div class="rc-top">
+                            <div>
+                                <div class="rc-title">RENT RECEIPT</div>
+                                <div class="rc-subtitle">House Rent Allowance (HRA) Receipt</div>
+                            </div>
+                            <div class="rc-meta">
+                                <div><strong>Receipt No:</strong> ${receiptNo}</div>
+                                <div><strong>Date:</strong> ${receiptDate}</div>
+                            </div>
+                        </div>
+
+                        <div class="rc-body">
+                            Received a sum of <span class="rc-highlight">${escapeHtml(formattedAmt)}</span>
+                            (<em>${escapeHtml(wordsAmt)}</em>) from
+                            <span class="rc-highlight">${escapeHtml(tenant)}</span>
+                            towards the rent of property situated at
+                            <span class="rc-highlight">${escapeHtml(address)}</span>
+                            for the period of <span class="rc-highlight">${escapeHtml(monthLabel)}</span>.
+                        </div>
+
+                        <div class="rc-grid">
+                            <div class="rc-info">
+                                <p><strong>Payment Mode:</strong> ${escapeHtml(paymentMode)}</p>
+                                <p><strong>Landlord Name:</strong> ${escapeHtml(landlord)}</p>
+                                ${pan ? `<p><strong>Landlord PAN:</strong> ${escapeHtml(pan)}</p>` : ''}
+                            </div>
+                            <div class="rc-sign-wrap">
+                                ${stampHtml}
+                                <div class="sign-box">
+                                    ${sigHtml}
+                                    <div class="sign-line">Signature of Landlord</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function downloadReceipts() {
+            const tenant = (document.getElementById('tenantName').value.trim() || 'Tenant').replace(/\s+/g, '_');
+            const opt = {
+                margin: [8, 8, 8, 8],
+                filename: `Rent_Receipt_${tenant}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2.5, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css'] }
+            };
+            html2pdf().set(opt).from(document.getElementById('receipts-canvas')).save();
+        }
+
+        renderReceipts();
+    </script>
+</body>
+
+</html>
