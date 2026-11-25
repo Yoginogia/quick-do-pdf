@@ -1056,7 +1056,7 @@
   <main>
     <section class="hero">
       <div class="hero-badge">
-        <span></span> 40+ Free Online PDF Utilities • Client-Side & Private
+        <span></span> 48+ Free Online PDF Utilities • Client-Side & Private
       </div>
       <h1>Every PDF Tool You Need. <br><span class="g-shimmer">Fast, Free & Private.</span></h1>
       <p class="hero-subtitle">
@@ -1076,7 +1076,7 @@
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="toolSearch" placeholder="Search 40+ tools (e.g. Merge, Reduce JPG, Compress, Edit)...">
+          <input type="text" id="toolSearch" placeholder="Search 48+ tools (e.g. Merge, Reduce JPG, Compress, Edit)...">
         </div>
       </div>
     </section>
@@ -1084,7 +1084,7 @@
     <!-- STATS BAR -->
     <div class="stats-bar">
       <div class="stat">
-        <div class="stat-val v1" data-target="40">40+</div>
+        <div class="stat-val v1" data-target="48">48+</div>
         <div class="stat-label">Online Tools</div>
       </div>
       <div class="stat">
@@ -1199,7 +1199,7 @@
           <div class="card-desc">Create professional PDF invoices with itemized billing and company branding in seconds.</div>
           <div class="card-arrow">Launch App →</div>
         </a>
-        <a href="rent-receipt-generator.html" class="tool-card c-emerald">
+        <a href="rent-receipt-generator.html" data-categories="calc" class="tool-card c-emerald">
           <div class="card-icon">🏠</div>
           <div class="card-title">Rent Receipt Generator</div>
           <div class="card-desc">Generate HRA-compliant monthly or yearly rent receipts with landlord PAN and instant PDF export.</div>
@@ -1548,6 +1548,7 @@
             <li><a href="pdf-ocr.html">PDF OCR Scanner</a></li>
             <li><a href="emi-calculator.html">EMI Calculator</a></li>
             <li><a href="invoice-generator.html">Invoice Generator</a></li>
+            <li><a href="rent-receipt-generator.html">Rent Receipt Generator</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -1618,7 +1619,7 @@
 
           // Typewriter search placeholder effect
           const placeholders = [
-            "Search 40+ tools (e.g. Merge, Compress, Reduce JPG)...",
+            "Search 48+ tools (e.g. Merge, Compress, Reduce JPG)...",
             "Try typing 'PDF to Word' or 'Excel'...",
             "Search 'Sign PDF', 'Protect' or 'Unlock'...",
             "Search 'AI Summarizer' or 'Chat with PDF'...",
@@ -1679,6 +1680,13 @@
         }
       });
     </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 
 </html>
